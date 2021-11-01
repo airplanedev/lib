@@ -60,49 +60,12 @@ func applySet(jsPath string, v interface{}, o *ojson.Value) error {
 		return err
 	}
 
-	// Setting whole object.
-	if p.Len() == 0 {
-		o.V = v
-		return nil
+	loc, err := getLocation(p, o)
+	if err != nil {
+		return err
 	}
 
-	var cur interface{}
-	cur = o.V
-	for i, component := range p.Components() {
-		switch c := component.(type) {
-		case string:
-			obj, ok := cur.(*ojson.Object)
-			if !ok {
-				return errors.New("expected *ojson.Object")
-			}
-			if i == p.Len()-1 {
-				obj.Set(c, v)
-			} else {
-				var ok bool
-				cur, ok = obj.Get(c)
-				if !ok {
-					return errors.New("could not find value in path")
-				}
-			}
-
-		case int:
-			arr, ok := cur.([]interface{})
-			if !ok {
-				return errors.New("expected array")
-			}
-			if c >= len(arr) {
-				return errors.New("array had too few elements")
-			}
-			if i == p.Len()-1 {
-				arr[c] = v
-			} else {
-				cur = arr[c]
-			}
-
-		default:
-			return errors.New("unexpected component type")
-		}
-	}
+	updateLocation(loc, v)
 	return nil
 }
 
@@ -112,70 +75,101 @@ func applyAppend(jsPath string, v interface{}, o *ojson.Value) error {
 		return err
 	}
 
-	// Appending on root.
-	if p.Len() == 0 {
-		if o.V == nil {
-			o.V = []interface{}{}
-		}
-		arr, ok := o.V.([]interface{})
-		if !ok {
-			return errors.New("expected array at root")
-		}
-		o.V = append(arr, v)
-		return nil
+	loc, err := getLocation(p, o)
+	if err != nil {
+		return err
 	}
 
-	var cur interface{}
-	cur = o.V
-	for i, component := range p.Components() {
-		switch c := component.(type) {
-		case string:
-			obj, ok := cur.(*ojson.Object)
-			if !ok {
-				return errors.New("expected *ojson.Object")
-			}
-			if i == p.Len()-1 {
-				childArrV, ok := obj.Get(c)
-				if !ok || childArrV == nil {
-					childArrV = []interface{}{}
-				}
-				childArr, ok := childArrV.([]interface{})
-				if !ok {
-					return errors.New("expected array at append point")
-				}
-				obj.Set(c, append(childArr, v))
-			} else {
-				var ok bool
-				cur, ok = obj.Get(c)
-				if !ok {
-					return errors.New("could not find value in path")
-				}
-			}
-
-		case int:
-			arr, ok := cur.([]interface{})
-			if !ok {
-				return errors.New("expected array")
-			}
-			if c >= len(arr) {
-				return errors.New("array had too few elements")
-			}
-			if i == p.Len()-1 {
-				if arr[c] == nil {
-					arr[c] = []interface{}{}
-				}
-				childArr, ok := arr[c].([]interface{})
-				if !ok {
-					return errors.New("expected array at append point")
-				}
-				arr[c] = append(childArr, v)
-			} else {
-				cur = arr[c]
-			}
-
-		default:
-			return errors.New("unexpected component type")
-		}
+	var locArr []interface{}
+	locVal := getAtLocation(loc)
+	if locVal == nil {
+		locVal = updateLocation(loc, []interface{}{})
 	}
+	locArr, ok := locVal.([]interface{})
+	if !ok {
+		return errors.New("expected array at append point")
+	}
+	updateLocation(loc, append(locArr, v))
+	/*
+		// Appending on root.
+		if p.Len() == 0 {
+			if o.V == nil {
+				o.V = []interface{}{}
+			}
+			arr, ok := o.V.([]interface{})
+			if !ok {
+				return errors.New("expected array at root")
+			}
+			o.V = append(arr, v)
+			return nil
+		}
+
+		loc := location{
+			Root: (*rootLocation)(o),
+		}
+		var cur interface{}
+		cur = o.V
+		for i, component := range p.Components() {
+			switch c := component.(type) {
+			case string:
+				obj, ok := cur.(*ojson.Object)
+				if !ok {
+					if cur == nil {
+						updateLocation(loc, ojson.NewObject())
+						obj = getAtLocation(loc).(*ojson.Object)
+					} else {
+						log.Println(cur, loc)
+						return errors.New("expected *ojson.Object")
+					}
+				}
+				if i == p.Len()-1 {
+					childArrV, ok := obj.Get(c)
+					if !ok || childArrV == nil {
+						childArrV = []interface{}{}
+					}
+					childArr, ok := childArrV.([]interface{})
+					if !ok {
+						return errors.New("expected array at append point")
+					}
+					obj.Set(c, append(childArr, v))
+				} else {
+					var ok bool
+					cur, ok = obj.Get(c)
+					if !ok {
+						return errors.New("could not find value in path")
+					}
+					loc = location{
+						Obj: &objLocation{
+							Key: c,
+							Obj: obj,
+						},
+					}
+				}
+
+			case int:
+				arr, ok := cur.([]interface{})
+				if !ok {
+					return errors.New("expected array")
+				}
+				if c >= len(arr) {
+					return errors.New("array had too few elements")
+				}
+				if i == p.Len()-1 {
+					if arr[c] == nil {
+						arr[c] = []interface{}{}
+					}
+					childArr, ok := arr[c].([]interface{})
+					if !ok {
+						return errors.New("expected array at append point")
+					}
+					arr[c] = append(childArr, v)
+				} else {
+					cur = arr[c]
+				}
+
+			default:
+				return errors.New("unexpected component type")
+			}
+		}*/
 	return nil
 }
