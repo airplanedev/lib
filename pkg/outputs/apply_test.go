@@ -129,6 +129,13 @@ func TestApplySet(tt *testing.T) {
 			`null`,
 			`{"a":{"b":"c"}}`,
 		},
+		{
+			"create nested objects including array",
+			`a[0].b`,
+			`"c"`,
+			`{"a":[null]}`,
+			`{"a":[{"b":"c"}]}`,
+		},
 	} {
 		tt.Run(test.testName, func(t *testing.T) {
 			require := require.New(t)
@@ -207,6 +214,13 @@ func TestApplyAppend(tt *testing.T) {
 			`"c"`,
 			`null`,
 			`{"a":{"b":["c"]}}`,
+		},
+		{
+			"create nested objects including array",
+			`a[0].b`,
+			`"c"`,
+			`{"a":[null]}`,
+			`{"a":[{"b":["c"]}]}`,
 		},
 	} {
 		tt.Run(test.testName, func(t *testing.T) {
