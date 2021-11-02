@@ -47,6 +47,10 @@ func updateLocation(loc location, v interface{}) interface{} {
 	return v
 }
 
+// getLocation returns a location at path p, usually for modifying.
+// Note that this will create new `ojson.Object`s along the path if nulls are
+// encountered. For example, trying to access "a.b" in an empty object would
+// insert another empty object at key "a".
 func getLocation(p path.P, root *ojson.Value) (location, error) {
 	loc := location{
 		Root: (*rootLocation)(root),

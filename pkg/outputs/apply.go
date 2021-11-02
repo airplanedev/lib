@@ -82,8 +82,10 @@ func applyAppend(jsPath string, v interface{}, o *ojson.Value) error {
 
 	var locArr []interface{}
 	locVal := getAtLocation(loc)
+	// If the append point is a null, we effectively "insert" an empty array at
+	// that point first before appending to it.
 	if locVal == nil {
-		locVal = updateLocation(loc, []interface{}{})
+		locVal = []interface{}{}
 	}
 	locArr, ok := locVal.([]interface{})
 	if !ok {
