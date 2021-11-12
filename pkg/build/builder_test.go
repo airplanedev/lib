@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/airplanedev/dlog"
-	"github.com/airplanedev/lib/pkg/examples"
+	"github.com/airplanedev/lib/pkg/build/examples"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"

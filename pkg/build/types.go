@@ -86,28 +86,28 @@ type ResourceRequests map[string]string
 type Resources map[string]string
 
 // Task represents a task.
-type Task struct {
-	URL                        string           `json:"-" yaml:"-"`
-	ID                         string           `json:"taskID" yaml:"id"`
-	Name                       string           `json:"name" yaml:"name"`
-	Slug                       string           `json:"slug" yaml:"slug"`
-	Description                string           `json:"description" yaml:"description"`
-	Image                      *string          `json:"image" yaml:"image"`
-	Command                    []string         `json:"command" yaml:"command"`
-	Arguments                  []string         `json:"arguments" yaml:"arguments"`
-	Parameters                 Parameters       `json:"parameters" yaml:"parameters"`
-	Constraints                RunConstraints   `json:"constraints" yaml:"constraints"`
-	Env                        TaskEnv          `json:"env" yaml:"env"`
-	ResourceRequests           ResourceRequests `json:"resourceRequests" yaml:"resourceRequests"`
-	Resources                  Resources        `json:"resources" yaml:"resources"`
-	Kind                       TaskKind         `json:"kind" yaml:"kind"`
-	KindOptions                KindOptions      `json:"kindOptions" yaml:"kindOptions"`
-	Repo                       string           `json:"repo" yaml:"repo"`
-	RequireExplicitPermissions bool             `json:"requireExplicitPermissions" yaml:"-"`
-	Permissions                Permissions      `json:"permissions" yaml:"-"`
-	Timeout                    int              `json:"timeout" yaml:"timeout"`
-	InterpolationMode          string           `json:"interpolationMode" yaml:"-"`
-}
+// type Task struct {
+// 	URL                        string           `json:"-" yaml:"-"`
+// 	ID                         string           `json:"taskID" yaml:"id"`
+// 	Name                       string           `json:"name" yaml:"name"`
+// 	Slug                       string           `json:"slug" yaml:"slug"`
+// 	Description                string           `json:"description" yaml:"description"`
+// 	Image                      *string          `json:"image" yaml:"image"`
+// 	Command                    []string         `json:"command" yaml:"command"`
+// 	Arguments                  []string         `json:"arguments" yaml:"arguments"`
+// 	Parameters                 Parameters       `json:"parameters" yaml:"parameters"`
+// 	Constraints                RunConstraints   `json:"constraints" yaml:"constraints"`
+// 	Env                        TaskEnv          `json:"env" yaml:"env"`
+// 	ResourceRequests           ResourceRequests `json:"resourceRequests" yaml:"resourceRequests"`
+// 	Resources                  Resources        `json:"resources" yaml:"resources"`
+// 	Kind                       TaskKind         `json:"kind" yaml:"kind"`
+// 	KindOptions                KindOptions      `json:"kindOptions" yaml:"kindOptions"`
+// 	Repo                       string           `json:"repo" yaml:"repo"`
+// 	RequireExplicitPermissions bool             `json:"requireExplicitPermissions" yaml:"-"`
+// 	Permissions                Permissions      `json:"permissions" yaml:"-"`
+// 	Timeout                    int              `json:"timeout" yaml:"timeout"`
+// 	InterpolationMode          string           `json:"interpolationMode" yaml:"-"`
+// }
 
 type Permissions []Permission
 

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/airplanedev/lib/pkg/build/fsx"
+	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/pkg/errors"
 )
 

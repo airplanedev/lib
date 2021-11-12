@@ -13,7 +13,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/build/ignore"
 	"github.com/airplanedev/lib/pkg/build/logger"
-	"github.com/airplanedev/lib/pkg/build/utils/bufiox"
+	"github.com/airplanedev/lib/pkg/utils/bufiox"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	dockerJSONMessage "github.com/docker/docker/pkg/jsonmessage"

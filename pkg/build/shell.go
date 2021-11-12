@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/airplanedev/lib/pkg/build/fsx"
+	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/build/logger"
 	"github.com/pkg/errors"
 )
