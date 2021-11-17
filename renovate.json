@@ -1,0 +1,6 @@
+{
+  "extends": ["config:base", "group:allNonMajor"],
+  "labels": ["merge"],
+  "postUpdateOptions": ["gomodTidy"],
+  "reviewers": ["team:deps"]
+}
