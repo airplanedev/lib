@@ -41,6 +41,10 @@ func node(root string, options KindOptions) (string, error) {
 	var usesYarnWorkspaces bool
 
 	if hasPackageJSON {
+		// Check to see if the package.json uses yarn/npm workspaces.
+		// If the package.json has a "workspaces" key, it uses workspaces!
+		// We want to know this because if we are in a workspace, our install
+		// has to honor all of the package.json in the workspace.
 		buf, err := os.ReadFile(pathPackageJSON)
 		if err != nil {
 			return "", errors.Wrapf(err, "node: reading %s", pathPackageJSON)
