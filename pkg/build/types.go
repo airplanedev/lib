@@ -17,9 +17,6 @@ const (
 	TaskKindREST TaskKind = "rest"
 )
 
-// Type enumerates parameter types.
-type Type string
-
 // Value represents a value.
 type Value interface{}
 
