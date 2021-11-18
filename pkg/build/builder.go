@@ -129,7 +129,7 @@ func (b *Builder) Close() error {
 // and adds it to the tree, it passes the tree as the build context
 // and initializes the build.
 func (b *Builder) Build(ctx context.Context, taskID, version string) (*Response, error) {
-	name := "task-" + sanitizeTaskID(taskID)
+	name := "task-" + SanitizeTaskID(taskID)
 	uri := name + ":" + version
 	if b.auth != nil {
 		uri = b.auth.Repo + "/" + uri
@@ -282,7 +282,7 @@ func (b *Builder) authconfigs() map[string]types.AuthConfig {
 //
 // The following string manipulations won't matter for non-ksuid
 // IDs (the current scheme).
-func sanitizeTaskID(s string) string {
+func SanitizeTaskID(s string) string {
 	s = strings.ToLower(s)
 	if unicode.IsDigit(rune(s[len(s)-1])) {
 		s = s[:len(s)-1] + "a"
