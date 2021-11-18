@@ -38,7 +38,7 @@ func node(root string, options KindOptions) (string, error) {
 	pathPackageJSON := filepath.Join(root, "package.json")
 	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
-	var usesYarnWorkspaces bool
+	var usesWorkspaces bool
 
 	if hasPackageJSON {
 		// Check to see if the package.json uses yarn/npm workspaces.
@@ -56,7 +56,7 @@ func node(root string, options KindOptions) (string, error) {
 		if err := json.Unmarshal(buf, &pkg); err != nil {
 			return "", fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
 		}
-		usesYarnWorkspaces = len(pkg.Workspaces) > 0
+		usesWorkspaces = len(pkg.Workspaces) > 0
 	}
 
 	cfg := struct {
@@ -73,7 +73,7 @@ func node(root string, options KindOptions) (string, error) {
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
 		IsYarn:         fsx.AssertExistsAll(pathYarnLock) == nil,
-		UsesWorkspaces: usesYarnWorkspaces,
+		UsesWorkspaces: usesWorkspaces,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
 		NodeVersion: GetNodeVersion(options),
