@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"fmt"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -35,11 +36,30 @@ func node(root string, options KindOptions) (string, error) {
 
 	workdir, _ := options["workdir"].(string)
 	pathPackageJSON := filepath.Join(root, "package.json")
+	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
+	var usesYarnWorkspaces bool
+
+	if hasPackageJSON {
+		buf, err := os.ReadFile(pathPackageJSON)
+		if err != nil {
+			return "", errors.Wrapf(err, "node: reading %s", pathPackageJSON)
+		}
+
+		var pkg struct {
+			Workspaces []string `json:"workspaces"`
+		}
+		if err := json.Unmarshal(buf, &pkg); err != nil {
+			return "", fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
+		}
+		usesYarnWorkspaces = len(pkg.Workspaces) > 0
+	}
+
 	cfg := struct {
 		Workdir               string
 		Base                  string
 		HasPackageJSON        bool
+		UsesWorkspaces        bool
 		IsYarn                bool
 		InlineShim            string
 		InlineShimPackageJSON string
@@ -47,8 +67,9 @@ func node(root string, options KindOptions) (string, error) {
 		ExternalFlags         string
 	}{
 		Workdir:        workdir,
-		HasPackageJSON: fsx.AssertExistsAll(pathPackageJSON) == nil,
+		HasPackageJSON: hasPackageJSON,
 		IsYarn:         fsx.AssertExistsAll(pathYarnLock) == nil,
+		UsesWorkspaces: usesYarnWorkspaces,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
 		NodeVersion: GetNodeVersion(options),
@@ -104,38 +125,37 @@ func node(root string, options KindOptions) (string, error) {
 	// in which case we could introduce an extra step for performing build commands.
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}}
-
 		WORKDIR /airplane{{.Workdir}}
-
 		# Support setting BUILD_NPM_RC or BUILD_NPM_TOKEN to configure private registry auth
 		ARG BUILD_NPM_RC
 		ARG BUILD_NPM_TOKEN
 		RUN [ -z "${BUILD_NPM_RC}" ] || echo "${BUILD_NPM_RC}" > .npmrc
 		RUN [ -z "${BUILD_NPM_TOKEN}" ] || echo "//registry.npmjs.org/:_authToken=${BUILD_NPM_TOKEN}" > .npmrc
-
 		# qemu (on m1 at least) segfaults while looking up a UID/GID for running
 		# postinstall scripts. We run as root with --unsafe-perm instead, skipping
 		# that lookup. Possibly could fix by building for linux/arm on m1 instead
 		# of always building for linux/amd64.
 		RUN npm install -g typescript@4.2 && \
 			npm install -g esbuild@0.12 --unsafe-perm
-		COPY . /airplane
-
 		RUN mkdir -p /airplane/.airplane && \
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
 			npm install
-
+		COPY package*.json yarn.* /airplane/
 		{{if not .HasPackageJSON}}
 		RUN echo '{}' > /airplane/package.json
 		{{end}}
-
+		{{if .UsesWorkspaces}}
+		COPY . /airplane
+		{{end}}
 		{{if .IsYarn}}
 		RUN yarn --non-interactive
 		{{else}}
 		RUN npm install
 		{{end}}
-
+		{{if not .UsesWorkspaces}}
+		COPY . /airplane
+		{{end}}
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
@@ -262,20 +282,16 @@ func nodeLegacyBuilder(root string, options KindOptions) (string, error) {
 
 	return applyTemplate(heredoc.Doc(`
 		FROM {{ .Base }}
-
 		WORKDIR {{ .Workdir }}
-
 		# Support setting BUILD_NPM_RC or BUILD_NPM_TOKEN to configure private registry auth
 		ARG BUILD_NPM_RC
 		ARG BUILD_NPM_TOKEN
 		RUN [ -z "${BUILD_NPM_RC}" ] || echo "${BUILD_NPM_RC}" > .npmrc
 		RUN [ -z "${BUILD_NPM_TOKEN}" ] || echo "//registry.npmjs.org/:_authToken=${BUILD_NPM_TOKEN}" > .npmrc
-
 		COPY . {{ .Workdir }}
 		{{ range .Commands }}
 		RUN {{ . }}
 		{{ end }}
-
 		WORKDIR {{ .BuildWorkdir }}
 		ENTRYPOINT ["node", "{{ .Main }}"]
 	`), struct {

@@ -3,7 +3,6 @@ package logger
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
@@ -78,8 +77,6 @@ func NewLoader() *Loader {
 // before writing additional output to stderr.
 func (sp *Loader) Start() {
 	sp.spin.Start()
-	// Hide cursor
-	tput("civis")
 }
 
 // Stop stops the loader and removes it from stderr.
@@ -87,17 +84,9 @@ func (sp *Loader) Stop() {
 	sp.spin.Stop()
 	// Remove the spinner!
 	fmt.Fprint(os.Stderr, "\r \r")
-	// Show cursor
-	tput("cvvis")
 }
 
 // Returns whether the spinner is active.
 func (sp *Loader) IsActive() bool {
 	return sp.spin.Active()
-}
-
-func tput(arg string) error {
-	cmd := exec.Command("tput", arg)
-	cmd.Stdout = os.Stdout
-	return cmd.Run()
 }

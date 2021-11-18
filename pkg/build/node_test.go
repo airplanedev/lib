@@ -109,17 +109,22 @@ func TestNodeBuilder(t *testing.T) {
 				"entrypoint": "main.ts",
 			},
 		},
-		// TODO: debug why yarn workspaces aren't working. Seems like we would need to compile
-		// pkg1 before compiling pkg2. Once we do that, add an npm workspaces variant along with
-		// JS variants.
-		// {
-		// 	Root: "typescript/yarnworkspaces",
-		// 	Kind: TaskKindNode,
-		// 	Options: KindOptions{
-		// 		"shim":       "true",
-		// 		"entrypoint": "pkg2/src/index.ts",
-		// 	},
-		// },
+		{
+			Root: "typescript/yarnworkspaces",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "pkg2/src/index.ts",
+			},
+		},
+		{
+			Root: "typescript/nodeworkspaces",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "pkg2/src/index.ts",
+			},
+		},
 	}
 
 	RunTests(t, ctx, tests)
