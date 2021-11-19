@@ -145,21 +145,27 @@ func node(root string, options KindOptions) (string, error) {
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
 			npm install
+
+		{{if .HasPackageJSON}}
 		COPY package*.json yarn.* /airplane/
-		{{if not .HasPackageJSON}}
+		{{else}}
 		RUN echo '{}' > /airplane/package.json
 		{{end}}
+
 		{{if .UsesWorkspaces}}
 		COPY . /airplane
 		{{end}}
+
 		{{if .IsYarn}}
 		RUN yarn --non-interactive
 		{{else}}
 		RUN npm install
 		{{end}}
+
 		{{if not .UsesWorkspaces}}
 		COPY . /airplane
 		{{end}}
+		
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \

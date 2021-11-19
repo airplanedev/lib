@@ -125,6 +125,14 @@ func TestNodeBuilder(t *testing.T) {
 				"entrypoint": "pkg2/src/index.ts",
 			},
 		},
+		{
+			Root: "typescript/nopackagejson",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
 	}
 
 	RunTests(t, ctx, tests)
