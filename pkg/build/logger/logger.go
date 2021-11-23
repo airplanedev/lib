@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
+	"syscall"
 	"time"
 
 	"github.com/briandowns/spinner"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var (
@@ -64,23 +67,47 @@ func Debug(msg string, args ...interface{}) {
 	fmt.Fprint(os.Stderr, msgf+"\n")
 }
 
+type loader interface {
+	Start()
+	Stop()
+	IsActive() bool
+}
+
 // Loader adds a spinner / progress indicator to stderr.
 type Loader struct {
+	sync.Mutex
 	spin *spinner.Spinner
 }
 
-func NewLoader() *Loader {
-	return &Loader{spin: spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr))}
+// NoopLoader doesn't do anything.
+type NoopLoader struct {
+}
+
+type LoaderOpts struct {
+	hideLoader bool
+}
+
+func NewLoader(opts LoaderOpts) loader {
+	if opts.hideLoader || !terminal.IsTerminal(syscall.Stderr) {
+		return &NoopLoader{}
+	}
+	return &Loader{
+		spin: spinner.New(spinner.CharSets[11], 100*time.Millisecond, spinner.WithWriter(os.Stderr)),
+	}
 }
 
 // Start starts a new loader. The loader should be stopped
 // before writing additional output to stderr.
 func (sp *Loader) Start() {
+	sp.Lock()
+	defer sp.Unlock()
 	sp.spin.Start()
 }
 
 // Stop stops the loader and removes it from stderr.
 func (sp *Loader) Stop() {
+	sp.Lock()
+	defer sp.Unlock()
 	sp.spin.Stop()
 	// Remove the spinner!
 	fmt.Fprint(os.Stderr, "\r \r")
@@ -89,4 +116,12 @@ func (sp *Loader) Stop() {
 // Returns whether the spinner is active.
 func (sp *Loader) IsActive() bool {
 	return sp.spin.Active()
+}
+
+func (sp *NoopLoader) Start() {
+}
+func (sp *NoopLoader) Stop() {
+}
+func (sp *NoopLoader) IsActive() bool {
+	return false
 }
