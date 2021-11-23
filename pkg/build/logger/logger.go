@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/briandowns/spinner"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 var (
@@ -88,7 +88,7 @@ type LoaderOpts struct {
 }
 
 func NewLoader(opts LoaderOpts) Loader {
-	if opts.HideLoader || !terminal.IsTerminal(syscall.Stderr) {
+	if opts.HideLoader || !term.IsTerminal(syscall.Stderr) {
 		return &NoopLoader{}
 	}
 	return &SpinnerLoader{
