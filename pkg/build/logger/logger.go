@@ -84,11 +84,11 @@ type NoopLoader struct {
 }
 
 type LoaderOpts struct {
-	hideLoader bool
+	HideLoader bool
 }
 
 func NewLoader(opts LoaderOpts) Loader {
-	if opts.hideLoader || !terminal.IsTerminal(syscall.Stderr) {
+	if opts.HideLoader || !terminal.IsTerminal(syscall.Stderr) {
 		return &NoopLoader{}
 	}
 	return &SpinnerLoader{
