@@ -22,8 +22,6 @@ require (
 	github.com/golang/groupcache v0.0.0-20200121045136-8c9f03a8e57e // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/hashicorp/go-cleanhttp v0.5.1 // indirect
-	github.com/mattn/go-colorable v0.1.9 // indirect
 	github.com/moby/sys/mountinfo v0.5.0 // indirect
 	github.com/moby/term v0.0.0-20200915141129-7f0af18e79f2 // indirect
 	github.com/morikuni/aec v1.0.0 // indirect
@@ -45,10 +43,7 @@ require (
 	github.com/MakeNowJust/heredoc v1.0.0
 	github.com/Microsoft/hcsshim v0.9.1 // indirect
 	github.com/airplanedev/dlog v0.0.0-20210615011719-ca8d3becde5e
-	github.com/briandowns/spinner v1.16.0
 	github.com/docker/docker v20.10.10+incompatible
-	github.com/fatih/color v1.13.0
-	github.com/hashicorp/go-retryablehttp v0.7.0
 	github.com/mattn/go-isatty v0.0.14
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06

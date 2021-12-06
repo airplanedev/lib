@@ -7,7 +7,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
-	"github.com/airplanedev/lib/pkg/build/logger"
 	"github.com/pkg/errors"
 )
 
@@ -99,10 +98,8 @@ func DockerfilePaths() []string {
 // to the file, if found.
 func FindDockerfile(root string) string {
 	for _, filePath := range DockerfilePaths() {
-		logger.Debug("looking for %q", filePath)
 		dockerfilePath := filepath.Join(root, filePath)
 		if fsx.Exists(dockerfilePath) {
-			logger.Debug("found %q", dockerfilePath)
 			return dockerfilePath
 		}
 	}

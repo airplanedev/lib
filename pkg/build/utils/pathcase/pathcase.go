@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/airplanedev/lib/pkg/build/logger"
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +20,7 @@ func ActualFilename(filename string) (string, error) {
 	dir := filepath.Dir(filename)
 	files, readErr := os.ReadDir(dir)
 	if readErr != nil {
-		logger.Debug("error reading directory %q - going to iterate through what files were found anyways: %s", dir, readErr)
+		// Going to iterate through what files were found anyways
 	}
 
 	for _, file := range files {

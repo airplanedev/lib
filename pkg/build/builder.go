@@ -12,7 +12,6 @@ import (
 	"unicode"
 
 	"github.com/airplanedev/lib/pkg/build/ignore"
-	"github.com/airplanedev/lib/pkg/build/logger"
 	"github.com/airplanedev/lib/pkg/utils/bufiox"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
@@ -155,10 +154,8 @@ func (b *Builder) Build(ctx context.Context, taskID, version string) (*Response,
 	if err != nil {
 		return nil, errors.Wrap(err, "creating dockerfile")
 	}
-	logger.Debug(strings.TrimSpace(dockerfile))
 
 	dockerfilePath := ".airplane/Dockerfile"
-	logger.Debug("writing dockerfile to %s", dockerfilePath)
 	if err := tree.MkdirAll(filepath.Dir(dockerfilePath)); err != nil {
 		return nil, err
 	}
