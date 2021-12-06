@@ -120,7 +120,7 @@ func checkPythonInstalled(ctx context.Context, logger runtime.Logger) error {
 func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
 	d := data{}
 	if t != nil {
-		d.Comment = runtime.Comment(r, *t)
+		d.Comment = runtime.Comment(r, t.URL)
 	}
 
 	var buf bytes.Buffer

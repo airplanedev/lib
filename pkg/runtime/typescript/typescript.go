@@ -60,7 +60,7 @@ type Runtime struct {
 func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
 	d := data{}
 	if t != nil {
-		d.Comment = runtime.Comment(r, *t)
+		d.Comment = runtime.Comment(r, t.URL)
 		for _, p := range t.Parameters {
 			d.Params = append(d.Params, param{
 				Name: p.Slug,
