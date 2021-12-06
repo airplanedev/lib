@@ -25,38 +25,9 @@ type Parameters []Parameter
 
 // Parameter represents a task parameter.
 type Parameter struct {
-	Name        string      `json:"name" yaml:"name"`
-	Slug        string      `json:"slug" yaml:"slug"`
-	Type        Type        `json:"type" yaml:"type"`
-	Desc        string      `json:"desc" yaml:"desc,omitempty"`
-	Component   Component   `json:"component" yaml:"component,omitempty"`
-	Default     Value       `json:"default" yaml:"default,omitempty"`
-	Constraints Constraints `json:"constraints" yaml:"constraints,omitempty"`
-}
-
-// Component enumerates components.
-type Component string
-
-// All Component types.
-const (
-	ComponentNone      Component = ""
-	ComponentEditorSQL Component = "editor-sql"
-	ComponentTextarea  Component = "textarea"
-)
-
-// Value represents a value.
-type Value interface{}
-
-// Constraints represent constraints.
-type Constraints struct {
-	Optional bool               `json:"optional" yaml:"optional,omitempty"`
-	Regex    string             `json:"regex" yaml:"regex,omitempty"`
-	Options  []ConstraintOption `json:"options,omitempty" yaml:"options,omitempty"`
-}
-
-type ConstraintOption struct {
-	Label string `json:"label"`
-	Value Value  `json:"value"`
+	Name string
+	Slug string
+	Type Type
 }
 
 // Values represent parameters values.
