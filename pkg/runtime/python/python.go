@@ -16,7 +16,6 @@ import (
 	"github.com/MakeNowJust/heredoc"
 	"github.com/airplanedev/lib/pkg/build"
 
-	// "github.com/airplanedev/lib/pkg/logger"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/pkg/errors"
@@ -97,21 +96,53 @@ func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts run
 		return nil, nil, errors.Wrap(err, "serializing param values")
 	}
 
-	return []string{"python3", filepath.Join(tmpdir, "shim.py"), string(pv)}, closer, nil
+	bin := pythonBin(logger)
+	if bin == "" {
+		return nil, nil, errors.New("could not find python")
+	}
+	return []string{pythonBin(logger), filepath.Join(tmpdir, "shim.py"), string(pv)}, closer, nil
 }
 
-// Checks for python3 binary, as per PEP 0394:
+// pythonBin returns the first of python3 or python found on PATH, if any.
+// We expect most systems to have python3 if Python 3 is installed, as per PEP 0394:
 // https://www.python.org/dev/peps/pep-0394/#recommendation
-func checkPythonInstalled(ctx context.Context, logger runtime.Logger) error {
-	cmd := exec.CommandContext(ctx, "python3", "--version")
-	logger.Debug("Running %s", strings.Join(cmd.Args, " "))
-	err := cmd.Run()
-	if err != nil {
-		return errors.New(heredoc.Doc(`
-		It looks like the python3 command is not installed.
+// However, Python on Windows (whether through Python or Anaconda) does not seem to install python3.exe.
+func pythonBin(logger runtime.Logger) string {
+	for _, bin := range []string{"python3", "python"} {
+		logger.Debug("Looking for binary %s", bin)
+		path, err := exec.LookPath(bin)
+		if err == nil {
+			logger.Debug("Found binary %s at %s", bin, path)
+			return bin
+		}
+		logger.Debug("Could not find binary %s: %s", bin, err)
+	}
+	return ""
+}
 
-		Ensure Python 3 is installed and the python3 command exists: https://www.python.org/downloads
-	`))
+// Checks that Python 3 is installed, since we rely on 3 and don't support 2.
+func checkPythonInstalled(ctx context.Context, logger runtime.Logger) error {
+	bin := pythonBin(logger)
+	if bin == "" {
+		return errors.New(heredoc.Doc(`
+			Could not find the python3 or python commands on your PATH.
+			Ensure that Python 3 is installed and available in your shell environment.
+		`))
+	}
+	cmd := exec.CommandContext(ctx, bin, "--version")
+	logger.Debug("Running %s", strings.Join(cmd.Args, " "))
+	out, err := cmd.Output()
+	if err != nil {
+		return errors.New(fmt.Sprintf(heredoc.Doc(`
+			Got an error while running %s:
+			%s
+		`), strings.Join(cmd.Args, " "), err.Error()))
+	}
+	version := string(out)
+	if !strings.HasPrefix(version, "Python 3.") {
+		return errors.New(fmt.Sprintf(heredoc.Doc(`
+			Could not find Python 3 on your PATH. Found %s but running --version returned: %s
+		`), bin, version))
 	}
 	return nil
 }
