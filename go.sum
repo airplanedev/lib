@@ -76,8 +76,8 @@ github.com/ahmetalpbalkan/dlog v0.0.0-20170105205344-4fb5f8204f26 h1:pzStYMLAXM7
 github.com/ahmetalpbalkan/dlog v0.0.0-20170105205344-4fb5f8204f26/go.mod h1:ilK+u7u1HoqaDk0mjhh27QJB7PyWMreGffEvOCoEKiY=
 github.com/airplanedev/dlog v0.0.0-20210615011719-ca8d3becde5e h1:MeoR75I33g2XHKnTfRE67THlKm6fCoKQ3KcxsElHL4w=
 github.com/airplanedev/dlog v0.0.0-20210615011719-ca8d3becde5e/go.mod h1:jTwpOa6MfHZELuUd5UGfKDxZOqBi6fAbI3aFRnLvcA4=
-github.com/airplanedev/ojson v0.0.1 h1:WS6il8PwEoDeX0r8lCe4L+achERfDB+qYqSmdIuMAS4=
-github.com/airplanedev/ojson v0.0.1/go.mod h1:OinOlkiLgGwp+/RkH/9vVAIs78tP+oku4bt5v+jshoA=
+github.com/airplanedev/ojson v0.1.0 h1:KpEO5zr/9S2xj38Vijky5MWZQ5l2mtDLUoxkxBPVCoI=
+github.com/airplanedev/ojson v0.1.0/go.mod h1:OinOlkiLgGwp+/RkH/9vVAIs78tP+oku4bt5v+jshoA=
 github.com/airplanedev/path v0.0.1 h1:3xW/3y6gaKmIeBcHqzieMl5RcUubcazzoHblMqvk6W4=
 github.com/airplanedev/path v0.0.1/go.mod h1:x+ohE7SUHzBK+t4z7IBNpd+XUUFC9q0/5hZTBvHz270=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=

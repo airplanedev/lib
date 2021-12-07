@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	github.com/AlecAivazis/survey/v2 v2.3.2
-	github.com/airplanedev/ojson v0.0.1
+	github.com/airplanedev/ojson v0.1.0
 	github.com/airplanedev/path v0.0.1
 	github.com/aymerick/raymond v2.0.2+incompatible
 	github.com/blang/semver/v4 v4.0.0
