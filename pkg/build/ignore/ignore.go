@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/airplanedev/lib/pkg/build/logger"
 	"github.com/pkg/errors"
 	gitignore "github.com/sabhiram/go-gitignore"
 )
@@ -18,7 +17,6 @@ func Func(taskRootPath string) (func(filePath string, info os.FileInfo) (bool, e
 	if err != nil {
 		return nil, err
 	}
-	logger.Debug("Excludes:\n  %s", strings.Join(excludes, "\n  "))
 
 	ig := gitignore.CompileIgnoreLines(excludes...)
 	hasInclusion := false
@@ -52,9 +50,6 @@ func Func(taskRootPath string) (func(filePath string, info os.FileInfo) (bool, e
 			return false, nil
 		}
 
-		if !skip {
-			logger.Debug("Including in build archive: %s", relFilePath)
-		}
 		return !skip, nil
 	}, nil
 }
@@ -109,7 +104,6 @@ func Patterns(path string) ([]string, error) {
 			fileExcludes = append(fileExcludes, ex)
 		}
 	}
-	logger.Debug("Found %s - using %d exclude rule(s):\n  %s", ignorefile, len(fileExcludes), strings.Join(fileExcludes, "\n  "))
 	excludes = append(excludes, fileExcludes...)
 	return excludes, nil
 }

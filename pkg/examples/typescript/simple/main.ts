@@ -1,4 +1,4 @@
-// Linked to https://app.airplane.dev/t/typescript_no_package_json [do not edit this line]
+// Linked to https://app.airplane.dev/t/typescript_simple [do not edit this line]
 
 type Params = {
   id: string
