@@ -29,8 +29,10 @@ def run(args):
                 # airplanesdk is not installed - gracefully print to stdout instead.
                 # This makes it easier to use the shim in a dev environment. We ensure airplanesdk
                 # is installed in production images.
+                sys.stdout.flush()
                 print("The airplanesdk package must be installed to set return values as task output.", file=sys.stderr)
                 print("Printing return values to stdout instead.", file=sys.stderr)
+                sys.stderr.flush()
                 print(json.dumps(ret, indent=2))
     except Exception as e:
         raise Exception("executing {{.Entrypoint}}") from e
