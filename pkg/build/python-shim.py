@@ -26,7 +26,12 @@ def run(args):
             try:
                 airplane.set_output(ret)
             except NameError:
-                raise Exception("airplanesdk package must be installed to output return values - add airplanesdk to requirements.txt or remove return value from task")
+                # airplanesdk is not installed - gracefully print to stdout instead.
+                # This makes it easier to use the shim in a dev environment. We ensure airplanesdk
+                # is installed in production images.
+                print("The airplanesdk package must be installed to set return values as task output.", file=sys.stderr)
+                print("Printing return values to stdout instead.", file=sys.stderr)
+                print(json.dumps(ret, indent=2))
     except Exception as e:
         raise Exception("executing {{.Entrypoint}}") from e
 
