@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/common/logger"
 
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
@@ -133,7 +134,7 @@ func (r Runtime) FormatComment(s string) string {
 	return strings.Join(lines, "\n")
 }
 
-func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
+func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
 	checkNodeVersion(ctx, logger, opts.KindOptions)
 
 	root, err := r.Root(opts.Path)
@@ -239,7 +240,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts run
 // checkNodeVersion compares the major version of the currently installed
 // node binary with that of the configured task and logs a warning if they
 // do not match.
-func checkNodeVersion(ctx context.Context, logger runtime.Logger, opts build.KindOptions) {
+func checkNodeVersion(ctx context.Context, logger logger.Logger, opts build.KindOptions) {
 	nodeVersion, ok := opts["nodeVersion"].(string)
 	if !ok {
 		return

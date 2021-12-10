@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/common/logger"
 	"github.com/pkg/errors"
 )
 
@@ -81,7 +82,7 @@ type Interface interface {
 	//
 	// If running the script locally is not supported the method returns
 	// an `ErrNotImplemented`.
-	PrepareRun(ctx context.Context, logger Logger, opts PrepareRunOptions) (rexprs []string, closer io.Closer, err error)
+	PrepareRun(ctx context.Context, logger logger.Logger, opts PrepareRunOptions) (rexprs []string, closer io.Closer, err error)
 }
 
 type PrepareRunOptions struct {
@@ -96,12 +97,6 @@ type PrepareRunOptions struct {
 
 	// KindOptions specifies any runtime-specific task configuration.
 	KindOptions build.KindOptions
-}
-
-type Logger interface {
-	Log(msg string, args ...interface{})
-	Warning(msg string, args ...interface{})
-	Debug(msg string, args ...interface{})
 }
 
 // Runtimes is a collection of registered runtimes.

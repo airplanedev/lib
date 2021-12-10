@@ -24,6 +24,17 @@ func Confirm(question string) (bool, error) {
 	return ok, nil
 }
 
+func ConfirmWithAssumptions(question string, assumeYes, assumeNo bool) (bool, error) {
+	if assumeYes {
+		return true, nil
+	}
+	if assumeNo {
+		return false, nil
+	}
+
+	return Confirm(question)
+}
+
 // CanPrompt checks that both stdin and stderr are terminal
 func CanPrompt() bool {
 	return isatty.IsTerminal(os.Stdin.Fd()) && isatty.IsTerminal(os.Stderr.Fd())

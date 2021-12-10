@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/common/logger"
 	"github.com/airplanedev/lib/pkg/examples"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/otiai10/copy"
@@ -50,7 +51,7 @@ func Run(tt *testing.T, ctx context.Context, tests []Test) {
 				opts.ParamValues["id"] = test.SearchString
 			}
 
-			cmds, closer, err := r.PrepareRun(ctx, &NoopLogger{}, runtime.PrepareRunOptions{
+			cmds, closer, err := r.PrepareRun(ctx, &logger.NoopLogger{}, runtime.PrepareRunOptions{
 				Path:        copyExample(t, r, examples.Path(t, opts.Path)),
 				ParamValues: opts.ParamValues,
 				KindOptions: opts.KindOptions,
@@ -100,17 +101,4 @@ func copyExample(t *testing.T, r runtime.Interface, path string) string {
 	relpath, err := filepath.Rel(root, path)
 	require.NoError(err)
 	return filepath.Join(tmpdir, relpath)
-}
-
-type NoopLogger struct{}
-
-var _ runtime.Logger = &NoopLogger{}
-
-func (l *NoopLogger) Log(string, ...interface{}) {
-}
-
-func (l *NoopLogger) Debug(string, ...interface{}) {
-}
-
-func (l *NoopLogger) Warning(string, ...interface{}) {
 }
