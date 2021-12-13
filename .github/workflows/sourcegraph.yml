@@ -1,0 +1,16 @@
+name: sourcegraph
+on:
+  - push
+
+jobs:
+  lsif:
+    # this line will prevent forks of this repo from attempting to upload lsif indexes
+    if: github.repository == 'airplanedev/lib'
+    runs-on: ubuntu-latest
+    container: sourcegraph/lsif-go:v1.7.5
+    steps:
+      - uses: actions/checkout@v2
+      - name: Generate LSIF data
+        run: lsif-go
+      - name: Upload LSIF data
+        run: src lsif upload -github-token=${{ secrets.GITHUB_TOKEN }} -ignore-upload-failure
