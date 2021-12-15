@@ -26,7 +26,7 @@ func init() {
 // Code template.
 var code = template.Must(template.New("sh").Parse(`#!/bin/bash
 {{with .Comment -}}
-{{.Comment}}
+{{.}}
 
 {{end -}}
 # Params are in environment variables as PARAM_{SLUG}, e.g. PARAM_USER_ID
