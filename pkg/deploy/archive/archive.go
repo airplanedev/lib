@@ -14,12 +14,6 @@ import (
 	"golang.org/x/sync/singleflight"
 )
 
-type Logger interface {
-	Log(msg string, args ...interface{})
-	Warning(msg string, args ...interface{})
-	Debug(msg string, args ...interface{})
-}
-
 type Archiver interface {
 	Archive(ctx context.Context, root string) (uploadID string, size int, err error)
 }
