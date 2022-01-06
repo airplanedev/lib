@@ -2,11 +2,9 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"time"
 
 	"github.com/airplanedev/lib/pkg/build"
-	"gopkg.in/yaml.v3"
 )
 
 type APIClient interface {
@@ -120,92 +118,8 @@ type EnvVarValue struct {
 	Config *string `json:"config" yaml:"config,omitempty"`
 }
 
-var _ yaml.Unmarshaler = &EnvVarValue{}
-
-// UnmarshalJSON allows you set an env var's `value` using either
-// of these notations:
-//
-//   AIRPLANE_DSN: "foobar"
-//
-//   AIRPLANE_DSN:
-//     value: "foobar"
-//
-func (ev *EnvVarValue) UnmarshalYAML(node *yaml.Node) error {
-	// First, try to unmarshal as a string.
-	// This would be the first case above.
-	var value string
-	if err := node.Decode(&value); err == nil {
-		// Success!
-		ev.Value = &value
-		return nil
-	}
-
-	// Otherwise, perform a normal unmarshal operation.
-	// This would be the second case above.
-	//
-	// Note we need a new type, otherwise we recursively call this
-	// method and end up stack overflowing.
-	type envVarValue EnvVarValue
-	var v envVarValue
-	if err := node.Decode(&v); err != nil {
-		return err
-	}
-	*ev = EnvVarValue(v)
-
-	return nil
-}
-
-var _ json.Unmarshaler = &EnvVarValue{}
-
-func (ev *EnvVarValue) UnmarshalJSON(b []byte) error {
-	// First, try to unmarshal as a string.
-	var value string
-	if err := json.Unmarshal(b, &value); err == nil {
-		// Success!
-		ev.Value = &value
-		return nil
-	}
-
-	// Otherwise, perform a normal unmarshal operation.
-	//
-	// Note we need a new type, otherwise we recursively call this
-	// method and end up stack overflowing.
-	type envVarValue EnvVarValue
-	var v envVarValue
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	*ev = EnvVarValue(v)
-
-	return nil
-}
-
 // Parameters represents a slice of task parameters.
-//
-// TODO(amir): remove custom marshal/unmarshal once the API is updated.
 type Parameters []Parameter
-
-// UnmarshalJSON implementation.
-func (p *Parameters) UnmarshalJSON(buf []byte) error {
-	var tmp struct {
-		Parameters []Parameter `json:"parameters"`
-	}
-
-	if err := json.Unmarshal(buf, &tmp); err != nil {
-		return err
-	}
-
-	*p = tmp.Parameters
-	return nil
-}
-
-// MarshalJSON implementation.
-func (p Parameters) MarshalJSON() ([]byte, error) {
-	type object struct {
-		Parameters []Parameter `json:"parameters"`
-	}
-	return json.Marshal(object{p})
-}
 
 // Parameter represents a task parameter.
 type Parameter struct {
