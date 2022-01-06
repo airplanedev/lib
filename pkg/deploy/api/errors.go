@@ -4,19 +4,19 @@ import "fmt"
 
 // TaskMissingError implements an exaplainable error.
 type TaskMissingError struct {
-	appURL string
-	slug   string
+	AppURL string
+	Slug   string
 }
 
 // Error implementation.
 func (err TaskMissingError) Error() string {
-	return fmt.Sprintf("task with slug %q does not exist", err.slug)
+	return fmt.Sprintf("task with slug %q does not exist", err.Slug)
 }
 
 // ExplainError implementation.
 func (err TaskMissingError) ExplainError() string {
 	return fmt.Sprintf(
 		"Follow the URL below to create the task:\n%s",
-		err.appURL+"/tasks/new",
+		err.AppURL+"/tasks/new",
 	)
 }
