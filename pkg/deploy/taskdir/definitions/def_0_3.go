@@ -38,7 +38,7 @@ type Definition_0_3 struct {
 }
 
 type taskKind_0_3 interface {
-	fillInUpdateTaskRequest(context.Context, api.APIClient, *api.UpdateTaskRequest) error
+	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
 	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
@@ -55,7 +55,7 @@ type ImageDefinition_0_3 struct {
 	Env     api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Image = &d.Image
 	req.Command = d.Command
 	return nil
@@ -91,7 +91,7 @@ type DenoDefinition_0_3 struct {
 	Env       api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
 	return nil
 }
@@ -127,7 +127,7 @@ type DockerfileDefinition_0_3 struct {
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	return nil
 }
 
@@ -163,7 +163,7 @@ type GoDefinition_0_3 struct {
 	Env       api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
 	return nil
 }
@@ -202,7 +202,7 @@ type NodeDefinition_0_3 struct {
 	Env       api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
 	return nil
 }
@@ -241,7 +241,7 @@ type PythonDefinition_0_3 struct {
 	Env       api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
 	return nil
 }
@@ -279,7 +279,7 @@ type ShellDefinition_0_3 struct {
 	Env       api.TaskEnv `json:"env,omitempty"`
 }
 
-func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
 	return nil
 }
@@ -315,7 +315,7 @@ type SQLDefinition_0_3 struct {
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
 }
 
-func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	resourcesByName, err := getResourcesByName(ctx, client)
 	if err != nil {
 		return err
@@ -370,7 +370,7 @@ type RESTDefinition_0_3 struct {
 	FormData  map[string]interface{} `json:"formData,omitempty"`
 }
 
-func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	resourcesByName, err := getResourcesByName(ctx, client)
 	if err != nil {
 		return err
@@ -613,7 +613,7 @@ func (d Definition_0_3) taskKind() (taskKind_0_3, error) {
 	}
 }
 
-func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.APIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
 	req := api.UpdateTaskRequest{
 		Slug:        d.Slug,
 		Name:        d.Name,
@@ -682,7 +682,7 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 	return nil
 }
 
-func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	if d.Permissions != nil && !d.Permissions.isEmpty() {
 		req.RequireExplicitPermissions = true
 		// TODO: convert permissions.
@@ -690,7 +690,7 @@ func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, c
 	return nil
 }
 
-func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context, client api.APIClient, req *api.UpdateTaskRequest) error {
+func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	resourcesByName := map[string]api.Resource{}
 	if d.SQL != nil || d.REST != nil {
 		// Remap resources from ref -> name to ref -> id.
@@ -787,7 +787,7 @@ func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
 }
 
-func getResourcesByName(ctx context.Context, client api.APIClient) (map[string]api.Resource, error) {
+func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
 	// Remap resources from ref -> name to ref -> id.
 	resp, err := client.ListResources(ctx)
 	if err != nil {

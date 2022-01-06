@@ -8,7 +8,7 @@ type MockClient struct {
 	Tasks map[string]Task
 }
 
-var _ APIClient = &MockClient{}
+var _ IAPIClient = &MockClient{}
 
 func (mc *MockClient) GetTask(ctx context.Context, slug string) (res Task, err error) {
 	task, ok := mc.Tasks[slug]

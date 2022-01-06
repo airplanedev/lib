@@ -11,7 +11,7 @@ import (
 )
 
 type DefnDiscoverer struct {
-	Client             api.APIClient
+	Client             api.IAPIClient
 	AssumeYes          bool
 	AssumeNo           bool
 	Logger             logger.Logger

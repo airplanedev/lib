@@ -43,7 +43,7 @@ type TaskDiscoverer interface {
 
 type Discoverer struct {
 	TaskDiscoverers []TaskDiscoverer
-	Client          api.APIClient
+	Client          api.IAPIClient
 	Logger          logger.Logger
 }
 

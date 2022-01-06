@@ -20,7 +20,7 @@ type Archiver interface {
 
 type apiArchiver struct {
 	logger   logger.Logger
-	client   api.APIClient
+	client   api.IAPIClient
 	uploader Uploader
 
 	uploadArchiveSingleFlightGroup singleflight.Group
@@ -29,7 +29,7 @@ type apiArchiver struct {
 
 var _ Archiver = &apiArchiver{}
 
-func NewAPIArchiver(logger logger.Logger, client api.APIClient, uploader Uploader) Archiver {
+func NewAPIArchiver(logger logger.Logger, client api.IAPIClient, uploader Uploader) Archiver {
 	return &apiArchiver{
 		uploadedArchives: make(map[string]string),
 		logger:           logger,

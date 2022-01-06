@@ -275,7 +275,7 @@ func (def *Definition) GetSlug() string {
 	return def.Slug
 }
 
-func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.APIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
 	kind, options, err := def.GetKindAndOptions()
 	if err != nil {
 		return api.UpdateTaskRequest{}, err

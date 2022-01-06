@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type APIClient interface {
+type IAPIClient interface {
 	GetTask(ctx context.Context, slug string) (res Task, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
