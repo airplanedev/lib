@@ -1,0 +1,352 @@
+{
+  "title": "Task",
+  "oneOf": [
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "node": {
+              "type": "object",
+              "properties": {
+                "entrypoint": { "type": "string" },
+                "nodeVersion": { "enum": ["12", "14", "15", "16"] },
+                "arguments": { "$ref": "#/$defs/arguments" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["entrypoint", "nodeVersion"]
+            }
+          },
+          "required": ["node"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "python": {
+              "type": "object",
+              "properties": {
+                "entrypoint": { "type": "string" },
+                "arguments": { "$ref": "#/$defs/arguments" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["entrypoint"]
+            }
+          },
+          "required": ["python"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "shell": {
+              "type": "object",
+              "properties": {
+                "entrypoint": { "type": "string" },
+                "arguments": { "$ref": "#/$defs/arguments" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["entrypoint"]
+            }
+          },
+          "required": ["shell"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "image": {
+              "type": "object",
+              "properties": {
+                "command": { "type": "array", "items": { "type": "string" } },
+                "entrypoint": { "type": "string" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["command", "entrypoint"]
+            }
+          },
+          "required": ["image"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "deno": {
+              "type": "object",
+              "properties": {
+                "entrypoint": { "type": "string" },
+                "arguments": { "$ref": "#/$defs/arguments" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["entrypoint"]
+            }
+          },
+          "required": ["deno"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "go": {
+              "type": "object",
+              "properties": {
+                "entrypoint": { "type": "string" },
+                "arguments": { "$ref": "#/$defs/arguments" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["entrypoint"]
+            }
+          },
+          "required": ["go"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "dockerfile": {
+              "type": "object",
+              "properties": {
+                "dockerfile": { "type": "string" },
+                "env": { "$ref": "#/$defs/env" }
+              },
+              "additionalProperties": false,
+              "required": ["dockerfile"]
+            }
+          },
+          "required": ["dockerfile"]
+        }
+      ]
+    },
+
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "sql": {
+              "type": "object",
+              "properties": {
+                "resource": { "type": "string" },
+                "entrypoint": { "type": "string" },
+                "parameters": {
+                  "type": "object",
+                  "patternProperties": {
+                    ".*": { "type": ["string", "boolean", "number"] }
+                  }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["resource", "entrypoint"]
+            }
+          },
+          "required": ["sql"]
+        }
+      ]
+    },
+    {
+      "allOf": [
+        { "$ref": "#/$defs/baseDefinition" },
+        {
+          "type": "object",
+          "properties": {
+            "rest": {
+              "type": "object",
+              "properties": {
+                "resource": { "type": "string" },
+                "method": { "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"] },
+                "path": { "type": "string" },
+                "urlParams": {
+                  "type": "object",
+                  "patternProperties": { ".*": { "type": "string" } }
+                },
+                "headers": {
+                  "type": "object",
+                  "patternProperties": { ".*": { "type": "string" } }
+                },
+                "bodyType": {
+                  "enum": ["json", "raw", "form-data", "x-www-form-urlencoded"]
+                },
+                "body": { "type": "string" },
+                "formData": {
+                  "type": "object",
+                  "patternProperties": { ".*": { "type": "string" } }
+                }
+              },
+              "additionalProperties": false,
+              "required": ["resource", "method", "path", "bodyType"]
+            }
+          },
+          "required": ["rest"]
+        }
+      ]
+    }
+  ],
+
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "$ref": "#/$defs/slug" },
+        "type": {
+          "enum": [
+            "shorttext",
+            "longtext",
+            "sql",
+            "boolean",
+            "upload",
+            "integer",
+            "float",
+            "date",
+            "datetime",
+            "configvar"
+          ]
+        },
+        "description": { "type": "string" },
+        "default": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" }
+          ]
+        },
+        "required": { "type": "boolean" },
+        "options": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              { "type": "string" },
+              {
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "value": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            ]
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["name", "slug", "type"]
+    },
+    "env": {
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "config": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    },
+    "arguments": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+	"slug": {
+	  "type": "string",
+	  "pattern": "^[a-z0-9_]+$",
+	  "maxLength": 50
+	},
+    "baseDefinition": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "slug": { "$ref": "#/$defs/slug" },
+        "description": { "type": "string" },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/parameter"
+          }
+        },
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "viewers": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "requesters": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "executers": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "admins": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          },
+          "additionalProperties": false
+        },
+        "constraints": {
+          "type": "object",
+          "properties": {
+            "labels": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "key": { "type": "string" },
+                  "value": { "type": "string" }
+                },
+                "additionalProperties": false
+              }
+            }
+          },
+          "additionalProperties": false
+        },
+        "timeout": {
+          "type": "number",
+          "maximum": 3600,
+          "exclusiveMinimum": 0
+        }
+      },
+      "required": ["name", "slug"]
+    }
+  }
+}

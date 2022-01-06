@@ -18,6 +18,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
+	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
 
@@ -52,7 +53,7 @@ type data struct {
 type Runtime struct{}
 
 // PrepareRun implementation.
-func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
+func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
 	if err := checkPythonInstalled(ctx, logger); err != nil {
 		return nil, nil, err
 	}
@@ -107,7 +108,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts run
 // We expect most systems to have python3 if Python 3 is installed, as per PEP 0394:
 // https://www.python.org/dev/peps/pep-0394/#recommendation
 // However, Python on Windows (whether through Python or Anaconda) does not seem to install python3.exe.
-func pythonBin(logger runtime.Logger) string {
+func pythonBin(logger logger.Logger) string {
 	for _, bin := range []string{"python3", "python"} {
 		logger.Debug("Looking for binary %s", bin)
 		path, err := exec.LookPath(bin)
@@ -121,7 +122,7 @@ func pythonBin(logger runtime.Logger) string {
 }
 
 // Checks that Python 3 is installed, since we rely on 3 and don't support 2.
-func checkPythonInstalled(ctx context.Context, logger runtime.Logger) error {
+func checkPythonInstalled(ctx context.Context, logger logger.Logger) error {
 	bin := pythonBin(logger)
 	if bin == "" {
 		return errors.New(heredoc.Doc(`

@@ -15,6 +15,7 @@ import (
 	"github.com/airplanedev/lib/pkg/utils"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/utils/handlebars"
+	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +45,7 @@ type data struct {
 type Runtime struct{}
 
 // PrepareRun implementation.
-func (r Runtime) PrepareRun(ctx context.Context, logger runtime.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
+func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
 	if err := checkAndPromptFileExecutable(opts.Path); err != nil {
 		return nil, nil, err
 	}
