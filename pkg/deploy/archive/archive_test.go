@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/airplanedev/lib/pkg/deploy/api"
+	"github.com/airplanedev/lib/pkg/deploy/api/mock"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,7 +40,7 @@ func TestArchive(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			l := &logger.MockLogger{}
-			client := &api.MockClient{}
+			client := &mock.MockClient{}
 			uploader := &MockUploader{}
 			archiver := NewAPIArchiver(l, client, uploader)
 

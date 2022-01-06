@@ -99,6 +99,13 @@ type Resource struct {
 
 type ResourceKind string
 
+const (
+	KindUnknown  ResourceKind = ""
+	KindPostgres ResourceKind = "postgres"
+	KindMySQL    ResourceKind = "mysql"
+	KindREST     ResourceKind = "rest"
+)
+
 type Permissions []Permission
 
 type Permission struct {

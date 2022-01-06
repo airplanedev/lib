@@ -7,6 +7,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/deploy/api"
+	"github.com/airplanedev/lib/pkg/deploy/api/mock"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
 	_ "github.com/airplanedev/lib/pkg/runtime/python"
@@ -140,7 +141,7 @@ func TestDiscoverTasks(t *testing.T) {
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
-			apiClient := &api.MockClient{
+			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{}
@@ -149,7 +150,7 @@ func TestDiscoverTasks(t *testing.T) {
 			}
 			d := &Discoverer{
 				TaskDiscoverers: []TaskDiscoverer{scriptDiscoverer, defnDiscoverer},
-				Client: &api.MockClient{
+				Client: &mock.MockClient{
 					Tasks: tC.existingTasks,
 				},
 				Logger: &logger.MockLogger{},
