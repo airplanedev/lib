@@ -13,7 +13,7 @@ var _ APIClient = &MockClient{}
 func (mc *MockClient) GetTask(ctx context.Context, slug string) (res Task, err error) {
 	task, ok := mc.Tasks[slug]
 	if !ok {
-		return Task{}, &TaskMissingError{appURL: "api/", slug: slug}
+		return Task{}, &TaskMissingError{AppURL: "api/", Slug: slug}
 	}
 	return task, nil
 }
