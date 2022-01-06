@@ -6,7 +6,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/deploy/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir"
-	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
+	"github.com/airplanedev/lib/pkg/deploy/definitions"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 )
 
