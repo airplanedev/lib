@@ -67,11 +67,11 @@ func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
 }
 
 func (dd *DefnDiscoverer) HandleMissingTask(ctx context.Context, file string) (*api.Task, error) {
-	def, err := getDef(file)
-	if err != nil {
-		return nil, err
-	}
 	if dd.MissingTaskHandler != nil {
+		def, err := getDef(file)
+		if err != nil {
+			return nil, err
+		}
 		return dd.MissingTaskHandler(ctx, def)
 	}
 	return nil, nil
