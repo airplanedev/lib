@@ -414,14 +414,13 @@ func (d *RESTDefinition_0_3) getEnv() (api.TaskEnv, error) {
 }
 
 type ParameterDefinition_0_3 struct {
-	Name        string      `json:"name"`
-	Slug        string      `json:"slug"`
-	Type        string      `json:"type"`
-	Description string      `json:"description,omitempty"`
-	Default     interface{} `json:"default,omitempty"`
-	// TODO: default to true
-	Required bool                   `json:"required,omitempty"`
-	Options  []OptionDefinition_0_3 `json:"options,omitempty"`
+	Name        string                 `json:"name"`
+	Slug        string                 `json:"slug"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description,omitempty"`
+	Default     interface{}            `json:"default,omitempty"`
+	Required    *bool                  `json:"required,omitempty"`
+	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
 }
 
 type OptionDefinition_0_3 struct {
@@ -665,7 +664,7 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			return errors.Errorf("unknown parameter type: %s", pd.Type)
 		}
 
-		if !pd.Required {
+		if pd.Required != nil && !*pd.Required {
 			param.Constraints.Optional = true
 		}
 

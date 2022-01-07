@@ -6,6 +6,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func newBoolPtr(v bool) *bool {
+	return &v
+}
+
 var fullYAML = []byte(
 	`name: Hello World
 slug: hello_world
@@ -48,6 +52,46 @@ var fullJSON = []byte(
 	"timeout": 3600
 }`)
 
+var yamlWithDefault = []byte(
+	`name: Hello World
+slug: hello_world
+description: A starter task.
+parameters:
+- name: Name
+  slug: name
+  type: shorttext
+  description: Someone's name.
+  default: World
+python:
+  entrypoint: hello_world.py
+  arguments:
+  - "{{JSON.stringify(params)}}"
+timeout: 3600
+`)
+
+var jsonWithDefault = []byte(
+	`{
+	"name": "Hello World",
+	"slug": "hello_world",
+	"description": "A starter task.",
+	"parameters": [
+		{
+			"name": "Name",
+			"slug": "name",
+			"type": "shorttext",
+			"description": "Someone's name.",
+			"default": "World"
+		}
+	],
+	"python": {
+		"entrypoint": "hello_world.py",
+		"arguments": [
+			"{{JSON.stringify(params)}}"
+		]
+	},
+	"timeout": 3600
+}`)
+
 var fullDef = Definition_0_3{
 	Name:        "Hello World",
 	Slug:        "hello_world",
@@ -59,7 +103,27 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    true,
+			Required:    newBoolPtr(true),
+		},
+	},
+	Python: &PythonDefinition_0_3{
+		Entrypoint: "hello_world.py",
+		Arguments:  []string{"{{JSON.stringify(params)}}"},
+	},
+	Timeout: 3600,
+}
+
+var defWithDefault = Definition_0_3{
+	Name:        "Hello World",
+	Slug:        "hello_world",
+	Description: "A starter task.",
+	Parameters: []ParameterDefinition_0_3{
+		{
+			Name:        "Name",
+			Slug:        "name",
+			Type:        "shorttext",
+			Description: "Someone's name.",
+			Default:     "World",
 		},
 	},
 	Python: &PythonDefinition_0_3{
@@ -70,35 +134,72 @@ var fullDef = Definition_0_3{
 }
 
 func TestDefinition_0_3(t *testing.T) {
-	t.Run("marshal yaml", func(t *testing.T) {
-		assert := require.New(t)
-		ybytes, err := fullDef.Marshal(TaskDefFormatYAML)
-		assert.NoError(err)
-		assert.Equal(fullYAML, ybytes)
-	})
+	// marshalling tests
+	for _, test := range []struct {
+		name     string
+		format   TaskDefFormat
+		def      Definition_0_3
+		expected []byte
+	}{
+		{
+			name:     "marshal yaml",
+			format:   TaskDefFormatYAML,
+			def:      fullDef,
+			expected: fullYAML,
+		},
+		{
+			name:     "marshal json",
+			format:   TaskDefFormatJSON,
+			def:      fullDef,
+			expected: fullJSON,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assert := require.New(t)
+			bytestr, err := test.def.Marshal(test.format)
+			assert.NoError(err)
+			assert.Equal(test.expected, bytestr)
+		})
+	}
 
-	t.Run("marshal json", func(t *testing.T) {
-		assert := require.New(t)
-		jbytes, err := fullDef.Marshal(TaskDefFormatJSON)
-		assert.NoError(err)
-		assert.Equal(fullJSON, jbytes)
-	})
-
-	t.Run("unmarshal yaml", func(t *testing.T) {
-		assert := require.New(t)
-		d := Definition_0_3{}
-		err := d.Unmarshal(TaskDefFormatYAML, fullYAML)
-		assert.NoError(err)
-		assert.Equal(fullDef, d)
-	})
-
-	t.Run("unmarshal json", func(t *testing.T) {
-		assert := require.New(t)
-		d := Definition_0_3{}
-		err := d.Unmarshal(TaskDefFormatJSON, fullJSON)
-		assert.NoError(err)
-		assert.Equal(fullDef, d)
-	})
-
-	// TODO: add tests for non-zero defaults.
+	// unmarshalling tests
+	for _, test := range []struct {
+		name     string
+		format   TaskDefFormat
+		bytestr  []byte
+		expected Definition_0_3
+	}{
+		{
+			name:     "unmarshal yaml",
+			format:   TaskDefFormatYAML,
+			bytestr:  fullYAML,
+			expected: fullDef,
+		},
+		{
+			name:     "unmarshal json",
+			format:   TaskDefFormatJSON,
+			bytestr:  fullJSON,
+			expected: fullDef,
+		},
+		{
+			name:     "unmarshal yaml with default",
+			format:   TaskDefFormatYAML,
+			bytestr:  yamlWithDefault,
+			expected: defWithDefault,
+		},
+		{
+			name:     "unmarshal json with default",
+			format:   TaskDefFormatJSON,
+			bytestr:  jsonWithDefault,
+			expected: defWithDefault,
+		},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			assert := require.New(t)
+			d := Definition_0_3{}
+			err := d.Unmarshal(test.format, test.bytestr)
+			assert.NoError(err)
+			assert.Equal(test.expected, d)
+		})
+	}
 }
