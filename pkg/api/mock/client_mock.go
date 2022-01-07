@@ -3,7 +3,7 @@ package mock
 import (
 	"context"
 
-	"github.com/airplanedev/lib/pkg/deploy/api"
+	"github.com/airplanedev/lib/pkg/api"
 )
 
 type MockClient struct {

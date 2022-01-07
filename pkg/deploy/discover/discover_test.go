@@ -5,9 +5,9 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/airplanedev/lib/pkg/api"
+	"github.com/airplanedev/lib/pkg/api/mock"
 	"github.com/airplanedev/lib/pkg/build"
-	"github.com/airplanedev/lib/pkg/deploy/api"
-	"github.com/airplanedev/lib/pkg/deploy/api/mock"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
 	_ "github.com/airplanedev/lib/pkg/runtime/python"

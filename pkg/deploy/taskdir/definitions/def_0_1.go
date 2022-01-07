@@ -1,8 +1,8 @@
 package definitions
 
 import (
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
-	"github.com/airplanedev/lib/pkg/deploy/api"
 	"github.com/mitchellh/mapstructure"
 	"github.com/pkg/errors"
 )

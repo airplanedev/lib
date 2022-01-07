@@ -7,8 +7,8 @@ import (
 	"path"
 
 	"github.com/airplanedev/archiver"
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build/ignore"
-	"github.com/airplanedev/lib/pkg/deploy/api"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 	"golang.org/x/sync/singleflight"

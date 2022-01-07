@@ -6,7 +6,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/airplanedev/lib/pkg/deploy/api"
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"

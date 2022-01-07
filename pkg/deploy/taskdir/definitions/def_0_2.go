@@ -1,7 +1,7 @@
 package definitions
 
 import (
-	"github.com/airplanedev/lib/pkg/deploy/api"
+	"github.com/airplanedev/lib/pkg/api"
 )
 
 type Definition_0_2 struct {
