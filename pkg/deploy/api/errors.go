@@ -2,7 +2,7 @@ package api
 
 import "fmt"
 
-// TaskMissingError implements an exaplainable error.
+// TaskMissingError implements an explainable error.
 type TaskMissingError struct {
 	AppURL string
 	Slug   string
