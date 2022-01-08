@@ -7,6 +7,10 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
+	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
+	_ "github.com/airplanedev/lib/pkg/runtime/python"
+	_ "github.com/airplanedev/lib/pkg/runtime/shell"
+	_ "github.com/airplanedev/lib/pkg/runtime/typescript"
 	"github.com/pkg/errors"
 )
 
