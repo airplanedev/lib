@@ -50,13 +50,11 @@ func node(root string, options KindOptions) (string, error) {
 			return "", errors.Wrapf(err, "node: reading %s", pathPackageJSON)
 		}
 
-		var pkg struct {
-			Workspaces []string `json:"workspaces"`
-		}
+		var pkg pkgJSONWorkspaces
 		if err := json.Unmarshal(buf, &pkg); err != nil {
 			return "", fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
 		}
-		usesWorkspaces = len(pkg.Workspaces) > 0
+		usesWorkspaces = len(pkg.workspaces) > 0
 	}
 
 	cfg := struct {
@@ -334,4 +332,32 @@ func getBaseNodeImage(version string) (string, error) {
 	}
 
 	return base, nil
+}
+
+type pkgJSONWorkspaces struct {
+	workspaces []string
+}
+
+func (p *pkgJSONWorkspaces) UnmarshalJSON(data []byte) error {
+	// Workspaces might be an array of strings...
+	var workspacesArray struct {
+		Workspaces []string `json:"workspaces"`
+	}
+	if err := json.Unmarshal(data, &workspacesArray); err == nil {
+		p.workspaces = workspacesArray.Workspaces
+		return nil
+	}
+
+	// Or it might be an object with an array of strings.
+	var workspacesObject struct {
+		Workspaces struct {
+			Packages []string `json:"packages"`
+		} `json:"workspaces"`
+	}
+	if err := json.Unmarshal(data, &workspacesObject); err != nil {
+		return err
+	}
+	p.workspaces = workspacesObject.Workspaces.Packages
+	return nil
+
 }

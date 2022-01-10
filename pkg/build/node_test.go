@@ -118,6 +118,14 @@ func TestNodeBuilder(t *testing.T) {
 			},
 		},
 		{
+			Root: "typescript/yarnworkspacesobject",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "pkg2/src/index.ts",
+			},
+		},
+		{
 			Root: "typescript/nodeworkspaces",
 			Kind: TaskKindNode,
 			Options: KindOptions{

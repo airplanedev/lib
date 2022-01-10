@@ -1,0 +1,8 @@
+{
+  "name": "yarnworkspaces",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": {
+    "packages": ["pkg1", "pkg2"]
+  }
+}
