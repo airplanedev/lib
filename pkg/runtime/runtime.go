@@ -9,6 +9,7 @@ package runtime
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
@@ -105,6 +106,9 @@ var runtimes = make(map[string]Interface)
 
 // Register registers the given ext with r.
 func Register(ext string, r Interface) {
+	if _, ok := runtimes[ext]; ok {
+		panic(fmt.Sprintf("runtime: %s already registered", ext))
+	}
 	runtimes[ext] = r
 }
 
