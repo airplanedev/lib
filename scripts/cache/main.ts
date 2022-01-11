@@ -16,7 +16,7 @@ export default async function(params: Params) {
     throw new Error("expected a project")
   }
 
-  const versionsFile = JSON.parse(fs.readFileSync('./pkg/build/versions.json') as any) as Record<string, Record<string, {
+  const versionsFile = JSON.parse(fs.readFileSync('../../pkg/build/versions.json') as any) as Record<string, Record<string, {
     image: string
     tag: string
     digest: string

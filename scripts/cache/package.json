@@ -7,5 +7,8 @@
   "dependencies": {
     "airplane": "0.1.2",
     "execa": "5.1.1"
+  },
+  "airplane": {
+    "root": "../.."
   }
 }
