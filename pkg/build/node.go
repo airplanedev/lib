@@ -38,6 +38,7 @@ func node(root string, options KindOptions) (string, error) {
 	pathPackageJSON := filepath.Join(root, "package.json")
 	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
+	pathPackageLock := filepath.Join(root, "package-lock.json")
 	var usesWorkspaces bool
 
 	if hasPackageJSON {
@@ -63,6 +64,7 @@ func node(root string, options KindOptions) (string, error) {
 		HasPackageJSON        bool
 		UsesWorkspaces        bool
 		IsYarn                bool
+		HasPackageLock               bool
 		InlineShim            string
 		InlineShimPackageJSON string
 		NodeVersion           string
@@ -70,6 +72,7 @@ func node(root string, options KindOptions) (string, error) {
 	}{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
+		HasPackageLock:        fsx.AssertExistsAll(pathPackageLock) == nil,
 		IsYarn:         fsx.AssertExistsAll(pathYarnLock) == nil,
 		UsesWorkspaces: usesWorkspaces,
 		// esbuild is relatively generous in the node versions it supports:
@@ -156,8 +159,10 @@ func node(root string, options KindOptions) (string, error) {
 
 		{{if .IsYarn}}
 		RUN yarn --non-interactive --production --frozen-lockfile
-		{{else}}
+		{{else if .HasPackageLock}}
 		RUN npm ci --production
+		{{else}}
+		RUN npm i --production
 		{{end}}
 
 		{{if not .UsesWorkspaces}}
