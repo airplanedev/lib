@@ -424,8 +424,8 @@ type ParameterDefinition_0_3 struct {
 }
 
 type OptionDefinition_0_3 struct {
-	Label string `json:"label"`
-	Value string `json:"value"`
+	Label string      `json:"label"`
+	Value interface{} `json:"value"`
 }
 
 var _ json.Unmarshaler = &OptionDefinition_0_3{}
