@@ -155,9 +155,9 @@ func node(root string, options KindOptions) (string, error) {
 		{{end}}
 
 		{{if .IsYarn}}
-		RUN yarn --non-interactive
+		RUN yarn --non-interactive --production --frozen-lockfile
 		{{else}}
-		RUN npm install
+		RUN npm ci --production
 		{{end}}
 
 		{{if not .UsesWorkspaces}}
