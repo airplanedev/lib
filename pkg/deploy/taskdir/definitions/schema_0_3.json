@@ -266,6 +266,10 @@
               }
             ]
           }
+        },
+        "regex": {
+          "type": "string",
+          "format": "regex"
         }
       },
       "additionalProperties": false,

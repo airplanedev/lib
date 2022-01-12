@@ -421,6 +421,7 @@ type ParameterDefinition_0_3 struct {
 	Default     interface{}            `json:"default,omitempty"`
 	Required    *bool                  `json:"required,omitempty"`
 	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
+	Regex       string                 `json:"regex,omitempty"`
 }
 
 type OptionDefinition_0_3 struct {
@@ -667,6 +668,8 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 		if pd.Required != nil && !*pd.Required {
 			param.Constraints.Optional = true
 		}
+
+		param.Constraints.Regex = pd.Regex
 
 		if len(pd.Options) > 0 {
 			param.Constraints.Options = make([]api.ConstraintOption, len(pd.Options))
