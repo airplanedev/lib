@@ -74,12 +74,13 @@
             "image": {
               "type": "object",
               "properties": {
+                "image": { "type": "string" },
                 "command": { "type": "array", "items": { "type": "string" } },
                 "entrypoint": { "type": "string" },
                 "env": { "$ref": "#/$defs/env" }
               },
               "additionalProperties": false,
-              "required": ["command", "entrypoint"]
+              "required": ["image"]
             }
           },
           "required": ["image"]

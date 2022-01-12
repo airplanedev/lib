@@ -9,6 +9,8 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/alessio/shellescape"
+	"github.com/flynn/go-shlex"
 	"github.com/goccy/go-yaml"
 	"github.com/pkg/errors"
 	"github.com/xeipuuv/gojsonschema"
@@ -50,17 +52,23 @@ type taskKind_0_3 interface {
 var _ taskKind_0_3 = &ImageDefinition_0_3{}
 
 type ImageDefinition_0_3 struct {
-	Image   string      `json:"image"`
-	Command []string    `json:"command"`
-	Root    string      `json:"root,omitempty"`
-	Env     api.TaskEnv `json:"env,omitempty"`
+	Image      string      `json:"image"`
+	Entrypoint string      `json:"entrypoint,omitempty"`
+	Command    []string    `json:"command"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	if d.Image != "" {
 		req.Image = &d.Image
 	}
-	req.Command = d.Command
+	req.Arguments = d.Command
+	if cmd, err := shlex.Split(d.Entrypoint); err != nil {
+		return err
+	} else {
+		req.Command = cmd
+	}
 	return nil
 }
 
@@ -68,7 +76,8 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	if t.Image != nil {
 		d.Image = *t.Image
 	}
-	d.Command = t.Command
+	d.Command = t.Arguments
+	d.Entrypoint = shellescape.QuoteCommand(t.Command)
 	return nil
 }
 

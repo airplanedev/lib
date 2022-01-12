@@ -14,6 +14,10 @@ func newBoolPtr(v bool) *bool {
 	return &v
 }
 
+func newStringPtr(v string) *string {
+	return &v
+}
+
 var fullYAML = []byte(
 	`name: Hello World
 slug: hello_world
@@ -281,6 +285,29 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Shell: &ShellDefinition_0_3{
 					Arguments:  []string{},
 					Entrypoint: "main.sh",
+				},
+				Constraints: &api.RunConstraints{},
+			},
+		},
+		{
+			name: "image task",
+			task: api.Task{
+				Name:        "Image Task",
+				Slug:        "image_task",
+				Command:     []string{"bash"},
+				Arguments:   []string{"-c", "echo 'foobar'"},
+				Kind:        build.TaskKindImage,
+				KindOptions: build.KindOptions{},
+				Image:       newStringPtr("ubuntu:latest"),
+				Constraints: api.RunConstraints{},
+			},
+			definition: Definition_0_3{
+				Name: "Image Task",
+				Slug: "image_task",
+				Image: &ImageDefinition_0_3{
+					Image:      "ubuntu:latest",
+					Entrypoint: "bash",
+					Command:    []string{"-c", "echo 'foobar'"},
 				},
 				Constraints: &api.RunConstraints{},
 			},
@@ -556,6 +583,29 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
 				},
+				Constraints: api.RunConstraints{},
+			},
+		},
+		{
+			name: "image task",
+			definition: Definition_0_3{
+				Name: "Image Task",
+				Slug: "image_task",
+				Image: &ImageDefinition_0_3{
+					Image:      "ubuntu:latest",
+					Entrypoint: "bash",
+					Command:    []string{"-c", "echo 'foobar'"},
+				},
+				Constraints: &api.RunConstraints{},
+			},
+			request: api.UpdateTaskRequest{
+				Name:        "Image Task",
+				Slug:        "image_task",
+				Parameters:  []api.Parameter{},
+				Command:     []string{"bash"},
+				Arguments:   []string{"-c", "echo 'foobar'"},
+				Kind:        build.TaskKindImage,
+				Image:       newStringPtr("ubuntu:latest"),
 				Constraints: api.RunConstraints{},
 			},
 		},
