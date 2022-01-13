@@ -35,8 +35,7 @@ type Definition_0_3 struct {
 
 	Permissions *PermissionDefinition_0_3 `json:"permissions,omitempty"`
 	Constraints *api.RunConstraints       `json:"constraints,omitempty"`
-	// TODO: default 3600
-	Timeout int `json:"timeout,omitempty"`
+	Timeout     int                       `json:"timeout,omitempty"`
 }
 
 type taskKind_0_3 interface {
@@ -104,11 +103,10 @@ func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
 
 type DenoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -121,6 +119,8 @@ func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -165,6 +165,8 @@ func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client a
 	if v, ok := t.KindOptions["dockerfile"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Dockerfile = sv
+		} else {
+			return errors.Errorf("expected string dockerfile, got %T instead", v)
 		}
 	}
 	return nil
@@ -195,11 +197,10 @@ func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &GoDefinition_0_3{}
 
 type GoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -212,6 +213,8 @@ func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIC
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -243,12 +246,11 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
-	Entrypoint  string `json:"entrypoint"`
-	NodeVersion string `json:"nodeVersion"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint  string      `json:"entrypoint"`
+	NodeVersion string      `json:"nodeVersion"`
+	Arguments   []string    `json:"arguments,omitempty"`
+	Root        string      `json:"root,omitempty"`
+	Env         api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -261,11 +263,15 @@ func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["nodeVersion"]; ok {
 		if sv, ok := v.(string); ok {
 			d.NodeVersion = sv
+		} else {
+			return errors.Errorf("expected string nodeVersion, got %T instead", v)
 		}
 	}
 	return nil
@@ -298,11 +304,10 @@ func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
 
 type PythonDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -315,6 +320,8 @@ func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.I
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -346,11 +353,10 @@ func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
 
 type ShellDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: defaults to PARAM1={{params.param1}} PARAM2{{params.param2}} etc.
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -363,6 +369,8 @@ func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -427,6 +435,8 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.Parameters = mv
+		} else {
+			return errors.Errorf("expected map queryArgs, got %T instead", v)
 		}
 	}
 	return nil
@@ -500,36 +510,50 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["method"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Method = sv
+		} else {
+			return errors.Errorf("expected string method, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["path"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Path = sv
+		} else {
+			return errors.Errorf("expected string path, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["urlParams"]; ok {
 		if mv, ok := v.(map[string]string); ok {
 			d.URLParams = mv
+		} else {
+			return errors.Errorf("expected map urlParams, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["headers"]; ok {
 		if mv, ok := v.(map[string]string); ok {
 			d.Headers = mv
+		} else {
+			return errors.Errorf("expected map headers, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["bodyType"]; ok {
 		if sv, ok := v.(string); ok {
 			d.BodyType = sv
+		} else {
+			return errors.Errorf("expected string bodyType, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["body"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Body = sv
+		} else {
+			return errors.Errorf("expected string body, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["formData"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.FormData = mv
+		} else {
+			return errors.Errorf("expected map formData, got %T instead", v)
 		}
 	}
 	return nil
@@ -939,7 +963,7 @@ func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
 }
 
-func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (*Definition_0_3, error) {
+func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
 	d := Definition_0_3{
 		Name:        t.Name,
 		Slug:        t.Slug,
@@ -949,18 +973,18 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	}
 
 	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
 	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
-	return &d, nil
+	return d, nil
 }
 
 func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
@@ -983,8 +1007,10 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 				p.Type = "longtext"
 			case api.ComponentEditorSQL:
 				p.Type = "sql"
-			default:
+			case api.ComponentNone:
 				p.Type = "shorttext"
+			default:
+				return errors.Errorf("unexpected component for type=string: %s", param.Component)
 			}
 		case "boolean", "upload", "integer", "float", "date", "datetime", "configvar":
 			p.Type = string(param.Type)
@@ -1002,8 +1028,10 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 		if len(param.Constraints.Options) > 0 {
 			p.Options = make([]OptionDefinition_0_3, len(param.Constraints.Options))
 			for j, opt := range param.Constraints.Options {
-				p.Options[j].Label = opt.Label
-				p.Options[j].Value = opt.Value
+				p.Options[j] = OptionDefinition_0_3{
+					Label: opt.Label,
+					Value: opt.Value,
+				}
 			}
 		}
 

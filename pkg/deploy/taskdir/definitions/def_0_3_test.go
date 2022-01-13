@@ -502,7 +502,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 			}
 			d, err := NewDefinitionFromTask_0_3(ctx, client, test.task)
 			assert.NoError(err)
-			assert.Equal(test.definition, *d)
+			assert.Equal(test.definition, d)
 		})
 	}
 }
