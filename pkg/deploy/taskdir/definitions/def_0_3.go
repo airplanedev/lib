@@ -930,7 +930,7 @@ func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
 }
 
-func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (*Definition_0_3, error) {
+func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
 	d := Definition_0_3{
 		Name:        t.Name,
 		Slug:        t.Slug,
@@ -940,18 +940,18 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	}
 
 	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
 	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {
-		return nil, err
+		return Definition_0_3{}, err
 	}
 
-	return &d, nil
+	return d, nil
 }
 
 func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
