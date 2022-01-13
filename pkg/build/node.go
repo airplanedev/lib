@@ -120,6 +120,8 @@ func node(root string, options KindOptions) (string, error) {
 	} else if isYarn {
 		installCommand = "yarn install --non-interactive --production --frozen-lockfile"
 	} else if hasPackageLock {
+		// Use npm ci if possible, since it's faster and behaves better:
+		// https://docs.npmjs.com/cli/v8/commands/npm-ci
 		installCommand = "npm ci --production"
 	}
 	cfg.InstallCommand = installCommand
