@@ -9,6 +9,8 @@ import (
 type MockClient struct {
 	Tasks     map[string]api.Task
 	Resources []api.Resource
+	Members   []api.TeamMember
+	Groups    []api.Group
 }
 
 var _ api.IAPIClient = &MockClient{}
@@ -30,5 +32,12 @@ func (mc *MockClient) ListResources(ctx context.Context) (res api.ListResourcesR
 func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuildUploadRequest) (res api.CreateBuildUploadResponse, err error) {
 	return api.CreateBuildUploadResponse{
 		WriteOnlyURL: "writeOnlyURL",
+	}, nil
+}
+
+func (mc *MockClient) ListEntities(ctx context.Context) (res api.ListEntitiesResponse, err error) {
+	return api.ListEntitiesResponse{
+		Members: mc.Members,
+		Groups:  mc.Groups,
 	}, nil
 }
