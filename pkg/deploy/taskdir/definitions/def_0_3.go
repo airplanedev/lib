@@ -112,6 +112,8 @@ func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -156,6 +158,8 @@ func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client a
 	if v, ok := t.KindOptions["dockerfile"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Dockerfile = sv
+		} else {
+			return errors.Errorf("expected string dockerfile, got %T instead", v)
 		}
 	}
 	return nil
@@ -203,6 +207,8 @@ func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIC
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -252,11 +258,15 @@ func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["nodeVersion"]; ok {
 		if sv, ok := v.(string); ok {
 			d.NodeVersion = sv
+		} else {
+			return errors.Errorf("expected string nodeVersion, got %T instead", v)
 		}
 	}
 	return nil
@@ -306,6 +316,8 @@ func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.I
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -354,6 +366,8 @@ func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
 	return nil
@@ -418,6 +432,8 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.Parameters = mv
+		} else {
+			return errors.Errorf("expected map queryArgs, got %T instead", v)
 		}
 	}
 	return nil
@@ -491,36 +507,50 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	if v, ok := t.KindOptions["method"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Method = sv
+		} else {
+			return errors.Errorf("expected string method, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["path"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Path = sv
+		} else {
+			return errors.Errorf("expected string path, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["urlParams"]; ok {
 		if mv, ok := v.(map[string]string); ok {
 			d.URLParams = mv
+		} else {
+			return errors.Errorf("expected map urlParams, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["headers"]; ok {
 		if mv, ok := v.(map[string]string); ok {
 			d.Headers = mv
+		} else {
+			return errors.Errorf("expected map headers, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["bodyType"]; ok {
 		if sv, ok := v.(string); ok {
 			d.BodyType = sv
+		} else {
+			return errors.Errorf("expected string bodyType, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["body"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Body = sv
+		} else {
+			return errors.Errorf("expected string body, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["formData"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.FormData = mv
+		} else {
+			return errors.Errorf("expected map formData, got %T instead", v)
 		}
 	}
 	return nil
