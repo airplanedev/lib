@@ -995,8 +995,10 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 		if len(param.Constraints.Options) > 0 {
 			p.Options = make([]OptionDefinition_0_3, len(param.Constraints.Options))
 			for j, opt := range param.Constraints.Options {
-				p.Options[j].Label = opt.Label
-				p.Options[j].Value = opt.Value
+				p.Options[j] = OptionDefinition_0_3{
+					Label: opt.Label,
+					Value: opt.Value,
+				}
 			}
 		}
 
