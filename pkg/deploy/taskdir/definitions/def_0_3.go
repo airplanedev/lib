@@ -33,8 +33,7 @@ type Definition_0_3 struct {
 
 	Permissions *PermissionDefinition_0_3 `json:"permissions,omitempty"`
 	Constraints *api.RunConstraints       `json:"constraints,omitempty"`
-	// TODO: default 3600
-	Timeout int `json:"timeout,omitempty"`
+	Timeout     int                       `json:"timeout,omitempty"`
 }
 
 type taskKind_0_3 interface {
@@ -95,11 +94,10 @@ func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
 
 type DenoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -190,11 +188,10 @@ func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &GoDefinition_0_3{}
 
 type GoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -240,12 +237,11 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
-	Entrypoint  string `json:"entrypoint"`
-	NodeVersion string `json:"nodeVersion"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint  string      `json:"entrypoint"`
+	NodeVersion string      `json:"nodeVersion"`
+	Arguments   []string    `json:"arguments,omitempty"`
+	Root        string      `json:"root,omitempty"`
+	Env         api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -299,11 +295,10 @@ func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
 
 type PythonDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -349,11 +344,10 @@ func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
 
 type ShellDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: defaults to PARAM1={{params.param1}} PARAM2{{params.param2}} etc.
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
