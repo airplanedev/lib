@@ -974,8 +974,10 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 				p.Type = "longtext"
 			case api.ComponentEditorSQL:
 				p.Type = "sql"
-			default:
+			case api.ComponentNone:
 				p.Type = "shorttext"
+			default:
+				return errors.Errorf("unexpected component for type=string: %s", param.Component)
 			}
 		case "boolean", "upload", "integer", "float", "date", "datetime", "configvar":
 			p.Type = string(param.Type)
