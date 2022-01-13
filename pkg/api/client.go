@@ -13,6 +13,7 @@ type IAPIClient interface {
 	GetTask(ctx context.Context, slug string) (res Task, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
+	ListEntities(ctx context.Context) (res ListEntitiesResponse, err error)
 }
 
 // Task represents a task.
@@ -109,12 +110,33 @@ const (
 type Permissions []Permission
 
 type Permission struct {
-	Action     Action  `json:"action"`
+	Action     Action  `json:"action,omitempty"`
+	RoleID     RoleID  `json:"roleID,omitempty"`
 	SubUserID  *string `json:"subUserID"`
 	SubGroupID *string `json:"subGroupID"`
 }
 
 type Action string
+
+type RoleID string
+
+const (
+	RoleTeamAdmin        RoleID = "team_admin"
+	RoleTeamDeveloper    RoleID = "team_developer"
+	RoleTaskViewer       RoleID = "task_viewer"
+	RoleTaskRequester    RoleID = "task_requester"
+	RoleTaskExecuter     RoleID = "task_executer"
+	RoleTaskAdmin        RoleID = "task_admin"
+	RoleRunViewer        RoleID = "run_viewer"
+	RoleRunbookViewer    RoleID = "runbook_viewer"
+	RoleRunbookRequester RoleID = "runbook_requester"
+	RoleRunbookExecuter  RoleID = "runbook_executer"
+	RoleRunbookAdmin     RoleID = "runbook_admin"
+	RoleSessionViewer    RoleID = "session_viewer"
+	RoleSessionExecuter  RoleID = "session_executer"
+	RoleSessionAdmin     RoleID = "session_admin"
+	RoleResourceUser     RoleID = "resource_user"
+)
 
 type ResourceRequests map[string]string
 
@@ -275,4 +297,20 @@ type RunConstraints struct {
 type AgentLabel struct {
 	Key   string `json:"key" yaml:"key"`
 	Value string `json:"value" yaml:"value"`
+}
+
+type ListEntitiesResponse struct {
+	Members []TeamMember `json:"members"`
+	Groups  []Group      `json:"groups"`
+}
+
+type TeamMember struct {
+	ID    string `json:"userID"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+}
+
+type Group struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
 }
