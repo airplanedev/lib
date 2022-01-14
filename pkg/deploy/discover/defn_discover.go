@@ -23,7 +23,7 @@ var _ TaskDiscoverer = &DefnDiscoverer{}
 func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (slug string, err error) {
 	def, err := getDef(file)
 	if err != nil {
-		return "", err
+		return "", nil
 	}
 
 	return def.GetSlug(), nil
