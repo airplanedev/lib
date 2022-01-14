@@ -968,7 +968,6 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		Name:        t.Name,
 		Slug:        t.Slug,
 		Description: t.Description,
-		Constraints: &t.Constraints,
 		Timeout:     t.Timeout,
 	}
 
@@ -978,6 +977,10 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
 		return Definition_0_3{}, err
+	}
+
+	if t.Constraints.Labels != nil {
+		d.Constraints = &t.Constraints
 	}
 
 	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {
