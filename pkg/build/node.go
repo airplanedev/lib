@@ -183,7 +183,6 @@ func node(root string, options KindOptions) (string, error) {
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
 				--external:airplane \
-				--minify \
 				--platform=node {{.ExternalFlags}} \
 				--target=node{{.NodeVersion}} \
 				--outfile=/airplane/.airplane/dist/shim.js
