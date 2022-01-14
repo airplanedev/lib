@@ -124,7 +124,7 @@ func node(root string, options KindOptions) (string, error) {
 		// https://docs.npmjs.com/cli/v8/commands/npm-ci
 		installCommand = "npm ci --production"
 	}
-	cfg.InstallCommand = installCommand
+	cfg.InstallCommand = strings.ReplaceAll(installCommand, "\n", "\\n")
 
 	// The following Dockerfile can build both JS and TS tasks. In general, we're
 	// aiming for recent EC202x support and for support for import/export syntax.
