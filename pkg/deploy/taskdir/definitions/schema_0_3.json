@@ -74,12 +74,13 @@
             "image": {
               "type": "object",
               "properties": {
+                "image": { "type": "string" },
                 "command": { "type": "array", "items": { "type": "string" } },
                 "entrypoint": { "type": "string" },
                 "env": { "$ref": "#/$defs/env" }
               },
               "additionalProperties": false,
-              "required": ["command", "entrypoint"]
+              "required": ["image"]
             }
           },
           "required": ["image"]
@@ -248,16 +249,28 @@
           "items": {
             "anyOf": [
               { "type": "string" },
+              { "type": "number" },
+              { "type": "boolean" },
               {
                 "type": "object",
                 "properties": {
                   "label": { "type": "string" },
-                  "value": { "type": "string" }
+                  "value": {
+                    "anyOf": [
+                      { "type": "string" },
+                      { "type": "number" },
+                      { "type": "boolean" }
+                    ]
+                  }
                 },
                 "additionalProperties": false
               }
             ]
           }
+        },
+        "regex": {
+          "type": "string",
+          "format": "regex"
         }
       },
       "additionalProperties": false,
@@ -284,11 +297,11 @@
       "type": "array",
       "items": { "type": "string" }
     },
-	"slug": {
-	  "type": "string",
-	  "pattern": "^[a-z0-9_]+$",
-	  "maxLength": 50
-	},
+    "slug": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "maxLength": 50
+    },
     "baseDefinition": {
       "type": "object",
       "properties": {

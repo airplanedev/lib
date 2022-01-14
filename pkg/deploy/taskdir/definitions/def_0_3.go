@@ -9,6 +9,8 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/alessio/shellescape"
+	"github.com/flynn/go-shlex"
 	"github.com/goccy/go-yaml"
 	"github.com/pkg/errors"
 	"github.com/xeipuuv/gojsonschema"
@@ -33,12 +35,12 @@ type Definition_0_3 struct {
 
 	Permissions *PermissionDefinition_0_3 `json:"permissions,omitempty"`
 	Constraints *api.RunConstraints       `json:"constraints,omitempty"`
-	// TODO: default 3600
-	Timeout int `json:"timeout,omitempty"`
+	Timeout     int                       `json:"timeout,omitempty"`
 }
 
 type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
+	hydrateFromTask(context.Context, api.IAPIClient, *api.Task) error
 	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
@@ -49,15 +51,32 @@ type taskKind_0_3 interface {
 var _ taskKind_0_3 = &ImageDefinition_0_3{}
 
 type ImageDefinition_0_3 struct {
-	Image   string      `json:"image"`
-	Command []string    `json:"command"`
-	Root    string      `json:"root,omitempty"`
-	Env     api.TaskEnv `json:"env,omitempty"`
+	Image      string      `json:"image"`
+	Entrypoint string      `json:"entrypoint,omitempty"`
+	Command    []string    `json:"command"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Image = &d.Image
-	req.Command = d.Command
+	if d.Image != "" {
+		req.Image = &d.Image
+	}
+	req.Arguments = d.Command
+	if cmd, err := shlex.Split(d.Entrypoint); err != nil {
+		return err
+	} else {
+		req.Command = cmd
+	}
+	return nil
+}
+
+func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if t.Image != nil {
+		d.Image = *t.Image
+	}
+	d.Command = t.Arguments
+	d.Entrypoint = shellescape.QuoteCommand(t.Command)
 	return nil
 }
 
@@ -84,15 +103,26 @@ func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
 
 type DenoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
+	return nil
+}
+
+func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -131,6 +161,17 @@ func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, 
 	return nil
 }
 
+func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if v, ok := t.KindOptions["dockerfile"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Dockerfile = sv
+		} else {
+			return errors.Errorf("expected string dockerfile, got %T instead", v)
+		}
+	}
+	return nil
+}
+
 func (d *DockerfileDefinition_0_3) upgradeJST() error {
 	return nil
 }
@@ -156,15 +197,26 @@ func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &GoDefinition_0_3{}
 
 type GoDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
+	return nil
+}
+
+func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -194,16 +246,34 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
-	Entrypoint  string `json:"entrypoint"`
-	NodeVersion string `json:"nodeVersion"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint  string      `json:"entrypoint"`
+	NodeVersion string      `json:"nodeVersion"`
+	Arguments   []string    `json:"arguments,omitempty"`
+	Root        string      `json:"root,omitempty"`
+	Env         api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
+	return nil
+}
+
+func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["nodeVersion"]; ok {
+		if sv, ok := v.(string); ok {
+			d.NodeVersion = sv
+		} else {
+			return errors.Errorf("expected string nodeVersion, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -234,15 +304,26 @@ func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
 
 type PythonDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: default {{JSON.stringify(params)}}
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
+	return nil
+}
+
+func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -272,15 +353,26 @@ func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
 
 type ShellDefinition_0_3 struct {
-	Entrypoint string `json:"entrypoint"`
-	// TODO: defaults to PARAM1={{params.param1}} PARAM2{{params.param2}} etc.
-	Arguments []string    `json:"arguments,omitempty"`
-	Root      string      `json:"root,omitempty"`
-	Env       api.TaskEnv `json:"env,omitempty"`
+	Entrypoint string      `json:"entrypoint"`
+	Arguments  []string    `json:"arguments,omitempty"`
+	Root       string      `json:"root,omitempty"`
+	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
 	req.Arguments = d.Arguments
+	return nil
+}
+
+func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -326,6 +418,26 @@ func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client 
 		}
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
+	}
+	return nil
+}
+
+func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if resID, ok := t.Resources["db"]; ok {
+		resourcesByID, err := getResourcesByID(ctx, client)
+		if err != nil {
+			return err
+		}
+		if res, ok := resourcesByID[resID]; ok {
+			d.Resource = res.Name
+		}
+	}
+	if v, ok := t.KindOptions["queryArgs"]; ok {
+		if mv, ok := v.(map[string]interface{}); ok {
+			d.Parameters = mv
+		} else {
+			return errors.Errorf("expected map queryArgs, got %T instead", v)
+		}
 	}
 	return nil
 }
@@ -385,6 +497,68 @@ func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 	return nil
 }
 
+func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if resID, ok := t.Resources["rest"]; ok {
+		resourcesByID, err := getResourcesByID(ctx, client)
+		if err != nil {
+			return err
+		}
+		if res, ok := resourcesByID[resID]; ok {
+			d.Resource = res.Name
+		}
+	}
+	if v, ok := t.KindOptions["method"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Method = sv
+		} else {
+			return errors.Errorf("expected string method, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["path"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Path = sv
+		} else {
+			return errors.Errorf("expected string path, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["urlParams"]; ok {
+		if mv, ok := v.(map[string]string); ok {
+			d.URLParams = mv
+		} else {
+			return errors.Errorf("expected map urlParams, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["headers"]; ok {
+		if mv, ok := v.(map[string]string); ok {
+			d.Headers = mv
+		} else {
+			return errors.Errorf("expected map headers, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["bodyType"]; ok {
+		if sv, ok := v.(string); ok {
+			d.BodyType = sv
+		} else {
+			return errors.Errorf("expected string bodyType, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["body"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Body = sv
+		} else {
+			return errors.Errorf("expected string body, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["formData"]; ok {
+		if mv, ok := v.(map[string]interface{}); ok {
+			d.FormData = mv
+		} else {
+			return errors.Errorf("expected map formData, got %T instead", v)
+		}
+	}
+	return nil
+}
+
 func (d *RESTDefinition_0_3) upgradeJST() error {
 	return nil
 }
@@ -421,11 +595,12 @@ type ParameterDefinition_0_3 struct {
 	Default     interface{}            `json:"default,omitempty"`
 	Required    *bool                  `json:"required,omitempty"`
 	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
+	Regex       string                 `json:"regex,omitempty"`
 }
 
 type OptionDefinition_0_3 struct {
-	Label string `json:"label"`
-	Value string `json:"value"`
+	Label string      `json:"label"`
+	Value interface{} `json:"value"`
 }
 
 var _ json.Unmarshaler = &OptionDefinition_0_3{}
@@ -668,6 +843,8 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			param.Constraints.Optional = true
 		}
 
+		param.Constraints.Regex = pd.Regex
+
 		if len(pd.Options) > 0 {
 			param.Constraints.Options = make([]api.ConstraintOption, len(pd.Options))
 			for j, od := range pd.Options {
@@ -786,8 +963,123 @@ func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
 }
 
+func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
+	d := Definition_0_3{
+		Name:        t.Name,
+		Slug:        t.Slug,
+		Description: t.Description,
+		Constraints: &t.Constraints,
+		Timeout:     t.Timeout,
+	}
+
+	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
+		return Definition_0_3{}, err
+	}
+
+	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
+		return Definition_0_3{}, err
+	}
+
+	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {
+		return Definition_0_3{}, err
+	}
+
+	return d, nil
+}
+
+func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if len(t.Parameters) == 0 {
+		return nil
+	}
+	d.Parameters = make([]ParameterDefinition_0_3, len(t.Parameters))
+	for idx, param := range t.Parameters {
+		p := ParameterDefinition_0_3{
+			Name:        param.Name,
+			Slug:        param.Slug,
+			Description: param.Desc,
+			Default:     param.Default,
+		}
+
+		switch param.Type {
+		case "string":
+			switch param.Component {
+			case api.ComponentTextarea:
+				p.Type = "longtext"
+			case api.ComponentEditorSQL:
+				p.Type = "sql"
+			case api.ComponentNone:
+				p.Type = "shorttext"
+			default:
+				return errors.Errorf("unexpected component for type=string: %s", param.Component)
+			}
+		case "boolean", "upload", "integer", "float", "date", "datetime", "configvar":
+			p.Type = string(param.Type)
+		default:
+			return errors.Errorf("unknown parameter type: %s", param.Type)
+		}
+
+		if param.Constraints.Optional {
+			v := false
+			p.Required = &v
+		}
+
+		p.Regex = param.Constraints.Regex
+
+		if len(param.Constraints.Options) > 0 {
+			p.Options = make([]OptionDefinition_0_3, len(param.Constraints.Options))
+			for j, opt := range param.Constraints.Options {
+				p.Options[j] = OptionDefinition_0_3{
+					Label: opt.Label,
+					Value: opt.Value,
+				}
+			}
+		}
+
+		d.Parameters[idx] = p
+	}
+	return nil
+}
+
+func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	switch t.Kind {
+	case build.TaskKindDeno:
+		d.Deno = &DenoDefinition_0_3{}
+		return d.Deno.hydrateFromTask(ctx, client, t)
+	case build.TaskKindDockerfile:
+		d.Dockerfile = &DockerfileDefinition_0_3{}
+		return d.Dockerfile.hydrateFromTask(ctx, client, t)
+	case build.TaskKindGo:
+		d.Go = &GoDefinition_0_3{}
+		return d.Go.hydrateFromTask(ctx, client, t)
+	case build.TaskKindImage:
+		d.Image = &ImageDefinition_0_3{}
+		return d.Image.hydrateFromTask(ctx, client, t)
+	case build.TaskKindNode:
+		d.Node = &NodeDefinition_0_3{}
+		return d.Node.hydrateFromTask(ctx, client, t)
+	case build.TaskKindPython:
+		d.Python = &PythonDefinition_0_3{}
+		return d.Python.hydrateFromTask(ctx, client, t)
+	case build.TaskKindShell:
+		d.Shell = &ShellDefinition_0_3{}
+		return d.Shell.hydrateFromTask(ctx, client, t)
+	case build.TaskKindSQL:
+		d.SQL = &SQLDefinition_0_3{}
+		return d.SQL.hydrateFromTask(ctx, client, t)
+	case build.TaskKindREST:
+		d.REST = &RESTDefinition_0_3{}
+		return d.REST.hydrateFromTask(ctx, client, t)
+	default:
+		return errors.Errorf("unknown task kind: %s", t.Kind)
+	}
+}
+
+func (d *Definition_0_3) convertPermissionsFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	// TODO: convert permissions.
+	return nil
+}
+
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
-	// Remap resources from ref -> name to ref -> id.
 	resp, err := client.ListResources(ctx)
 	if err != nil {
 		return nil, errors.Wrap(err, "fetching resources")
@@ -797,4 +1089,16 @@ func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]
 		resourcesByName[resource.Name] = resource
 	}
 	return resourcesByName, nil
+}
+
+func getResourcesByID(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
+	resp, err := client.ListResources(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "fetching resources")
+	}
+	resourcesByID := map[string]api.Resource{}
+	for _, resource := range resp.Resources {
+		resourcesByID[resource.ID] = resource
+	}
+	return resourcesByID, nil
 }

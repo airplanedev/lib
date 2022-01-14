@@ -7,7 +7,8 @@ import (
 )
 
 type MockClient struct {
-	Tasks map[string]api.Task
+	Tasks     map[string]api.Task
+	Resources []api.Resource
 }
 
 var _ api.IAPIClient = &MockClient{}
@@ -21,7 +22,9 @@ func (mc *MockClient) GetTask(ctx context.Context, slug string) (res api.Task, e
 }
 
 func (mc *MockClient) ListResources(ctx context.Context) (res api.ListResourcesResponse, err error) {
-	return api.ListResourcesResponse{}, nil
+	return api.ListResourcesResponse{
+		Resources: mc.Resources,
+	}, nil
 }
 
 func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuildUploadRequest) (res api.CreateBuildUploadResponse, err error) {
