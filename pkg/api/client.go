@@ -112,7 +112,10 @@ type Permission struct {
 	Action     Action  `json:"action"`
 	SubUserID  *string `json:"subUserID"`
 	SubGroupID *string `json:"subGroupID"`
+	RoleID     RoleID  `json:"roleID"`
 }
+
+type RoleID string
 
 type Action string
 
