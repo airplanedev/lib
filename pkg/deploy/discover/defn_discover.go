@@ -21,9 +21,13 @@ type DefnDiscoverer struct {
 var _ TaskDiscoverer = &DefnDiscoverer{}
 
 func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (slug string, err error) {
+	if !definitions.IsTaskDef(file) {
+		return "", nil
+	}
+
 	def, err := getDef(file)
 	if err != nil {
-		return "", nil
+		return "", err
 	}
 
 	return def.GetSlug(), nil
