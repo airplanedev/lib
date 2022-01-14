@@ -271,6 +271,10 @@ type RunConstraints struct {
 	Labels []AgentLabel `json:"labels" yaml:"labels"`
 }
 
+func (rc RunConstraints) IsEmpty() bool {
+	return len(rc.Labels) == 0
+}
+
 // AgentLabel represents an agent label.
 type AgentLabel struct {
 	Key   string `json:"key" yaml:"key"`

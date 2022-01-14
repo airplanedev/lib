@@ -803,7 +803,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		return api.UpdateTaskRequest{}, err
 	}
 
-	if d.Constraints != nil {
+	if d.Constraints != nil && !d.Constraints.IsEmpty() {
 		req.Constraints = *d.Constraints
 	}
 
@@ -979,7 +979,7 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		return Definition_0_3{}, err
 	}
 
-	if t.Constraints.Labels != nil {
+	if !t.Constraints.IsEmpty() {
 		d.Constraints = &t.Constraints
 	}
 
