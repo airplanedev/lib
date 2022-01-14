@@ -80,7 +80,7 @@ func (dd *DefnDiscoverer) HandleMissingTask(ctx context.Context, file string) (*
 func getDef(file string) (definitions.DefinitionInterface, error) {
 	dir, err := taskdir.Open(file, true)
 	if err != nil {
-		return &definitions.Definition_0_3{}, nil
+		return &definitions.Definition_0_3{}, err
 	}
 	defer dir.Close()
 
