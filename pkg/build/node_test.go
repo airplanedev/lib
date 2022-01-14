@@ -157,6 +157,14 @@ func TestNodeBuilder(t *testing.T) {
 				"entrypoint": "main.ts",
 			},
 		},
+		{
+			Root: "typescript/prisma",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
 	}
 
 	RunTests(t, ctx, tests)

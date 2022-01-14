@@ -1,0 +1,21 @@
+{
+  "dependencies": {
+    "@headlessui/react": "^1.4.1",
+    "airplane": "^0.0.5",
+    "@prisma/client": "^3.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.8",
+    "prettier": "^2.4.1",
+    "prisma": "^3.8.1",
+    "ts-node": "^10.4.0",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "gen": "prisma generate"
+  },
+  "airplane": {
+    "install": "yarn install --production=false",
+    "postinstall": "npm run gen"
+  }
+}
