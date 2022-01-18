@@ -353,6 +353,8 @@
           },
           "additionalProperties": false
         },
+        "requireRequests": { "type": "boolean" },
+        "allowSelfApprovals": { "type": "boolean" },
         "timeout": {
           "type": "number",
           "maximum": 3600,
