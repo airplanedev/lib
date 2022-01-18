@@ -65,8 +65,8 @@ func node(root string, options KindOptions) (string, error) {
 		UsesWorkspaces        bool
 		InlineShim            string
 		InlineShimPackageJSON string
+		InlineBuild           string
 		NodeVersion           string
-		ExternalFlags         string
 		InstallCommand        string
 		PostInstallCommand    string
 	}{
@@ -77,20 +77,7 @@ func node(root string, options KindOptions) (string, error) {
 		// https://esbuild.github.io/api/#target
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
-	}
-
-	// Workaround to get esbuild to not bundle dependencies.
-	// See build.ExternalPackages for details.
-	if cfg.HasPackageJSON {
-		deps, err := ExternalPackages(pathPackageJSON)
-		if err != nil {
-			return "", err
-		}
-		var flags []string
-		for _, dep := range deps {
-			flags = append(flags, fmt.Sprintf("--external:%s", dep))
-		}
-		cfg.ExternalFlags = strings.Join(flags, " ")
+		InlineBuild:        inlineString(nodeBuild),
 	}
 
 	if !strings.HasPrefix(cfg.Workdir, "/") {
@@ -148,12 +135,6 @@ func node(root string, options KindOptions) (string, error) {
 		ARG BUILD_NPM_TOKEN
 		RUN [ -z "${BUILD_NPM_RC}" ] || echo "${BUILD_NPM_RC}" > .npmrc
 		RUN [ -z "${BUILD_NPM_TOKEN}" ] || echo "//registry.npmjs.org/:_authToken=${BUILD_NPM_TOKEN}" > .npmrc
-		# qemu (on m1 at least) segfaults while looking up a UID/GID for running
-		# postinstall scripts. We run as root with --unsafe-perm instead, skipping
-		# that lookup. Possibly could fix by building for linux/arm on m1 instead
-		# of always building for linux/amd64.
-		RUN npm install -g typescript@4.2 && \
-			npm install -g esbuild@0.12 --unsafe-perm
 		RUN mkdir -p /airplane/.airplane && \
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
@@ -180,12 +161,8 @@ func node(root string, options KindOptions) (string, error) {
 		{{end}}
 		
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
-			esbuild /airplane/.airplane/shim.js \
-				--bundle \
-				--external:airplane \
-				--platform=node {{.ExternalFlags}} \
-				--target=node{{.NodeVersion}} \
-				--outfile=/airplane/.airplane/dist/shim.js
+			{{.InlineBuild}} > /airplane/.airplane/build.mjs && \
+			node /airplane/.airplane/build.mjs {{.NodeVersion}}
 		ENTRYPOINT ["node", "/airplane/.airplane/dist/shim.js"]
 	`), cfg)
 }
@@ -195,8 +172,10 @@ func GenShimPackageJSON() ([]byte, error) {
 		Dependencies map[string]string `json:"dependencies"`
 	}{
 		Dependencies: map[string]string{
-			"airplane":    "~0.1.2",
-			"@types/node": "^16",
+			"airplane":                      "~0.1.2",
+			"@types/node":                   "^16",
+			"@esbuild-plugins/node-resolve": "0.1.4",
+			"esbuild":                       "0.12",
 		},
 	})
 	return b, errors.Wrap(err, "generating shim dependencies")
@@ -217,6 +196,9 @@ func GetNodeVersion(opts KindOptions) string {
 
 //go:embed node-shim.js
 var nodeShim string
+
+//go:embed node-build.mjs
+var nodeBuild string
 
 func NodeShim(entrypoint string) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept
