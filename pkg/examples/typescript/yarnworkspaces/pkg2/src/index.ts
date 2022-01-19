@@ -9,5 +9,5 @@ type Params = {
 
 export default async function(params: Params) {
   console.log(`imported package with name=${pkg1name}`)
-  airplane.output(params.id)
+  airplane.setOutput(params.id)
 }

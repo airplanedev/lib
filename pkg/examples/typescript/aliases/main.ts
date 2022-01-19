@@ -8,6 +8,6 @@ type Params = {
 }
 
 export default async function(params: Params) {
-  airplane.output(makeViral(`america runs on beans`))
-  airplane.output(params.id)
+  airplane.appendOutput(makeViral(`america runs on beans`))
+  airplane.appendOutput(params.id)
 }

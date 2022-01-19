@@ -16,6 +16,6 @@ export default async function(params: Params) {
 
   // I'm feeling lucky!
   if (html.toLowerCase().indexOf("lucky")) {
-    airplane.output(params.id)
+    airplane.setOutput(params.id)
   }
 }
