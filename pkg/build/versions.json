@@ -23,9 +23,9 @@
   },
   "deno": {
     "1": {
-      "image": "registry.hub.docker.com/hayd/debian-deno",
-      "tag": "1.9.0",
-      "digest": "sha256:b3a5a905f9d334e3fcb80614000ea5fc461bc1980f9a258a1c2feaaa8c76874f"
+      "image": "registry.hub.docker.com/denoland/deno",
+      "tag": "debian-1.17.2",
+      "digest": "sha256:dd860caa958a741f32e6bcf09122a792555a49c264a968c57abfd7180805e49d"
     }
   },
   "go": {

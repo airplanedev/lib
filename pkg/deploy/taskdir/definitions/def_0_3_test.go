@@ -565,6 +565,62 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "check execute rules",
+			task: api.Task{
+				Name:      "Test Task",
+				Slug:      "test_task",
+				Arguments: []string{"{{JSON.stringify(params)}}"},
+				Kind:      build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				Constraints: api.RunConstraints{},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: true,
+					RequireRequests:     true,
+				},
+			},
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Python: &PythonDefinition_0_3{
+					Arguments:  []string{"{{JSON.stringify(params)}}"},
+					Entrypoint: "main.py",
+				},
+				Constraints:        &api.RunConstraints{},
+				RequireRequests:    true,
+				AllowSelfApprovals: newBoolPtr(false),
+			},
+		},
+		{
+			name: "check default execute rules",
+			task: api.Task{
+				Name:      "Test Task",
+				Slug:      "test_task",
+				Arguments: []string{"{{JSON.stringify(params)}}"},
+				Kind:      build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				Constraints: api.RunConstraints{},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: false,
+					RequireRequests:     false,
+				},
+			},
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Python: &PythonDefinition_0_3{
+					Arguments:  []string{"{{JSON.stringify(params)}}"},
+					Entrypoint: "main.py",
+				},
+				Constraints:        &api.RunConstraints{},
+				RequireRequests:    false,
+				AllowSelfApprovals: nil,
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
@@ -755,6 +811,68 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				{
 					ID:   "2000",
 					Name: "Team Squad",
+				},
+			},
+		},
+		{
+			name: "test update execute rules",
+			definition: Definition_0_3{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Description: "A task for testing",
+				Python: &PythonDefinition_0_3{
+					Arguments:  []string{"{{JSON.stringify(params)}}"},
+					Entrypoint: "main.py",
+				},
+				Constraints:        &api.RunConstraints{},
+				RequireRequests:    true,
+				AllowSelfApprovals: newBoolPtr(false),
+			},
+			request: api.UpdateTaskRequest{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Parameters:  []api.Parameter{},
+				Description: "A task for testing",
+				Arguments:   []string{"{{JSON.stringify(params)}}"},
+				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				Constraints: api.RunConstraints{},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: true,
+					RequireRequests:     true,
+				},
+			},
+		},
+		{
+			name: "test update default execute rules",
+			definition: Definition_0_3{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Description: "A task for testing",
+				Python: &PythonDefinition_0_3{
+					Arguments:  []string{"{{JSON.stringify(params)}}"},
+					Entrypoint: "main.py",
+				},
+				Constraints:        &api.RunConstraints{},
+				RequireRequests:    false,
+				AllowSelfApprovals: nil,
+			},
+			request: api.UpdateTaskRequest{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Parameters:  []api.Parameter{},
+				Description: "A task for testing",
+				Arguments:   []string{"{{JSON.stringify(params)}}"},
+				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				Constraints: api.RunConstraints{},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: false,
+					RequireRequests:     false,
 				},
 			},
 		},

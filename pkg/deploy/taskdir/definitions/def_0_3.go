@@ -33,9 +33,11 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Permissions *PermissionDefinition_0_3 `json:"permissions,omitempty"`
-	Constraints *api.RunConstraints       `json:"constraints,omitempty"`
-	Timeout     int                       `json:"timeout,omitempty"`
+	Permissions        *PermissionDefinition_0_3 `json:"permissions,omitempty"`
+	Constraints        *api.RunConstraints       `json:"constraints,omitempty"`
+	RequireRequests    bool                      `json:"requireRequests,omitempty"`
+	AllowSelfApprovals *bool                     `json:"allowSelfApprovals,omitempty"`
+	Timeout            int                       `json:"timeout,omitempty"`
 }
 
 type taskKind_0_3 interface {
@@ -807,6 +809,13 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		req.Constraints = *d.Constraints
 	}
 
+	if d.RequireRequests {
+		req.ExecuteRules.RequireRequests = true
+	}
+	if d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals {
+		req.ExecuteRules.DisallowSelfApprove = true
+	}
+
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
 	}
@@ -1021,11 +1030,12 @@ func (d *Definition_0_3) GetSlug() string {
 
 func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
 	d := Definition_0_3{
-		Name:        t.Name,
-		Slug:        t.Slug,
-		Description: t.Description,
-		Constraints: &t.Constraints,
-		Timeout:     t.Timeout,
+		Name:            t.Name,
+		Slug:            t.Slug,
+		Description:     t.Description,
+		Constraints:     &t.Constraints,
+		RequireRequests: t.ExecuteRules.RequireRequests,
+		Timeout:         t.Timeout,
 	}
 
 	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
@@ -1034,6 +1044,11 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
 		return Definition_0_3{}, err
+	}
+
+	if t.ExecuteRules.DisallowSelfApprove {
+		v := false
+		d.AllowSelfApprovals = &v
 	}
 
 	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {

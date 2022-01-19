@@ -36,6 +36,7 @@ type Task struct {
 	Repo                       string            `json:"repo" yaml:"repo"`
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions" yaml:"-"`
 	Permissions                Permissions       `json:"permissions" yaml:"-"`
+	ExecuteRules               ExecuteRules      `json:"executeRules" yaml:"-"`
 	Timeout                    int               `json:"timeout" yaml:"timeout"`
 	InterpolationMode          string            `json:"interpolationMode" yaml:"-"`
 }
@@ -72,6 +73,7 @@ type UpdateTaskRequest struct {
 	Repo                       string            `json:"repo"`
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
 	Permissions                Permissions       `json:"permissions"`
+	ExecuteRules               ExecuteRules      `json:"executeRules"`
 	// TODO(amir): friendly type here (120s, 5m ...)
 	Timeout int     `json:"timeout"`
 	BuildID *string `json:"buildID"`
@@ -313,4 +315,9 @@ type TeamMember struct {
 type Group struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type ExecuteRules struct {
+	DisallowSelfApprove bool `json:"disallowSelfApprove"`
+	RequireRequests     bool `json:"requireRequests"`
 }

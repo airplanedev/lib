@@ -10,13 +10,10 @@ import (
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/utils/logger"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDiscoverTasks(t *testing.T) {
-	assert := assert.New(t)
-	require := require.New(t)
 	fixturesPath, _ := filepath.Abs("./fixtures")
 	discoverPath, _ := filepath.Abs("./")
 	tests := []struct {
@@ -137,6 +134,7 @@ func TestDiscoverTasks(t *testing.T) {
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
+			require := require.New(t)
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
 			}
@@ -153,12 +151,12 @@ func TestDiscoverTasks(t *testing.T) {
 			}
 			got, err := d.DiscoverTasks(context.Background(), tC.paths...)
 			if tC.expectedErr {
-				assert.NotNil(err)
+				require.NotNil(err)
 				return
 			}
 			require.NoError(err)
 
-			assert.Equal(tC.want, got)
+			require.Equal(tC.want, got)
 		})
 	}
 }

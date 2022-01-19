@@ -107,7 +107,7 @@ func (r Runtime) Root(path string) (string, error) {
 	}
 
 	var pkg struct {
-		Settings runtime.Settings `json:"airplane"`
+		Settings build.Settings `json:"airplane"`
 	}
 
 	if err := json.Unmarshal(buf, &pkg); err != nil {
