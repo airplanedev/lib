@@ -218,7 +218,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 		task       api.Task
 		definition Definition_0_3
 		resources  []api.Resource
-		members    []api.TeamMember
+		users      []api.User
 		groups     []api.Group
 	}{
 		{
@@ -541,7 +541,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 				Constraints: &api.RunConstraints{},
 			},
-			members: []api.TeamMember{
+			users: []api.User{
 				{
 					ID:    "1000",
 					Name:  "Gary Goodspeed",
@@ -627,7 +627,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 			ctx := context.Background()
 			client := &mock.MockClient{
 				Resources: test.resources,
-				Members:   test.members,
+				Users:     test.users,
 				Groups:    test.groups,
 			}
 			d, err := NewDefinitionFromTask_0_3(ctx, client, test.task)
@@ -642,7 +642,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		name       string
 		definition Definition_0_3
 		request    api.UpdateTaskRequest
-		members    []api.TeamMember
+		users      []api.User
 		groups     []api.Group
 	}{
 		{
@@ -790,7 +790,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				},
 				Constraints: api.RunConstraints{},
 			},
-			members: []api.TeamMember{
+			users: []api.User{
 				{
 					ID:    "1000",
 					Name:  "Gary Goodspeed",
@@ -881,8 +881,8 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			assert := require.New(t)
 			ctx := context.Background()
 			client := &mock.MockClient{
-				Members: test.members,
-				Groups:  test.groups,
+				Users:  test.users,
+				Groups: test.groups,
 			}
 			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
 			assert.NoError(err)

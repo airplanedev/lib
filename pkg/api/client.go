@@ -13,7 +13,8 @@ type IAPIClient interface {
 	GetTask(ctx context.Context, slug string) (res Task, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
-	ListEntities(ctx context.Context) (res ListEntitiesResponse, err error)
+	ListGroups(ctx context.Context) (res ListGroupsResponse, err error)
+	ListUsers(ctx context.Context) (res ListUsersResponse, err error)
 }
 
 // Task represents a task.
@@ -301,20 +302,23 @@ type AgentLabel struct {
 	Value string `json:"value" yaml:"value"`
 }
 
-type ListEntitiesResponse struct {
-	Members []TeamMember `json:"members"`
-	Groups  []Group      `json:"groups"`
-}
-
-type TeamMember struct {
-	ID    string `json:"userID"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
+type ListGroupsResponse struct {
+	Groups []Group `json:"groups"`
 }
 
 type Group struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
+}
+
+type ListUsersResponse struct {
+	Users []User `json:"users"`
+}
+
+type User struct {
+	ID    string `json:"userID"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
 }
 
 type ExecuteRules struct {

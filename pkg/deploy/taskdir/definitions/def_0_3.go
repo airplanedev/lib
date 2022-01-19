@@ -874,18 +874,21 @@ func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, c
 
 	req.RequireExplicitPermissions = true
 
-	entities, err := client.ListEntities(ctx)
+	userResp, err := client.ListUsers(ctx)
 	if err != nil {
 		return err
 	}
-
-	membersByEmail := map[string]api.TeamMember{}
-	for _, member := range entities.Members {
-		membersByEmail[member.Email] = member
+	usersByEmail := map[string]api.User{}
+	for _, user := range userResp.Users {
+		usersByEmail[user.Email] = user
 	}
 
+	groupResp, err := client.ListGroups(ctx)
+	if err != nil {
+		return err
+	}
 	groupsByName := map[string]api.Group{}
-	for _, group := range entities.Groups {
+	for _, group := range groupResp.Groups {
 		groupsByName[group.Name] = group
 	}
 
@@ -912,9 +915,9 @@ func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, c
 	} {
 		roleID := roleAndIdents.roleID
 		for _, ident := range roleAndIdents.idents {
-			if member, ok := membersByEmail[ident]; ok {
+			if user, ok := usersByEmail[ident]; ok {
 				req.Permissions = append(req.Permissions, api.Permission{
-					SubUserID: &member.ID,
+					SubUserID: &user.ID,
 					RoleID:    roleID,
 				})
 			} else if group, ok := groupsByName[ident]; ok {
@@ -1150,18 +1153,21 @@ func (d *Definition_0_3) convertPermissionsFromTask(ctx context.Context, client 
 		return nil
 	}
 
-	entities, err := client.ListEntities(ctx)
+	userResp, err := client.ListUsers(ctx)
 	if err != nil {
 		return err
 	}
-
-	membersByID := map[string]api.TeamMember{}
-	for _, member := range entities.Members {
-		membersByID[member.ID] = member
+	usersByID := map[string]api.User{}
+	for _, user := range userResp.Users {
+		usersByID[user.ID] = user
 	}
 
+	groupResp, err := client.ListGroups(ctx)
+	if err != nil {
+		return err
+	}
 	groupsByID := map[string]api.Group{}
-	for _, group := range entities.Groups {
+	for _, group := range groupResp.Groups {
 		groupsByID[group.ID] = group
 	}
 
@@ -1169,10 +1175,10 @@ func (d *Definition_0_3) convertPermissionsFromTask(ctx context.Context, client 
 	for _, perm := range t.Permissions {
 		var ident string
 		if perm.SubUserID != nil {
-			if member, ok := membersByID[*perm.SubUserID]; !ok {
+			if user, ok := usersByID[*perm.SubUserID]; !ok {
 				continue
 			} else {
-				ident = member.Email
+				ident = user.Email
 			}
 		} else if perm.SubGroupID != nil {
 			if group, ok := groupsByID[*perm.SubGroupID]; !ok {

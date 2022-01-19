@@ -9,7 +9,7 @@ import (
 type MockClient struct {
 	Tasks     map[string]api.Task
 	Resources []api.Resource
-	Members   []api.TeamMember
+	Users     []api.User
 	Groups    []api.Group
 }
 
@@ -35,9 +35,14 @@ func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuild
 	}, nil
 }
 
-func (mc *MockClient) ListEntities(ctx context.Context) (res api.ListEntitiesResponse, err error) {
-	return api.ListEntitiesResponse{
-		Members: mc.Members,
-		Groups:  mc.Groups,
+func (mc *MockClient) ListUsers(ctx context.Context) (res api.ListUsersResponse, err error) {
+	return api.ListUsersResponse{
+		Users: mc.Users,
+	}, nil
+}
+
+func (mc *MockClient) ListGroups(ctx context.Context) (res api.ListGroupsResponse, err error) {
+	return api.ListGroupsResponse{
+		Groups: mc.Groups,
 	}, nil
 }
