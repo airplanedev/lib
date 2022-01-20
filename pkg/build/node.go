@@ -39,8 +39,10 @@ func node(root string, options KindOptions) (string, error) {
 	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
 	pathPackageLock := filepath.Join(root, "package-lock.json")
-	var usesWorkspaces bool
+	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
+	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
 
+	var pkg pkgJSON
 	if hasPackageJSON {
 		// Check to see if the package.json uses yarn/npm workspaces.
 		// If the package.json has a "workspaces" key, it uses workspaces!
@@ -51,11 +53,9 @@ func node(root string, options KindOptions) (string, error) {
 			return "", errors.Wrapf(err, "node: reading %s", pathPackageJSON)
 		}
 
-		var pkg pkgJSONWorkspaces
 		if err := json.Unmarshal(buf, &pkg); err != nil {
 			return "", fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
 		}
-		usesWorkspaces = len(pkg.workspaces) > 0
 	}
 
 	cfg := struct {
@@ -63,21 +63,20 @@ func node(root string, options KindOptions) (string, error) {
 		Base                  string
 		HasPackageJSON        bool
 		UsesWorkspaces        bool
-		IsYarn                bool
-		HasPackageLock               bool
 		InlineShim            string
 		InlineShimPackageJSON string
 		NodeVersion           string
 		ExternalFlags         string
+		InstallCommand        string
+		PostInstallCommand    string
 	}{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
-		HasPackageLock:        fsx.AssertExistsAll(pathPackageLock) == nil,
-		IsYarn:         fsx.AssertExistsAll(pathYarnLock) == nil,
-		UsesWorkspaces: usesWorkspaces,
+		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
-		NodeVersion: GetNodeVersion(options),
+		NodeVersion:        GetNodeVersion(options),
+		PostInstallCommand: pkg.Settings.PostInstallCommand,
 	}
 
 	// Workaround to get esbuild to not bundle dependencies.
@@ -115,6 +114,18 @@ func node(root string, options KindOptions) (string, error) {
 	}
 	cfg.InlineShim = inlineString(shim)
 
+	installCommand := "npm install --production"
+	if pkg.Settings.InstallCommand != "" {
+		installCommand = pkg.Settings.InstallCommand
+	} else if isYarn {
+		installCommand = "yarn install --non-interactive --production --frozen-lockfile"
+	} else if hasPackageLock {
+		// Use npm ci if possible, since it's faster and behaves better:
+		// https://docs.npmjs.com/cli/v8/commands/npm-ci
+		installCommand = "npm ci --production"
+	}
+	cfg.InstallCommand = strings.ReplaceAll(installCommand, "\n", "\\n")
+
 	// The following Dockerfile can build both JS and TS tasks. In general, we're
 	// aiming for recent EC202x support and for support for import/export syntax.
 	// The former is easier, since recent versions of Node have excellent coverage
@@ -130,6 +141,7 @@ func node(root string, options KindOptions) (string, error) {
 	// in which case we could introduce an extra step for performing build commands.
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}}
+		ENV NODE_ENV=production
 		WORKDIR /airplane{{.Workdir}}
 		# Support setting BUILD_NPM_RC or BUILD_NPM_TOKEN to configure private registry auth
 		ARG BUILD_NPM_RC
@@ -157,16 +169,14 @@ func node(root string, options KindOptions) (string, error) {
 		COPY . /airplane
 		{{end}}
 
-		{{if .IsYarn}}
-		RUN yarn --non-interactive --production --frozen-lockfile
-		{{else if .HasPackageLock}}
-		RUN npm ci --production
-		{{else}}
-		RUN npm i --production
-		{{end}}
+		RUN {{.InstallCommand}}
 
 		{{if not .UsesWorkspaces}}
 		COPY . /airplane
+		{{end}}
+
+		{{if .PostInstallCommand}}
+		RUN {{.PostInstallCommand}}
 		{{end}}
 		
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
@@ -339,30 +349,38 @@ func getBaseNodeImage(version string) (string, error) {
 	return base, nil
 }
 
+// Settings represent Airplane specific settings.
+type Settings struct {
+	Root               string `json:"root"`
+	InstallCommand     string `json:"install"`
+	PostInstallCommand string `json:"postinstall"`
+}
+
+type pkgJSON struct {
+	Settings   Settings          `json:"airplane"`
+	Workspaces pkgJSONWorkspaces `json:"workspaces"`
+}
+
 type pkgJSONWorkspaces struct {
 	workspaces []string
 }
 
 func (p *pkgJSONWorkspaces) UnmarshalJSON(data []byte) error {
 	// Workspaces might be an array of strings...
-	var workspacesArray struct {
-		Workspaces []string `json:"workspaces"`
-	}
-	if err := json.Unmarshal(data, &workspacesArray); err == nil {
-		p.workspaces = workspacesArray.Workspaces
+	var workspaces []string
+	if err := json.Unmarshal(data, &workspaces); err == nil {
+		p.workspaces = workspaces
 		return nil
 	}
 
 	// Or it might be an object with an array of strings.
 	var workspacesObject struct {
-		Workspaces struct {
-			Packages []string `json:"packages"`
-		} `json:"workspaces"`
+		Packages []string `json:"packages"`
 	}
 	if err := json.Unmarshal(data, &workspacesObject); err != nil {
 		return err
 	}
-	p.workspaces = workspacesObject.Workspaces.Packages
+	p.workspaces = workspacesObject.Packages
 	return nil
 
 }

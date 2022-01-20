@@ -4,5 +4,11 @@
     "airplane": "^0.0.5",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4"
+  },
+  "devDependencies": {
+    "prettier": "^2.4.1"
+  },
+  "airplane": {
+    "install": "yarn install --production=false"
   }
 }

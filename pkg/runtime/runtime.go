@@ -32,11 +32,6 @@ var (
 	ErrNotImplemented = errors.New("runtime: not implemented")
 )
 
-// Settings represent Airplane specific settings.
-type Settings struct {
-	Root string `json:"root"`
-}
-
 // Interface repersents a runtime.
 type Interface interface {
 	// Generate accepts a task and generates code to match the task.
