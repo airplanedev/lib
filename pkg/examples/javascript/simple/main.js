@@ -3,5 +3,5 @@
 import airplane from 'airplane'
 
 export default async function(params) {
-  airplane.output(params.id)
+  airplane.setOutput(params.id)
 }

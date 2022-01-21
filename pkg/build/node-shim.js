@@ -5,7 +5,7 @@ import task from "{{.Entrypoint}}";
 async function main() {
   if (process.argv.length !== 3) {
     console.log(
-      "airplane_output:error " +
+      "airplane_output_append:error " +
         JSON.stringify({
           "error":
             `Expected to receive a single argument (via {{ "{{JSON}}" }}). Task CLI arguments may be misconfigured.`,
@@ -22,7 +22,7 @@ async function main() {
   } catch (err) {
     console.error(err);
     console.log(
-      "airplane_output:error " + JSON.stringify({ "error": String(err) }),
+      "airplane_output_append:error " + JSON.stringify({ "error": String(err) }),
     );
     process.exit(1);
   }

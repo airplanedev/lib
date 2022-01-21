@@ -7,5 +7,5 @@ type Params = {
 }
 
 export default async function(params: Params) {
-  airplane.output(params.id)
+  airplane.setOutput(params.id)
 }

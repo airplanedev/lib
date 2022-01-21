@@ -805,7 +805,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		return api.UpdateTaskRequest{}, err
 	}
 
-	if d.Constraints != nil {
+	if d.Constraints != nil && !d.Constraints.IsEmpty() {
 		req.Constraints = *d.Constraints
 	}
 
@@ -1028,7 +1028,6 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		Name:            t.Name,
 		Slug:            t.Slug,
 		Description:     t.Description,
-		Constraints:     &t.Constraints,
 		RequireRequests: t.ExecuteRules.RequireRequests,
 		Timeout:         t.Timeout,
 	}
@@ -1039,6 +1038,10 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
 		return Definition_0_3{}, err
+	}
+
+	if !t.Constraints.IsEmpty() {
+		d.Constraints = &t.Constraints
 	}
 
 	if t.ExecuteRules.DisallowSelfApprove {

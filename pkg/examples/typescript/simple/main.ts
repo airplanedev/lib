@@ -5,5 +5,5 @@ type Params = {
 }
 
 export default async function(params: Params) {
-  console.log(`airplane_output "${params.id}"`);
+  console.log(`airplane_output_set "${params.id}"`);
 }
