@@ -10,6 +10,7 @@ import (
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
 	_ "github.com/airplanedev/lib/pkg/runtime/python"
 	_ "github.com/airplanedev/lib/pkg/runtime/shell"
+	_ "github.com/airplanedev/lib/pkg/runtime/sql"
 	_ "github.com/airplanedev/lib/pkg/runtime/typescript"
 	"github.com/pkg/errors"
 )
