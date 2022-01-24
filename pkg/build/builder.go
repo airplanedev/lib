@@ -298,13 +298,16 @@ const (
 	NameNode       Name = "node"
 	NameDockerfile Name = "dockerfile"
 	NameShell      Name = "shell"
+
+	NameSQL  Name = "sql"
+	NameREST Name = "rest"
 )
 
 func NeedsBuilding(kind TaskKind) (bool, error) {
 	switch Name(kind) {
 	case NameGo, NameDeno, NamePython, NameNode, NameDockerfile, NameShell:
 		return true, nil
-	case NameImage:
+	case NameImage, NameSQL, NameREST:
 		return false, nil
 	default:
 		return false, errors.Errorf("NeedsBuilding got unexpected kind %s", kind)
