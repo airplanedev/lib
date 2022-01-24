@@ -407,6 +407,20 @@ type SQLDefinition_0_3 struct {
 	Resource   string                 `json:"resource"`
 	Entrypoint string                 `json:"entrypoint"`
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
+
+	// Contents of Entrypoint, cached
+	entrypointContents string `json:"-"`
+}
+
+func (d *SQLDefinition_0_3) GetQuery() (string, error) {
+	if d.entrypointContents == "" {
+		queryBytes, err := os.ReadFile(d.Entrypoint)
+		if err != nil {
+			return "", errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
+		}
+		d.entrypointContents = string(queryBytes)
+	}
+	return d.entrypointContents, nil
 }
 
 func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -434,6 +448,13 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			d.Resource = res.Name
 		}
 	}
+	if v, ok := t.KindOptions["query"]; ok {
+		if sv, ok := v.(string); ok {
+			d.entrypointContents = sv
+		} else {
+			return errors.Errorf("expected string query, got %T instead", v)
+		}
+	}
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.Parameters = mv
@@ -449,12 +470,12 @@ func (d *SQLDefinition_0_3) upgradeJST() error {
 }
 
 func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
-	queryBytes, err := os.ReadFile(d.Entrypoint)
+	query, err := d.GetQuery()
 	if err != nil {
-		return nil, errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
+		return nil, err
 	}
 	return build.KindOptions{
-		"query":     string(queryBytes),
+		"query":     query,
 		"queryArgs": d.Parameters,
 	}, nil
 }
