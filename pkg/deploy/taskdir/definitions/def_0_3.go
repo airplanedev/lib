@@ -43,6 +43,7 @@ type Definition_0_3 struct {
 type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
 	hydrateFromTask(context.Context, api.IAPIClient, *api.Task) error
+	setEntrypoint(string) error
 	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
@@ -79,6 +80,11 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	}
 	d.Command = t.Arguments
 	d.Entrypoint = shellescape.QuoteCommand(t.Command)
+	return nil
+}
+
+func (d *ImageDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
 	return nil
 }
 
@@ -128,6 +134,11 @@ func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	return nil
 }
 
+func (d *DenoDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
+	return nil
+}
+
 func (d *DenoDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -172,6 +183,10 @@ func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client a
 		}
 	}
 	return nil
+}
+
+func (d *DockerfileDefinition_0_3) setEntrypoint(entrypoint string) error {
+	return ErrNoEntrypoint
 }
 
 func (d *DockerfileDefinition_0_3) upgradeJST() error {
@@ -219,6 +234,11 @@ func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIC
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	return nil
+}
+
+func (d *GoDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
 	return nil
 }
 
@@ -279,6 +299,11 @@ func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 	return nil
 }
 
+func (d *NodeDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
+	return nil
+}
+
 func (d *NodeDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -326,6 +351,11 @@ func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.I
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	return nil
+}
+
+func (d *PythonDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
 	return nil
 }
 
@@ -378,6 +408,11 @@ func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	return nil
 }
 
+func (d *ShellDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
+	return nil
+}
+
 func (d *ShellDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -407,6 +442,20 @@ type SQLDefinition_0_3 struct {
 	Resource   string                 `json:"resource"`
 	Entrypoint string                 `json:"entrypoint"`
 	Parameters map[string]interface{} `json:"parameters,omitempty"`
+
+	// Contents of Entrypoint, cached
+	entrypointContents string `json:"-"`
+}
+
+func (d *SQLDefinition_0_3) GetQuery() (string, error) {
+	if d.entrypointContents == "" {
+		queryBytes, err := os.ReadFile(d.Entrypoint)
+		if err != nil {
+			return "", errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
+		}
+		d.entrypointContents = string(queryBytes)
+	}
+	return d.entrypointContents, nil
 }
 
 func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -434,6 +483,13 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			d.Resource = res.Name
 		}
 	}
+	if v, ok := t.KindOptions["query"]; ok {
+		if sv, ok := v.(string); ok {
+			d.entrypointContents = sv
+		} else {
+			return errors.Errorf("expected string query, got %T instead", v)
+		}
+	}
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
 			d.Parameters = mv
@@ -444,17 +500,22 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	return nil
 }
 
+func (d *SQLDefinition_0_3) setEntrypoint(entrypoint string) error {
+	d.Entrypoint = entrypoint
+	return nil
+}
+
 func (d *SQLDefinition_0_3) upgradeJST() error {
 	return nil
 }
 
 func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
-	queryBytes, err := os.ReadFile(d.Entrypoint)
+	query, err := d.GetQuery()
 	if err != nil {
-		return nil, errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
+		return nil, err
 	}
 	return build.KindOptions{
-		"query":     string(queryBytes),
+		"query":     query,
 		"queryArgs": d.Parameters,
 	}, nil
 }
@@ -559,6 +620,10 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 		}
 	}
 	return nil
+}
+
+func (d *RESTDefinition_0_3) setEntrypoint(entrypoint string) error {
+	return ErrNoEntrypoint
 }
 
 func (d *RESTDefinition_0_3) upgradeJST() error {
@@ -1021,6 +1086,15 @@ func (d *Definition_0_3) GetEnv() (api.TaskEnv, error) {
 
 func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
+}
+
+func (d *Definition_0_3) SetEntrypoint(entrypoint string) error {
+	taskKind, err := d.taskKind()
+	if err != nil {
+		return err
+	}
+
+	return taskKind.setEntrypoint(entrypoint)
 }
 
 func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
