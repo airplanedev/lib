@@ -18,11 +18,9 @@ func init() {
 }
 
 // Code.
-var code = []byte(`-- Add your SQL code here:
+var code = []byte(`-- Add your SQL queries here.
+-- See SQL documentation: https://docs.airplane.dev/creating-tasks/sql
 SELECT 1;
-
--- Define SQL parameters in your definition file:
--- SELECT * from users where user_id = :user_id;
 `)
 
 // Runtime implementation.
