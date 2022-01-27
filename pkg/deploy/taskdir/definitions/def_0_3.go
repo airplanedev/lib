@@ -33,11 +33,10 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Permissions        *PermissionDefinition_0_3 `json:"permissions,omitempty"`
-	Constraints        *api.RunConstraints       `json:"constraints,omitempty"`
-	RequireRequests    bool                      `json:"requireRequests,omitempty"`
-	AllowSelfApprovals *bool                     `json:"allowSelfApprovals,omitempty"`
-	Timeout            int                       `json:"timeout,omitempty"`
+	Constraints        *api.RunConstraints `json:"constraints,omitempty"`
+	RequireRequests    bool                `json:"requireRequests,omitempty"`
+	AllowSelfApprovals *bool               `json:"allowSelfApprovals,omitempty"`
+	Timeout            int                 `json:"timeout,omitempty"`
 }
 
 type taskKind_0_3 interface {
@@ -693,17 +692,6 @@ func (o *OptionDefinition_0_3) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type PermissionDefinition_0_3 struct {
-	Viewers    []string `json:"viewers,omitempty"`
-	Requesters []string `json:"requesters,omitempty"`
-	Executers  []string `json:"executers,omitempty"`
-	Admins     []string `json:"admins,omitempty"`
-}
-
-func (d PermissionDefinition_0_3) isEmpty() bool {
-	return len(d.Viewers) == 0 && len(d.Requesters) == 0 && len(d.Executers) == 0 && len(d.Admins) == 0
-}
-
 //go:embed schema_0_3.json
 var schemaStr string
 
@@ -866,10 +854,6 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		return api.UpdateTaskRequest{}, err
 	}
 
-	if err := d.addPermissionsToUpdateTaskRequest(ctx, client, &req); err != nil {
-		return api.UpdateTaskRequest{}, err
-	}
-
 	if d.Constraints != nil && !d.Constraints.IsEmpty() {
 		req.Constraints = *d.Constraints
 	}
@@ -883,6 +867,11 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
+	}
+
+	if currentTask != nil {
+		req.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
+		req.Permissions = currentTask.Permissions
 	}
 
 	return req, nil
@@ -929,65 +918,6 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 
 		req.Parameters[i] = param
 	}
-	return nil
-}
-
-func (d Definition_0_3) addPermissionsToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	if d.Permissions == nil || d.Permissions.isEmpty() {
-		return nil
-	}
-
-	req.RequireExplicitPermissions = true
-
-	userResp, err := client.ListUsers(ctx)
-	if err != nil {
-		return err
-	}
-	usersByEmail := map[string]api.User{}
-	for _, user := range userResp.Users {
-		usersByEmail[user.Email] = user
-	}
-
-	groupResp, err := client.ListGroups(ctx)
-	if err != nil {
-		return err
-	}
-	groupsByName := map[string]api.Group{}
-	for _, group := range groupResp.Groups {
-		groupsByName[group.Name] = group
-	}
-
-	roleIDs := []api.RoleID{
-		api.RoleTaskViewer,
-		api.RoleTaskRequester,
-		api.RoleTaskExecuter,
-		api.RoleTaskAdmin,
-	}
-	idents := [][]string{
-		d.Permissions.Viewers,
-		d.Permissions.Requesters,
-		d.Permissions.Executers,
-		d.Permissions.Admins,
-	}
-
-	for idx, roleID := range roleIDs {
-		for _, ident := range idents[idx] {
-			if user, ok := usersByEmail[ident]; ok {
-				req.Permissions = append(req.Permissions, api.Permission{
-					SubUserID: &user.ID,
-					RoleID:    roleID,
-				})
-			} else if group, ok := groupsByName[ident]; ok {
-				req.Permissions = append(req.Permissions, api.Permission{
-					SubGroupID: &group.ID,
-					RoleID:     roleID,
-				})
-			} else {
-				return errors.Errorf("unknown entity in permissions: %s", ident)
-			}
-		}
-	}
-
 	return nil
 }
 
@@ -1123,10 +1053,6 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		d.AllowSelfApprovals = &v
 	}
 
-	if err := d.convertPermissionsFromTask(ctx, client, &t); err != nil {
-		return Definition_0_3{}, err
-	}
-
 	return d, nil
 }
 
@@ -1215,68 +1141,6 @@ func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api
 	default:
 		return errors.Errorf("unknown task kind: %s", t.Kind)
 	}
-}
-
-func (d *Definition_0_3) convertPermissionsFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	if !t.RequireExplicitPermissions {
-		return nil
-	}
-
-	userResp, err := client.ListUsers(ctx)
-	if err != nil {
-		return err
-	}
-	usersByID := map[string]api.User{}
-	for _, user := range userResp.Users {
-		usersByID[user.ID] = user
-	}
-
-	groupResp, err := client.ListGroups(ctx)
-	if err != nil {
-		return err
-	}
-	groupsByID := map[string]api.Group{}
-	for _, group := range groupResp.Groups {
-		groupsByID[group.ID] = group
-	}
-
-	d.Permissions = &PermissionDefinition_0_3{}
-	for _, perm := range t.Permissions {
-		var ident string
-		if perm.SubUserID != nil {
-			if user, ok := usersByID[*perm.SubUserID]; ok {
-				ident = user.Email
-			} else {
-				return errors.Errorf("unknown user on permission: %s", *perm.SubUserID)
-			}
-		} else if perm.SubGroupID != nil {
-			if group, ok := groupsByID[*perm.SubGroupID]; ok {
-				ident = group.Name
-			} else {
-				return errors.Errorf("unknown group on permission: %s", *perm.SubGroupID)
-			}
-		} else {
-			return errors.Errorf("malformed permission object: %v", perm)
-		}
-
-		if perm.RoleID != "" {
-			switch perm.RoleID {
-			case api.RoleTaskAdmin:
-				d.Permissions.Admins = append(d.Permissions.Admins, ident)
-			case api.RoleTaskExecuter:
-				d.Permissions.Executers = append(d.Permissions.Executers, ident)
-			case api.RoleTaskRequester:
-				d.Permissions.Requesters = append(d.Permissions.Requesters, ident)
-			case api.RoleTaskViewer:
-				d.Permissions.Viewers = append(d.Permissions.Viewers, ident)
-			default:
-				return errors.Errorf("unknown role ID: %s", perm.RoleID)
-			}
-		} else {
-			return errors.Errorf("unhandled permission object: %v", perm)
-		}
-	}
-	return nil
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

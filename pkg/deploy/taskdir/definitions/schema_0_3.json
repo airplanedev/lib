@@ -314,28 +314,6 @@
             "$ref": "#/$defs/parameter"
           }
         },
-        "permissions": {
-          "type": "object",
-          "properties": {
-            "viewers": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "requesters": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "executers": {
-              "type": "array",
-              "items": { "type": "string" }
-            },
-            "admins": {
-              "type": "array",
-              "items": { "type": "string" }
-            }
-          },
-          "additionalProperties": false
-        },
         "constraints": {
           "type": "object",
           "properties": {
