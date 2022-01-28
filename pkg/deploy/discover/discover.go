@@ -86,7 +86,9 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				// The file is not an Airplane task.
 				continue
 			}
-			task, err := d.Client.GetTask(ctx, slug)
+			task, err := d.Client.GetTask(ctx, api.GetTaskRequest{
+				Slug: slug,
+			})
 			if err != nil {
 				var missingErr *api.TaskMissingError
 				if errors.As(err, &missingErr) {
