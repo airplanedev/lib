@@ -80,11 +80,10 @@ type UpdateTaskRequest struct {
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
 	Permissions                Permissions       `json:"permissions"`
 	ExecuteRules               ExecuteRules      `json:"executeRules"`
-	// TODO(amir): friendly type here (120s, 5m ...)
-	Timeout int     `json:"timeout"`
-	BuildID *string `json:"buildID"`
-
-	InterpolationMode string `json:"interpolationMode" yaml:"-"`
+	Timeout                    int               `json:"timeout"`
+	BuildID                    *string           `json:"buildID"`
+	InterpolationMode          string            `json:"interpolationMode"`
+	EnvSlug                    string            `json:"envSlug"`
 }
 
 type ListResourcesResponse struct {
