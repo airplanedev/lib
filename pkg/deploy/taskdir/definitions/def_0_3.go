@@ -856,10 +856,11 @@ func (d Definition_0_3) taskKind() (taskKind_0_3, error) {
 
 func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
 	req := api.UpdateTaskRequest{
-		Slug:        d.Slug,
-		Name:        d.Name,
-		Description: d.Description,
-		Timeout:     d.Timeout,
+		Slug:              d.Slug,
+		Name:              d.Name,
+		Description:       d.Description,
+		Timeout:           d.Timeout,
+		InterpolationMode: "jst",
 	}
 
 	if err := d.addParametersToUpdateTaskRequest(ctx, &req); err != nil {
