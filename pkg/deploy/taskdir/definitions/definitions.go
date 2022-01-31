@@ -282,24 +282,26 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 	}
 
 	utr := api.UpdateTaskRequest{
-		Slug:             def.Slug,
-		Name:             def.Name,
-		Description:      def.Description,
-		Command:          []string{},
-		Arguments:        def.Arguments,
-		Parameters:       def.Parameters,
-		Constraints:      def.Constraints,
-		Env:              def.Env,
-		ResourceRequests: def.ResourceRequests,
-		Resources:        def.Resources,
-		Kind:             kind,
-		KindOptions:      options,
-		Repo:             def.Repo,
-		Timeout:          def.Timeout,
+		Slug:              def.Slug,
+		Name:              def.Name,
+		Description:       def.Description,
+		Command:           []string{},
+		Arguments:         def.Arguments,
+		Parameters:        def.Parameters,
+		Constraints:       def.Constraints,
+		Env:               def.Env,
+		ResourceRequests:  def.ResourceRequests,
+		Resources:         def.Resources,
+		Kind:              kind,
+		KindOptions:       options,
+		Repo:              def.Repo,
+		Timeout:           def.Timeout,
+		InterpolationMode: "jst",
 	}
 	if currentTask != nil {
 		utr.Permissions = currentTask.Permissions
 		utr.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
+		utr.InterpolationMode = currentTask.InterpolationMode
 	}
 	return utr, nil
 }

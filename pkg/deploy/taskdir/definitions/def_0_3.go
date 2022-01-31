@@ -863,6 +863,10 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		InterpolationMode: "jst",
 	}
 
+	if currentTask != nil {
+		req.InterpolationMode = currentTask.InterpolationMode
+	}
+
 	if err := d.addParametersToUpdateTaskRequest(ctx, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
 	}
