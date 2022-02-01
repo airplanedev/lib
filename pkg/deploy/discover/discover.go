@@ -45,6 +45,12 @@ type Discoverer struct {
 	TaskDiscoverers []TaskDiscoverer
 	Client          api.IAPIClient
 	Logger          logger.Logger
+
+	// EnvSlug is the slug of the environment to look for discovered tasks in.
+	//
+	// If a task is discovered, but doesn't exist in this environment, then it will be ignored by
+	// default. Each TaskDiscover can optionally override this behavior.
+	EnvSlug string
 }
 
 // DiscoverTasks recursively discovers Airplane tasks.
@@ -87,7 +93,8 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				continue
 			}
 			task, err := d.Client.GetTask(ctx, api.GetTaskRequest{
-				Slug: slug,
+				Slug:    slug,
+				EnvSlug: d.EnvSlug,
 			})
 			if err != nil {
 				var missingErr *api.TaskMissingError
