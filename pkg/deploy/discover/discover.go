@@ -48,8 +48,8 @@ type Discoverer struct {
 
 	// EnvSlug is the slug of the environment to look for discovered tasks in.
 	//
-	// If a task is discovered, but doesn't exist in this environment, then it will be ignored by
-	// default. Each TaskDiscover can optionally override this behavior.
+	// If a task is discovered, but doesn't exist in this environment, then the task
+	// is treated as missing.
 	EnvSlug string
 }
 
