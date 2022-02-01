@@ -10,7 +10,7 @@ import (
 )
 
 type IAPIClient interface {
-	GetTask(ctx context.Context, slug string) (res Task, err error)
+	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 	ListGroups(ctx context.Context) (res ListGroupsResponse, err error)
@@ -40,6 +40,11 @@ type Task struct {
 	ExecuteRules               ExecuteRules      `json:"executeRules" yaml:"-"`
 	Timeout                    int               `json:"timeout" yaml:"timeout"`
 	InterpolationMode          string            `json:"interpolationMode" yaml:"-"`
+}
+
+type GetTaskRequest struct {
+	Slug    string
+	EnvSlug string
 }
 
 type CreateBuildUploadRequest struct {
@@ -75,11 +80,10 @@ type UpdateTaskRequest struct {
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
 	Permissions                Permissions       `json:"permissions"`
 	ExecuteRules               ExecuteRules      `json:"executeRules"`
-	// TODO(amir): friendly type here (120s, 5m ...)
-	Timeout int     `json:"timeout"`
-	BuildID *string `json:"buildID"`
-
-	InterpolationMode string `json:"interpolationMode" yaml:"-"`
+	Timeout                    int               `json:"timeout"`
+	BuildID                    *string           `json:"buildID"`
+	InterpolationMode          string            `json:"interpolationMode"`
+	EnvSlug                    string            `json:"envSlug"`
 }
 
 type ListResourcesResponse struct {
