@@ -13,8 +13,6 @@ type IAPIClient interface {
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
-	ListGroups(ctx context.Context) (res ListGroupsResponse, err error)
-	ListUsers(ctx context.Context) (res ListUsersResponse, err error)
 }
 
 // Task represents a task.
@@ -308,25 +306,6 @@ func (rc RunConstraints) IsEmpty() bool {
 type AgentLabel struct {
 	Key   string `json:"key" yaml:"key"`
 	Value string `json:"value" yaml:"value"`
-}
-
-type ListGroupsResponse struct {
-	Groups []Group `json:"groups"`
-}
-
-type Group struct {
-	ID   string `json:"id"`
-	Name string `json:"name"`
-}
-
-type ListUsersResponse struct {
-	Users []User `json:"users"`
-}
-
-type User struct {
-	ID    string `json:"userID"`
-	Email string `json:"email"`
-	Name  string `json:"name"`
 }
 
 type ExecuteRules struct {

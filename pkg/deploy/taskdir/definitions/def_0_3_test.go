@@ -218,8 +218,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 		task       api.Task
 		definition Definition_0_3
 		resources  []api.Resource
-		users      []api.User
-		groups     []api.Group
 	}{
 		{
 			name: "python task",
@@ -541,8 +539,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 			ctx := context.Background()
 			client := &mock.MockClient{
 				Resources: test.resources,
-				Users:     test.users,
-				Groups:    test.groups,
 			}
 			d, err := NewDefinitionFromTask_0_3(ctx, client, test.task)
 			assert.NoError(err)
@@ -556,8 +552,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		name       string
 		definition Definition_0_3
 		request    api.UpdateTaskRequest
-		users      []api.User
-		groups     []api.Group
 	}{
 		{
 			name: "python task",
@@ -709,10 +703,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
 			ctx := context.Background()
-			client := &mock.MockClient{
-				Users:  test.users,
-				Groups: test.groups,
-			}
+			client := &mock.MockClient{}
 			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
 			assert.NoError(err)
 			assert.Equal(test.request, req)
