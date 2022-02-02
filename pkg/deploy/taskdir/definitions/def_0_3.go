@@ -872,6 +872,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 	if currentTask != nil {
 		req.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
 		req.Permissions = currentTask.Permissions
+		req.ExecuteRules = currentTask.ExecuteRules
 	}
 
 	return req, nil
