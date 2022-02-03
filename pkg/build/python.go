@@ -47,6 +47,10 @@ func python(root string, args KindOptions) (string, error) {
 		RUN mkdir -p .airplane && {{.InlineShim}} > .airplane/shim.py
 		{{if .HasRequirements}}
 		COPY requirements.txt .
+		{{if .HasPipConf}}
+		COPY pip.conf .
+		ENV PIP_CONFIG_FILE=pip.conf
+		{{end}}
 		RUN pip install -r requirements.txt
 		{{end}}
 		COPY . .
@@ -58,10 +62,12 @@ func python(root string, args KindOptions) (string, error) {
 		Base            string
 		InlineShim      string
 		HasRequirements bool
+		HasPipConf      bool
 	}{
 		Base:            v.String(),
 		InlineShim:      inlineString(shim),
 		HasRequirements: fsx.Exists(filepath.Join(root, "requirements.txt")),
+		HasPipConf:      fsx.Exists(filepath.Join(root, "pip.conf")),
 	})
 	if err != nil {
 		return "", errors.Wrapf(err, "rendering dockerfile")
