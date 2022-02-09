@@ -15,7 +15,6 @@ import (
 
 func TestDiscoverTasks(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
-	discoverPath, _ := filepath.Abs("./")
 	tests := []struct {
 		name          string
 		paths         []string
@@ -110,15 +109,13 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot: fixturesPath,
-					// TODO adjust to be fixturesPath when entrypoint is relative to task defn
-					TaskEntrypoint: discoverPath + "/single_task.js",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition_0_3{
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
 						Description: "ut dolor sit officia ea",
-						// TODO adjust to be absolute path
-						Node: &definitions.NodeDefinition_0_3{Entrypoint: "./single_task.js", NodeVersion: "14"},
+						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "./single_task.js", NodeVersion: "14"},
 					},
 					Task: api.Task{Kind: build.TaskKindNode},
 					From: TaskConfigSourceDefn,

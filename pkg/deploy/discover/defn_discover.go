@@ -52,7 +52,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 	} else if err != nil {
 		return TaskConfig{}, err
 	} else {
-		taskFilePath, err = filepath.Abs(entrypoint)
+		taskFilePath, err = filepath.Abs(filepath.Join(filepath.Dir(dir.DefinitionPath()), entrypoint))
 		if err != nil {
 			return TaskConfig{}, err
 		}
