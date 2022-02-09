@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"sort"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
@@ -53,9 +54,12 @@ type Discoverer struct {
 	EnvSlug string
 }
 
-// DiscoverTasks recursively discovers Airplane tasks.
+// DiscoverTasks recursively discovers Airplane tasks. Only one task config per slug is returned.
+// If there are multiple tasks discovered with the same slug, the order of the discoverers takes
+// precedence; if a single discoverer discovers multiple tasks with the same slug, the first task
+// discovered takes precedence. Task configs are returned in alphabetical order of their slugs.
 func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]TaskConfig, error) {
-	var taskConfigs []TaskConfig
+	taskConfigsBySlug := map[string][]TaskConfig{}
 	for _, p := range paths {
 		if ignoredDirectories[p] {
 			continue
@@ -79,7 +83,13 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 			if err != nil {
 				return nil, err
 			}
-			taskConfigs = append(taskConfigs, nestedTaskConfigs...)
+			for _, tc := range nestedTaskConfigs {
+				slug := tc.Task.Slug
+				if _, ok := taskConfigsBySlug[slug]; !ok {
+					taskConfigsBySlug[slug] = []TaskConfig{}
+				}
+				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], tc)
+			}
 			continue
 		}
 		// We found a file.
@@ -116,9 +126,44 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				return nil, err
 			}
 			taskConfig.From = td.TaskConfigSource()
-			taskConfigs = append(taskConfigs, taskConfig)
+			if _, ok := taskConfigsBySlug[slug]; !ok {
+				taskConfigsBySlug[slug] = []TaskConfig{}
+			}
+			taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], taskConfig)
 		}
 	}
 
+	if len(taskConfigsBySlug) == 0 {
+		return nil, nil
+	}
+
+	// Sort by slugs, so we have a deterministic order.
+	slugs := make([]string, 0, len(taskConfigsBySlug))
+	for slug := range taskConfigsBySlug {
+		slugs = append(slugs, slug)
+	}
+	sort.Strings(slugs)
+
+	taskConfigs := make([]TaskConfig, len(slugs))
+	for i, slug := range slugs {
+		tcs := taskConfigsBySlug[slug]
+		if len(tcs) == 1 {
+			taskConfigs[i] = tcs[0]
+			continue
+		}
+		found := false
+		for _, td := range d.TaskDiscoverers {
+			if found {
+				break
+			}
+			for _, tc := range tcs {
+				if td.TaskConfigSource() == tc.From {
+					taskConfigs[i] = tc
+					found = true
+					break
+				}
+			}
+		}
+	}
 	return taskConfigs, nil
 }
