@@ -7,6 +7,7 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
+	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 )
 
@@ -45,25 +46,36 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 		return TaskConfig{}, err
 	}
 
-	taskFilePath := ""
+	tc := TaskConfig{
+		Task: task,
+		Def:  &def,
+	}
+
 	entrypoint, err := def.Entrypoint()
 	if err == definitions.ErrNoEntrypoint {
 		// nothing
 	} else if err != nil {
 		return TaskConfig{}, err
 	} else {
-		taskFilePath, err = filepath.Abs(filepath.Join(filepath.Dir(dir.DefinitionPath()), entrypoint))
+		absEntrypoint, err := filepath.Abs(filepath.Join(filepath.Dir(dir.DefinitionPath()), entrypoint))
 		if err != nil {
 			return TaskConfig{}, err
 		}
+		tc.TaskEntrypoint = absEntrypoint
+
+		r, err := runtime.Lookup(entrypoint, task.Kind)
+		if err != nil {
+			return TaskConfig{}, err
+		}
+
+		taskroot, err := r.Root(absEntrypoint)
+		if err != nil {
+			return TaskConfig{}, err
+		}
+		tc.TaskRoot = taskroot
 	}
 
-	return TaskConfig{
-		TaskRoot:       dir.DefinitionRootPath(),
-		TaskEntrypoint: taskFilePath,
-		Task:           task,
-		Def:            &def,
-	}, nil
+	return tc, nil
 }
 
 func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
