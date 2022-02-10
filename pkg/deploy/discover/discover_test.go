@@ -30,9 +30,8 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task.js",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
@@ -51,9 +50,8 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task.js",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
@@ -62,9 +60,8 @@ func TestDiscoverTasks(t *testing.T) {
 					From: TaskConfigSourceScript,
 				},
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task2.js",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task2.js",
 					Def: &definitions.Definition{
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition{Entrypoint: "single_task2.js"},
@@ -83,9 +80,8 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath + "/nestedScripts",
-					WorkingDirectory: fixturesPath + "/nestedScripts",
-					TaskEntrypoint:   fixturesPath + "/nestedScripts/single_task.js",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
@@ -94,9 +90,8 @@ func TestDiscoverTasks(t *testing.T) {
 					From: TaskConfigSourceScript,
 				},
 				{
-					TaskRoot:         fixturesPath + "/nestedScripts",
-					WorkingDirectory: fixturesPath + "/nestedScripts",
-					TaskEntrypoint:   fixturesPath + "/nestedScripts/single_task2.js",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task2.js",
 					Def: &definitions.Definition{
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition{Entrypoint: "single_task2.js"},
