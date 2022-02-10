@@ -482,6 +482,13 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			d.Resource = res.Name
 		}
 	}
+	if v, ok := t.KindOptions["entrypoint"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Entrypoint = sv
+		} else {
+			return errors.Errorf("expected string entrypoint, got %T instead", v)
+		}
+	}
 	if v, ok := t.KindOptions["query"]; ok {
 		if sv, ok := v.(string); ok {
 			d.entrypointContents = sv
@@ -514,8 +521,9 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 		return nil, err
 	}
 	return build.KindOptions{
-		"query":     query,
-		"queryArgs": d.Parameters,
+		"entrypoint": d.Entrypoint,
+		"query":      query,
+		"queryArgs":  d.Parameters,
 	}, nil
 }
 
