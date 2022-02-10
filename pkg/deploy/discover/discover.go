@@ -133,8 +133,15 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 		}
 	}
 
+	return d.deduplicateTaskConfigs(taskConfigsBySlug), nil
+}
+
+// Given a map of slug -> [task config, ...], returns a list of task configs unique by slug, sorted
+// by slug. Task configs are chosen based on order of TaskDiscoverers & order of discovery.
+func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskConfig) []TaskConfig {
+	// Short-circuit if we have no task configs.
 	if len(taskConfigsBySlug) == 0 {
-		return nil, nil
+		return nil
 	}
 
 	// Sort by slugs, so we have a deterministic order.
@@ -147,15 +154,17 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 	taskConfigs := make([]TaskConfig, len(slugs))
 	for i, slug := range slugs {
 		tcs := taskConfigsBySlug[slug]
+
+		// Short-circuit if there's only one task config in the list.
 		if len(tcs) == 1 {
 			taskConfigs[i] = tcs[0]
 			continue
 		}
+
+		// Otherwise, loop through the TaskDiscoverers. Take the first task config that matches the
+		// discoverer in this order.
 		found := false
 		for _, td := range d.TaskDiscoverers {
-			if found {
-				break
-			}
 			for _, tc := range tcs {
 				if td.TaskConfigSource() == tc.From {
 					taskConfigs[i] = tc
@@ -163,7 +172,10 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 					break
 				}
 			}
+			if found {
+				break
+			}
 		}
 	}
-	return taskConfigs, nil
+	return taskConfigs
 }
