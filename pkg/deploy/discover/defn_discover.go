@@ -73,6 +73,12 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 			return TaskConfig{}, err
 		}
 		tc.TaskRoot = taskroot
+
+		wd, err := r.Workdir(absEntrypoint)
+		if err != nil {
+			return TaskConfig{}, err
+		}
+		def.SetWorkdir(taskroot, wd)
 	}
 
 	return tc, nil
