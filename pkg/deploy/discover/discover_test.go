@@ -149,6 +149,46 @@ func TestDiscoverTasks(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "different working directory",
+			paths: []string{"./fixtures/subdir/single_task.js"},
+			existingTasks: map[string]api.Task{
+				"my_task": {Slug: "my_task", Kind: build.TaskKindNode},
+			},
+			want: []TaskConfig{
+				{
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
+					Def: &definitions.Definition{
+						Slug: "my_task",
+						Node: &definitions.NodeDefinition{Entrypoint: "subdir/single_task.js", Workdir: "/subdir"},
+					},
+					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
+					From: TaskConfigSourceScript,
+				},
+			},
+		},
+		{
+			name:  "different working directory, with definition",
+			paths: []string{"./fixtures/subdir/defn.task.yaml"},
+			existingTasks: map[string]api.Task{
+				"my_task": {Slug: "my_task", Kind: build.TaskKindNode},
+			},
+			want: []TaskConfig{
+				{
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
+					Def: &definitions.Definition_0_3{
+						Name:        "sunt in tempor eu",
+						Slug:        "my_task",
+						Description: "ut dolor sit officia ea",
+						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "subdir/single_task.js", NodeVersion: "14", Workdir: "/subdir"},
+					},
+					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
+					From: TaskConfigSourceDefn,
+				},
+			},
+		},
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
