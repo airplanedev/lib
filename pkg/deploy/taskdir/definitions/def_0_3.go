@@ -270,7 +270,6 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
-	Workdir     string      `json:"-"`
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	Arguments   []string    `json:"arguments,omitempty"`
@@ -285,13 +284,6 @@ func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 
 func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
 	d.Arguments = t.Arguments
-	if v, ok := t.KindOptions["workdir"]; ok {
-		if sv, ok := v.(string); ok {
-			d.Workdir = sv
-		} else {
-			return errors.Errorf("expected string workdir, got %T instead", v)
-		}
-	}
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -321,7 +313,6 @@ func (d *NodeDefinition_0_3) upgradeJST() error {
 
 func (d *NodeDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
-		"workdir":     d.Workdir, // should only be part of BuildOptions
 		"entrypoint":  d.Entrypoint,
 		"nodeVersion": d.NodeVersion,
 	}, nil
@@ -1053,7 +1044,7 @@ func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
 		return nil
 	}
 
-	d.Node.Workdir = strings.TrimPrefix(workdir, taskroot)
+	d.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
 
 	return nil
 }
