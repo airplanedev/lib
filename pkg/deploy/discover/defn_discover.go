@@ -87,7 +87,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 			if err != nil {
 				return TaskConfig{}, err
 			}
-			def.SetEntrypoint(ep)
+			def.SetBuildConfig("entrypoint", ep)
 		}
 	}
 
