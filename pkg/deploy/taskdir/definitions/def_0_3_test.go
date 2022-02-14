@@ -664,7 +664,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: &api.ExecuteRules{
+				ExecuteRules: api.ExecuteRules{
 					DisallowSelfApprove: true,
 					RequireRequests:     true,
 				},
@@ -693,7 +693,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: &api.ExecuteRules{
+				ExecuteRules: api.ExecuteRules{
 					DisallowSelfApprove: false,
 					RequireRequests:     false,
 				},
