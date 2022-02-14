@@ -268,7 +268,7 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
-	Workdir     string      `json:"workdir"`
+	Workdir     string      `json:"-"`
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	Arguments   []string    `json:"arguments,omitempty"`
