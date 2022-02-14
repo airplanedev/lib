@@ -77,7 +77,7 @@ type UpdateTaskRequest struct {
 	Repo                       string            `json:"repo"`
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
 	Permissions                Permissions       `json:"permissions"`
-	ExecuteRules               ExecuteRules      `json:"executeRules"`
+	ExecuteRules               *ExecuteRules     `json:"executeRules"`
 	Timeout                    int               `json:"timeout"`
 	BuildID                    *string           `json:"buildID"`
 	InterpolationMode          string            `json:"interpolationMode"`
