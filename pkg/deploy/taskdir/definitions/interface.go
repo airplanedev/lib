@@ -8,6 +8,8 @@ import (
 )
 
 type DefinitionInterface interface {
+	GetBuildConfig() (build.BuildConfig, error)
+	SetBuildConfig(key string, value interface{})
 	GetKindAndOptions() (build.TaskKind, build.KindOptions, error)
 	GetEnv() (api.TaskEnv, error)
 	GetSlug() string

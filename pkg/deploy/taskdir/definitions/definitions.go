@@ -305,6 +305,28 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 	return utr, nil
 }
 
+func (def *Definition) GetBuildConfig() (build.BuildConfig, error) {
+	_, options, err := def.GetKindAndOptions()
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range def.buildConfig {
+		if v == nil {
+			delete(options, k)
+		} else {
+			options[k] = v
+		}
+	}
+	return build.BuildConfig(options), nil
+}
+
+func (def *Definition) SetBuildConfig(key string, value interface{}) {
+	if def.buildConfig == nil {
+		def.buildConfig = map[string]interface{}{}
+	}
+	def.buildConfig[key] = value
+}
+
 func UnmarshalDefinition(buf []byte, defPath string) (Definition, error) {
 	// Validate definition against our Definition struct
 	if err := validateYAML(buf, Definition{}); err != nil {

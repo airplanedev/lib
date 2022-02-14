@@ -38,6 +38,8 @@ type Definition_0_3 struct {
 	RequireRequests    bool                `json:"requireRequests,omitempty"`
 	AllowSelfApprovals *bool               `json:"allowSelfApprovals,omitempty"`
 	Timeout            int                 `json:"timeout,omitempty"`
+
+	buildConfig build.BuildConfig
 }
 
 type taskKind_0_3 interface {
@@ -1170,6 +1172,28 @@ func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api
 	default:
 		return errors.Errorf("unknown task kind: %s", t.Kind)
 	}
+}
+
+func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
+	_, options, err := d.GetKindAndOptions()
+	if err != nil {
+		return nil, err
+	}
+	for k, v := range d.buildConfig {
+		if v == nil {
+			delete(options, k)
+		} else {
+			options[k] = v
+		}
+	}
+	return build.BuildConfig(options), nil
+}
+
+func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
+	if d.buildConfig == nil {
+		d.buildConfig = map[string]interface{}{}
+	}
+	d.buildConfig[key] = value
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

@@ -2,6 +2,8 @@ package build
 
 type KindOptions map[string]interface{}
 
+type BuildConfig map[string]interface{}
+
 type TaskKind string
 
 const (
