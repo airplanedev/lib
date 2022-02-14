@@ -300,6 +300,7 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 	if currentTask != nil {
 		utr.Permissions = currentTask.Permissions
 		utr.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
+		utr.ExecuteRules = currentTask.ExecuteRules
 	}
 	return utr, nil
 }
