@@ -555,8 +555,8 @@ type RESTDefinition_0_3 struct {
 	Resource  string                 `json:"resource"`
 	Method    string                 `json:"method"`
 	Path      string                 `json:"path"`
-	URLParams map[string]string      `json:"urlParams,omitempty"`
-	Headers   map[string]string      `json:"headers,omitempty"`
+	URLParams map[string]interface{} `json:"urlParams,omitempty"`
+	Headers   map[string]interface{} `json:"headers,omitempty"`
 	BodyType  string                 `json:"bodyType"`
 	Body      string                 `json:"body,omitempty"`
 	FormData  map[string]interface{} `json:"formData,omitempty"`
@@ -602,14 +602,14 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 		}
 	}
 	if v, ok := t.KindOptions["urlParams"]; ok {
-		if mv, ok := v.(map[string]string); ok {
+		if mv, ok := v.(map[string]interface{}); ok {
 			d.URLParams = mv
 		} else {
 			return errors.Errorf("expected map urlParams, got %T instead", v)
 		}
 	}
 	if v, ok := t.KindOptions["headers"]; ok {
-		if mv, ok := v.(map[string]string); ok {
+		if mv, ok := v.(map[string]interface{}); ok {
 			d.Headers = mv
 		} else {
 			return errors.Errorf("expected map headers, got %T instead", v)

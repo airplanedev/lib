@@ -320,10 +320,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"method": "GET",
 					"path":   "/get",
-					"urlParams": map[string]string{
+					"urlParams": map[string]interface{}{
 						"foo": "bar",
 					},
-					"headers": map[string]string{
+					"headers": map[string]interface{}{
 						"bar": "foo",
 					},
 					"bodyType": "json",
@@ -341,10 +341,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Resource: "httpbin",
 					Method:   "GET",
 					Path:     "/get",
-					URLParams: map[string]string{
+					URLParams: map[string]interface{}{
 						"foo": "bar",
 					},
-					Headers: map[string]string{
+					Headers: map[string]interface{}{
 						"bar": "foo",
 					},
 					BodyType: "json",

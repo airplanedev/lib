@@ -190,11 +190,15 @@
                 "path": { "type": "string" },
                 "urlParams": {
                   "type": "object",
-                  "patternProperties": { ".*": { "type": "string" } }
+                  "patternProperties": {
+                    ".*": { "type": ["string", "boolean", "number"] }
+                  }
                 },
                 "headers": {
                   "type": "object",
-                  "patternProperties": { ".*": { "type": "string" } }
+                  "patternProperties": {
+                    ".*": { "type": ["string", "boolean", "number"] }
+                  }
                 },
                 "bodyType": {
                   "enum": ["json", "raw", "form-data", "x-www-form-urlencoded"]
@@ -202,7 +206,9 @@
                 "body": { "type": "string" },
                 "formData": {
                   "type": "object",
-                  "patternProperties": { ".*": { "type": "string" } }
+                  "patternProperties": {
+                    ".*": { "type": ["string", "boolean", "number"] }
+                  }
                 }
               },
               "additionalProperties": false,
