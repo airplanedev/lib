@@ -21,6 +21,7 @@ func TestDiscoverTasks(t *testing.T) {
 		existingTasks map[string]api.Task
 		expectedErr   bool
 		want          []TaskConfig
+		buildConfigs  []build.BuildConfig
 	}{
 		{
 			name:  "single script",
@@ -38,6 +39,11 @@ func TestDiscoverTasks(t *testing.T) {
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -70,6 +76,14 @@ func TestDiscoverTasks(t *testing.T) {
 					From: TaskConfigSourceScript,
 				},
 			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+				{
+					"workdir": "",
+				},
+			},
 		},
 		{
 			name:  "nested scripts",
@@ -100,6 +114,14 @@ func TestDiscoverTasks(t *testing.T) {
 					From: TaskConfigSourceScript,
 				},
 			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+				{
+					"workdir": "",
+				},
+			},
 		},
 		{
 			name:  "single defn",
@@ -119,6 +141,11 @@ func TestDiscoverTasks(t *testing.T) {
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -148,6 +175,11 @@ func TestDiscoverTasks(t *testing.T) {
 					From: TaskConfigSourceDefn,
 				},
 			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+			},
 		},
 		{
 			name:  "different working directory",
@@ -161,10 +193,15 @@ func TestDiscoverTasks(t *testing.T) {
 					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
-						Node: &definitions.NodeDefinition{Entrypoint: "subdir/single_task.js", Workdir: "/subdir"},
+						Node: &definitions.NodeDefinition{Entrypoint: "subdir/single_task.js"},
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "/subdir",
 				},
 			},
 		},
@@ -182,10 +219,16 @@ func TestDiscoverTasks(t *testing.T) {
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
 						Description: "ut dolor sit officia ea",
-						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "subdir/single_task.js", NodeVersion: "14", Workdir: "/subdir"},
+						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "./single_task.js", NodeVersion: "14"},
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir":    "/subdir",
+					"entrypoint": "subdir/single_task.js",
 				},
 			},
 		},
@@ -214,7 +257,13 @@ func TestDiscoverTasks(t *testing.T) {
 			}
 			require.NoError(err)
 
-			require.Equal(tC.want, got)
+			require.Equal(len(tC.want), len(got))
+			for i := range tC.want {
+				for k, v := range tC.buildConfigs[i] {
+					tC.want[i].Def.SetBuildConfig(k, v)
+				}
+				require.Equal(tC.want[i], got[i])
+			}
 		})
 	}
 }
