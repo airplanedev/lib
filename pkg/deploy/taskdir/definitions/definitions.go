@@ -201,9 +201,11 @@ func (def *Definition) SetEntrypoint(taskroot, absEntrypoint string) error {
 
 func (def *Definition) SetWorkdir(taskroot, workdir string) {
 	// TODO: currently only a concept on Node - should be generalized to all builders.
-	if def.Node != nil {
-		def.Node.Workdir = strings.TrimPrefix(workdir, taskroot)
+	if def.Node == nil {
+		return
 	}
+
+	def.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
 }
 
 func (def Definition) Validate() (Definition, error) {
