@@ -1166,18 +1166,25 @@ func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api
 }
 
 func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
+	config := build.BuildConfig{}
+
 	_, options, err := d.GetKindAndOptions()
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range d.buildConfig {
-		if v == nil {
-			delete(options, k)
+	for key, val := range options {
+		config[key] = val
+	}
+
+	for key, val := range d.buildConfig {
+		if val == nil { // Nil masks out the value.
+			delete(config, key)
 		} else {
-			options[k] = v
+			config[key] = val
 		}
 	}
-	return build.BuildConfig(options), nil
+
+	return config, nil
 }
 
 func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {

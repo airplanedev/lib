@@ -308,18 +308,25 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 }
 
 func (def *Definition) GetBuildConfig() (build.BuildConfig, error) {
+	config := build.BuildConfig{}
+
 	_, options, err := def.GetKindAndOptions()
 	if err != nil {
 		return nil, err
 	}
-	for k, v := range def.buildConfig {
-		if v == nil {
-			delete(options, k)
+	for key, val := range options {
+		config[key] = val
+	}
+
+	for key, val := range def.buildConfig {
+		if val == nil { // Nil masks out the value.
+			delete(config, key)
 		} else {
-			options[k] = v
+			config[key] = val
 		}
 	}
-	return build.BuildConfig(options), nil
+
+	return config, nil
 }
 
 func (def *Definition) SetBuildConfig(key string, value interface{}) {
