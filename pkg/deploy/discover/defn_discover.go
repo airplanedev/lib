@@ -79,7 +79,9 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 		if err != nil {
 			return TaskConfig{}, err
 		}
-		def.SetWorkdir(taskroot, wd)
+		if err := def.SetWorkdir(taskroot, wd); err != nil {
+			return TaskConfig{}, err
+		}
 
 		// Entrypoint for builder needs to be relative to taskroot, not definition directory.
 		if defnDir != taskroot {
