@@ -1,7 +1,10 @@
 package build
 
+// KindOptions are part of the task definition, supplied by the user.
 type KindOptions map[string]interface{}
 
+// BuildConfig is a collection of build-specific configuration options based on a task's
+// KindOptions.
 type BuildConfig map[string]interface{}
 
 type TaskKind string
