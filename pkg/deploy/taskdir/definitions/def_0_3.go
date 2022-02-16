@@ -989,8 +989,6 @@ func (d Definition_0_3) Root(dir string) (string, error) {
 	return path.Join(dir, root), nil
 }
 
-var ErrNoEntrypoint = errors.New("No entrypoint")
-
 func (d Definition_0_3) Entrypoint() (string, error) {
 	taskKind, err := d.taskKind()
 	if err != nil {

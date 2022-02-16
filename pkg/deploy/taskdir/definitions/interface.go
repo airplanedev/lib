@@ -5,6 +5,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/pkg/errors"
 )
 
 type DefinitionInterface interface {
@@ -23,5 +24,9 @@ type DefinitionInterface interface {
 	UpgradeJST() error
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error)
 	SetWorkdir(taskroot, workdir string) error
+
+	// Entrypoint returns ErrEntrypoint if the definition doesn't define an entrypoint. May be empty.
 	Entrypoint() (string, error)
 }
+
+var ErrNoEntrypoint = errors.New("No entrypoint")
