@@ -201,9 +201,11 @@ func (def *Definition) SetEntrypoint(taskroot, absEntrypoint string) error {
 
 func (def *Definition) SetWorkdir(taskroot, workdir string) {
 	// TODO: currently only a concept on Node - should be generalized to all builders.
-	if def.Node != nil {
-		def.Node.Workdir = strings.TrimPrefix(workdir, taskroot)
+	if def.Node == nil {
+		return
 	}
+
+	def.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
 }
 
 func (def Definition) Validate() (Definition, error) {
@@ -303,6 +305,35 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 		utr.ExecuteRules = currentTask.ExecuteRules
 	}
 	return utr, nil
+}
+
+func (def *Definition) GetBuildConfig() (build.BuildConfig, error) {
+	config := build.BuildConfig{}
+
+	_, options, err := def.GetKindAndOptions()
+	if err != nil {
+		return nil, err
+	}
+	for key, val := range options {
+		config[key] = val
+	}
+
+	for key, val := range def.buildConfig {
+		if val == nil { // Nil masks out the value.
+			delete(config, key)
+		} else {
+			config[key] = val
+		}
+	}
+
+	return config, nil
+}
+
+func (def *Definition) SetBuildConfig(key string, value interface{}) {
+	if def.buildConfig == nil {
+		def.buildConfig = map[string]interface{}{}
+	}
+	def.buildConfig[key] = value
 }
 
 func UnmarshalDefinition(buf []byte, defPath string) (Definition, error) {

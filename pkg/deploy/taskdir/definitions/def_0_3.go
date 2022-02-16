@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"os"
 	"path"
+	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
@@ -37,6 +38,8 @@ type Definition_0_3 struct {
 	RequireRequests    bool                `json:"requireRequests,omitempty"`
 	AllowSelfApprovals *bool               `json:"allowSelfApprovals,omitempty"`
 	Timeout            int                 `json:"timeout,omitempty"`
+
+	buildConfig build.BuildConfig
 }
 
 type taskKind_0_3 interface {
@@ -267,6 +270,7 @@ func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
 
 type NodeDefinition_0_3 struct {
+	Workdir     string      `json:"-"`
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	Arguments   []string    `json:"arguments,omitempty"`
@@ -281,6 +285,13 @@ func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 
 func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
 	d.Arguments = t.Arguments
+	if v, ok := t.KindOptions["workdir"]; ok {
+		if sv, ok := v.(string); ok {
+			d.Workdir = sv
+		} else {
+			return errors.Errorf("expected string workdir, got %T instead", v)
+		}
+	}
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -310,6 +321,7 @@ func (d *NodeDefinition_0_3) upgradeJST() error {
 
 func (d *NodeDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
+		"workdir":     d.Workdir, // should only be part of BuildOptions
 		"entrypoint":  d.Entrypoint,
 		"nodeVersion": d.NodeVersion,
 	}, nil
@@ -1035,6 +1047,17 @@ func (d *Definition_0_3) SetEntrypoint(entrypoint string) error {
 	return taskKind.setEntrypoint(entrypoint)
 }
 
+func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
+	// TODO: currently only a concept on Node - should be generalized to all builders.
+	if d.Node == nil {
+		return nil
+	}
+
+	d.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
+
+	return nil
+}
+
 func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
 	d := Definition_0_3{
 		Name:            t.Name,
@@ -1149,6 +1172,35 @@ func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api
 	default:
 		return errors.Errorf("unknown task kind: %s", t.Kind)
 	}
+}
+
+func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
+	config := build.BuildConfig{}
+
+	_, options, err := d.GetKindAndOptions()
+	if err != nil {
+		return nil, err
+	}
+	for key, val := range options {
+		config[key] = val
+	}
+
+	for key, val := range d.buildConfig {
+		if val == nil { // Nil masks out the value.
+			delete(config, key)
+		} else {
+			config[key] = val
+		}
+	}
+
+	return config, nil
+}
+
+func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
+	if d.buildConfig == nil {
+		d.buildConfig = map[string]interface{}{}
+	}
+	d.buildConfig[key] = value
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

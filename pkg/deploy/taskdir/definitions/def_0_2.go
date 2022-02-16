@@ -2,6 +2,7 @@ package definitions
 
 import (
 	"github.com/airplanedev/lib/pkg/api"
+	"github.com/airplanedev/lib/pkg/build"
 )
 
 type Definition_0_2 struct {
@@ -36,6 +37,8 @@ type Definition_0_2 struct {
 	//
 	// This field is ignored when using the "image" builder.
 	Root string `yaml:"root,omitempty"`
+
+	buildConfig build.BuildConfig
 }
 
 type ImageDefinition struct {
@@ -56,7 +59,6 @@ type GoDefinition struct {
 }
 
 type NodeDefinition struct {
-	Workdir     string `yaml:"workdir,omitempty" mapstructure:"workdir"`
 	Entrypoint  string `yaml:"entrypoint" mapstructure:"entrypoint"`
 	Language    string `yaml:"language" mapstructure:"language"`
 	NodeVersion string `yaml:"nodeVersion" mapstructure:"nodeVersion"`

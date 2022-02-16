@@ -27,12 +27,11 @@ const (
 )
 
 type TaskConfig struct {
-	TaskRoot         string
-	WorkingDirectory string
-	TaskEntrypoint   string
-	Task             api.Task
-	Def              definitions.DefinitionInterface
-	From             TaskConfigSource
+	TaskRoot       string
+	TaskEntrypoint string
+	Task           api.Task
+	Def            definitions.DefinitionInterface
+	From           TaskConfigSource
 }
 
 type TaskDiscoverer interface {
