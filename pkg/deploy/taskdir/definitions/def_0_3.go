@@ -5,7 +5,6 @@ import (
 	_ "embed"
 	"encoding/json"
 	"os"
-	"path"
 	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
@@ -49,7 +48,6 @@ type taskKind_0_3 interface {
 	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
-	getRoot() (string, error)
 	getEnv() (api.TaskEnv, error)
 }
 
@@ -59,7 +57,6 @@ type ImageDefinition_0_3 struct {
 	Image      string      `json:"image"`
 	Entrypoint string      `json:"entrypoint,omitempty"`
 	Command    []string    `json:"command"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -102,10 +99,6 @@ func (d *ImageDefinition_0_3) getEntrypoint() (string, error) {
 	return "", ErrNoEntrypoint
 }
 
-func (d *ImageDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -115,7 +108,6 @@ var _ taskKind_0_3 = &DenoDefinition_0_3{}
 type DenoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Arguments  []string    `json:"arguments,omitempty"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -156,10 +148,6 @@ func (d *DenoDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
 }
 
-func (d *DenoDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *DenoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -168,7 +156,6 @@ var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
 
 type DockerfileDefinition_0_3 struct {
 	Dockerfile string      `json:"dockerfile"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -205,10 +192,6 @@ func (d *DockerfileDefinition_0_3) getEntrypoint() (string, error) {
 	return "", ErrNoEntrypoint
 }
 
-func (d *DockerfileDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -218,7 +201,6 @@ var _ taskKind_0_3 = &GoDefinition_0_3{}
 type GoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Arguments  []string    `json:"arguments,omitempty"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -259,10 +241,6 @@ func (d *GoDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
 }
 
-func (d *GoDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -274,7 +252,6 @@ type NodeDefinition_0_3 struct {
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	Arguments   []string    `json:"arguments,omitempty"`
-	Root        string      `json:"root,omitempty"`
 	Env         api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -331,10 +308,6 @@ func (d *NodeDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
 }
 
-func (d *NodeDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -344,7 +317,6 @@ var _ taskKind_0_3 = &PythonDefinition_0_3{}
 type PythonDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Arguments  []string    `json:"arguments,omitempty"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -385,10 +357,6 @@ func (d *PythonDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
 }
 
-func (d *PythonDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
-}
-
 func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.Env, nil
 }
@@ -398,7 +366,6 @@ var _ taskKind_0_3 = &ShellDefinition_0_3{}
 type ShellDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Arguments  []string    `json:"arguments,omitempty"`
-	Root       string      `json:"root,omitempty"`
 	Env        api.TaskEnv `json:"env,omitempty"`
 }
 
@@ -437,10 +404,6 @@ func (d *ShellDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 
 func (d *ShellDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
-}
-
-func (d *ShellDefinition_0_3) getRoot() (string, error) {
-	return d.Root, nil
 }
 
 func (d *ShellDefinition_0_3) getEnv() (api.TaskEnv, error) {
@@ -541,10 +504,6 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 
 func (d *SQLDefinition_0_3) getEntrypoint() (string, error) {
 	return d.Entrypoint, nil
-}
-
-func (d *SQLDefinition_0_3) getRoot() (string, error) {
-	return "", nil
 }
 
 func (d *SQLDefinition_0_3) getEnv() (api.TaskEnv, error) {
@@ -663,10 +622,6 @@ func (d *RESTDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 
 func (d *RESTDefinition_0_3) getEntrypoint() (string, error) {
 	return "", ErrNoEntrypoint
-}
-
-func (d *RESTDefinition_0_3) getRoot() (string, error) {
-	return "", nil
 }
 
 func (d *RESTDefinition_0_3) getEnv() (api.TaskEnv, error) {
@@ -975,18 +930,6 @@ func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context,
 		return err
 	}
 	return nil
-}
-
-func (d Definition_0_3) Root(dir string) (string, error) {
-	taskKind, err := d.taskKind()
-	if err != nil {
-		return "", err
-	}
-	root, err := taskKind.getRoot()
-	if err != nil {
-		return "", err
-	}
-	return path.Join(dir, root), nil
 }
 
 func (d Definition_0_3) Entrypoint() (string, error) {
