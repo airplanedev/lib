@@ -53,7 +53,9 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, fi
 	if err != nil {
 		return TaskConfig{}, err
 	}
-	def.SetWorkdir(taskroot, wd)
+	if err := def.SetWorkdir(taskroot, wd); err != nil {
+		return TaskConfig{}, err
+	}
 
 	return TaskConfig{
 		TaskRoot:       taskroot,
