@@ -244,10 +244,15 @@ func TestDiscoverTasks(t *testing.T) {
 					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
-						Node: &definitions.NodeDefinition{Entrypoint: "subdir/single_task.js", Workdir: "/subdir"},
+						Node: &definitions.NodeDefinition{Entrypoint: "subdir/single_task.js"},
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "/subdir",
 				},
 			},
 		},
@@ -265,10 +270,16 @@ func TestDiscoverTasks(t *testing.T) {
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
 						Description: "ut dolor sit officia ea",
-						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "subdir/single_task.js", NodeVersion: "14", Workdir: "/subdir"},
+						Node:        &definitions.NodeDefinition_0_3{Entrypoint: "./single_task.js", NodeVersion: "14"},
 					},
 					Task: api.Task{Slug: "my_task", Kind: build.TaskKindNode},
 					From: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir":    "/subdir",
+					"entrypoint": "subdir/single_task.js",
 				},
 			},
 		},
