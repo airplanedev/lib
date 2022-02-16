@@ -33,7 +33,7 @@ type Definition_0_1 struct {
 	Root string `yaml:"root,omitempty"`
 }
 
-func (d Definition_0_1) upgrade() (Definition, error) {
+func (d Definition_0_1) upgrade() (DefinitionInterface, error) {
 	def := Definition_0_2{
 		Slug:        d.Slug,
 		Name:        d.Name,
@@ -50,13 +50,13 @@ func (d Definition_0_1) upgrade() (Definition, error) {
 	if d.Builder == "deno" {
 		def.Deno = &DenoDefinition{}
 		if err := mapstructure.Decode(d.BuilderConfig, &def.Deno); err != nil {
-			return Definition{}, errors.Wrap(err, "decoding Deno options")
+			return nil, errors.Wrap(err, "decoding Deno options")
 		}
 
 	} else if d.Builder == "dockerfile" {
 		def.Dockerfile = &DockerfileDefinition{}
 		if err := mapstructure.Decode(d.BuilderConfig, &def.Dockerfile); err != nil {
-			return Definition{}, errors.Wrap(err, "decoding Dockerfile options")
+			return nil, errors.Wrap(err, "decoding Dockerfile options")
 		}
 
 	} else if d.Builder == "image" {
@@ -68,19 +68,19 @@ func (d Definition_0_1) upgrade() (Definition, error) {
 	} else if d.Builder == "go" {
 		def.Go = &GoDefinition{}
 		if err := mapstructure.Decode(d.BuilderConfig, &def.Go); err != nil {
-			return Definition{}, errors.Wrap(err, "decoding Go options")
+			return nil, errors.Wrap(err, "decoding Go options")
 		}
 
 	} else if d.Builder == "node" {
 		def.Node = &NodeDefinition{}
 		if err := mapstructure.Decode(d.BuilderConfig, &def.Node); err != nil {
-			return Definition{}, errors.Wrap(err, "decoding Node options")
+			return nil, errors.Wrap(err, "decoding Node options")
 		}
 
 	} else if d.Builder == "python" {
 		def.Python = &PythonDefinition{}
 		if err := mapstructure.Decode(d.BuilderConfig, &def.Python); err != nil {
-			return Definition{}, errors.Wrap(err, "decoding Python options")
+			return nil, errors.Wrap(err, "decoding Python options")
 		}
 
 	}
