@@ -35,7 +35,7 @@ func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (slug
 }
 
 func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file string) (TaskConfig, error) {
-	dir, err := taskdir.Open(file, true)
+	dir, err := taskdir.Open(file)
 	if err != nil {
 		return TaskConfig{}, err
 	}
@@ -112,7 +112,7 @@ func (dd *DefnDiscoverer) HandleMissingTask(ctx context.Context, file string) (*
 }
 
 func getDef(file string) (definitions.DefinitionInterface, error) {
-	dir, err := taskdir.Open(file, true)
+	dir, err := taskdir.Open(file)
 	if err != nil {
 		return &definitions.Definition_0_3{}, err
 	}

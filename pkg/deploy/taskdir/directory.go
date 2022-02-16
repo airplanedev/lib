@@ -34,7 +34,7 @@ func New(file string) (TaskDirectory, error) {
 // Open creates a TaskDirectory struct from a file argument
 // Supports file in the form of github.com/path/to/repo/example and will download from GitHub
 // Supports file in the form of local_file.yml and will read it to determine the full details
-func Open(file string, use_0_3 bool) (TaskDirectory, error) {
+func Open(file string) (TaskDirectory, error) {
 	if strings.HasPrefix(file, "http://") {
 		return TaskDirectory{}, errors.New("http:// paths are not supported, use https:// instead")
 	}
@@ -53,23 +53,15 @@ func Open(file string, use_0_3 bool) (TaskDirectory, error) {
 		}
 	}
 
-	if !use_0_3 {
-		def, err := td.ReadDefinition()
-		if err != nil {
-			return TaskDirectory{}, err
-		}
-		td.rootPath = path.Join(filepath.Dir(td.defPath), def.Root)
-	} else {
-		def, err := td.ReadDefinition_0_3()
-		if err != nil {
-			return TaskDirectory{}, err
-		}
-		root, err := def.Root(filepath.Dir(td.defPath))
-		if err != nil {
-			return TaskDirectory{}, err
-		}
-		td.rootPath = root
+	def, err := td.ReadDefinition_0_3()
+	if err != nil {
+		return TaskDirectory{}, err
 	}
+	root, err := def.Root(filepath.Dir(td.defPath))
+	if err != nil {
+		return TaskDirectory{}, err
+	}
+	td.rootPath = root
 
 	if !strings.HasPrefix(td.defPath, td.rootPath+string(filepath.Separator)) {
 		return TaskDirectory{}, errors.Errorf("%s must be inside of the task's root directory: %s", path.Base(td.defPath), td.rootPath)
