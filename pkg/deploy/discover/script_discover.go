@@ -12,10 +12,12 @@ import (
 	_ "github.com/airplanedev/lib/pkg/runtime/shell"
 	_ "github.com/airplanedev/lib/pkg/runtime/sql"
 	_ "github.com/airplanedev/lib/pkg/runtime/typescript"
+	"github.com/airplanedev/lib/pkg/utils/pathcase"
 	"github.com/pkg/errors"
 )
 
 type ScriptDiscoverer struct {
+	Client api.IAPIClient
 }
 
 var _ TaskDiscoverer = &ScriptDiscoverer{}
@@ -31,7 +33,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, fi
 		return TaskConfig{}, errors.Wrapf(err, "cannot determine how to deploy %q - check your CLI is up to date", file)
 	}
 
-	def, err := definitions.NewDefinitionFromTask(task)
+	def, err := definitions.NewDefinitionFromTask(ctx, sd.Client, task)
 	if err != nil {
 		return TaskConfig{}, err
 	}
@@ -45,9 +47,17 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, fi
 	if err != nil {
 		return TaskConfig{}, err
 	}
-	if err := def.SetEntrypoint(taskroot, absFile); err != nil {
+
+	// Entrypoint needs to be relative to the taskroot.
+	absEntrypoint, err := pathcase.ActualFilename(absFile)
+	if err != nil {
 		return TaskConfig{}, err
 	}
+	ep, err := filepath.Rel(taskroot, absEntrypoint)
+	if err != nil {
+		return TaskConfig{}, err
+	}
+	def.SetBuildConfig("entrypoint", ep)
 
 	wd, err := r.Workdir(absFile)
 	if err != nil {
@@ -60,7 +70,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, fi
 	return TaskConfig{
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
-		Def:            &def,
+		Def:            def,
 		Task:           task,
 	}, nil
 }
