@@ -9,13 +9,6 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Definition represents a YAML-based task definition that can be used to create
-// or update Airplane tasks.
-//
-// Note this is the subset of fields that can be represented with a revision,
-// and therefore isolated to a specific environment.
-type Definition Definition_0_2
-
 var jsonRegex = regexp.MustCompile(`{{ *JSON *}}`)
 
 func upgradeArguments(args []string) []string {
