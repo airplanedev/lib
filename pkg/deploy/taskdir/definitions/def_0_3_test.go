@@ -596,7 +596,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
-					"workdir":     "",
 				},
 			},
 		},
