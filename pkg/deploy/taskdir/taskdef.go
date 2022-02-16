@@ -11,27 +11,10 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func (td TaskDirectory) ReadDefinition() (definitions.Definition, error) {
+func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error) {
 	buf, err := ioutil.ReadFile(td.defPath)
 	if err != nil {
-		return definitions.Definition{}, errors.Wrap(err, "reading task definition")
-	}
-
-	defPath := td.defPath
-	// Attempt to set a prettier defPath, best effort
-	if wd, err := os.Getwd(); err != nil {
-	} else if path, err := filepath.Rel(wd, defPath); err != nil {
-	} else {
-		defPath = path
-	}
-
-	return definitions.UnmarshalDefinition(buf, defPath)
-}
-
-func (td TaskDirectory) ReadDefinition_0_3() (definitions.Definition_0_3, error) {
-	buf, err := ioutil.ReadFile(td.defPath)
-	if err != nil {
-		return definitions.Definition_0_3{}, errors.Wrap(err, "reading task definition")
+		return nil, errors.Wrap(err, "reading task definition")
 	}
 
 	defPath := td.defPath
@@ -44,9 +27,9 @@ func (td TaskDirectory) ReadDefinition_0_3() (definitions.Definition_0_3, error)
 
 	def := definitions.Definition_0_3{}
 	if err := def.Unmarshal(definitions.GetTaskDefFormat(defPath), buf); err != nil {
-		return definitions.Definition_0_3{}, errors.Wrap(err, "unmarshalling task definition")
+		return nil, errors.Wrap(err, "unmarshalling task definition")
 	}
-	return def, nil
+	return &def, nil
 }
 
 // WriteSlug updates the slug of a task definition and persists td to disk.

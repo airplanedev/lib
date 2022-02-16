@@ -41,14 +41,14 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 	}
 	defer dir.Close()
 
-	def, err := dir.ReadDefinition_0_3()
+	def, err := dir.ReadDefinition()
 	if err != nil {
 		return TaskConfig{}, err
 	}
 
 	tc := TaskConfig{
 		Task: task,
-		Def:  &def,
+		Def:  def,
 	}
 
 	entrypoint, err := def.Entrypoint()
@@ -114,14 +114,14 @@ func (dd *DefnDiscoverer) HandleMissingTask(ctx context.Context, file string) (*
 func getDef(file string) (definitions.DefinitionInterface, error) {
 	dir, err := taskdir.Open(file)
 	if err != nil {
-		return &definitions.Definition_0_3{}, err
+		return nil, err
 	}
 	defer dir.Close()
 
-	def, err := dir.ReadDefinition_0_3()
+	def, err := dir.ReadDefinition()
 	if err != nil {
-		return &definitions.Definition_0_3{}, err
+		return nil, err
 	}
 
-	return &def, nil
+	return def, nil
 }

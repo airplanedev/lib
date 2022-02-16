@@ -53,15 +53,8 @@ func Open(file string) (TaskDirectory, error) {
 		}
 	}
 
-	def, err := td.ReadDefinition_0_3()
-	if err != nil {
-		return TaskDirectory{}, err
-	}
-	root, err := def.Root(filepath.Dir(td.defPath))
-	if err != nil {
-		return TaskDirectory{}, err
-	}
-	td.rootPath = root
+	// TODO: deprecate this
+	td.rootPath = filepath.Dir(td.defPath)
 
 	if !strings.HasPrefix(td.defPath, td.rootPath+string(filepath.Separator)) {
 		return TaskDirectory{}, errors.Errorf("%s must be inside of the task's root directory: %s", path.Base(td.defPath), td.rootPath)
