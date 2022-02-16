@@ -199,13 +199,14 @@ func (def *Definition) SetEntrypoint(taskroot, absEntrypoint string) error {
 	return nil
 }
 
-func (def *Definition) SetWorkdir(taskroot, workdir string) {
+func (def *Definition) SetWorkdir(taskroot, workdir string) error {
 	// TODO: currently only a concept on Node - should be generalized to all builders.
 	if def.Node == nil {
-		return
+		return nil
 	}
 
 	def.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
+	return nil
 }
 
 func (def Definition) Validate() (Definition, error) {
@@ -334,6 +335,25 @@ func (def *Definition) SetBuildConfig(key string, value interface{}) {
 		def.buildConfig = map[string]interface{}{}
 	}
 	def.buildConfig[key] = value
+}
+
+func (def *Definition) Entrypoint() (string, error) {
+	switch kind, _, _ := def.GetKindAndOptions(); kind {
+	case build.TaskKindDeno:
+		return def.Deno.Entrypoint, nil
+	case build.TaskKindGo:
+		return def.Go.Entrypoint, nil
+	case build.TaskKindNode:
+		return def.Node.Entrypoint, nil
+	case build.TaskKindPython:
+		return def.Python.Entrypoint, nil
+	case build.TaskKindShell:
+		return def.Shell.Entrypoint, nil
+	case build.TaskKindImage, build.TaskKindDockerfile, build.TaskKindSQL, build.TaskKindREST:
+		return "", ErrNoEntrypoint
+	default:
+		return "", errors.Errorf("unexpected kind %q", kind)
+	}
 }
 
 func UnmarshalDefinition(buf []byte, defPath string) (Definition, error) {

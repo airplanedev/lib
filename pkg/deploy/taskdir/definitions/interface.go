@@ -22,4 +22,6 @@ type DefinitionInterface interface {
 	GetSlug() string
 	UpgradeJST() error
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error)
+	SetWorkdir(taskroot, workdir string) error
+	Entrypoint() (string, error)
 }
