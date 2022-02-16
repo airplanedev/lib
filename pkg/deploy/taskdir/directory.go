@@ -2,7 +2,6 @@ package taskdir
 
 import (
 	"io"
-	"path"
 	"path/filepath"
 	"strings"
 
@@ -10,8 +9,6 @@ import (
 )
 
 type TaskDirectory struct {
-	// rootPath is the absolute path to the task's root directory.
-	rootPath string
 	// path is the absolute path of the airplane.yml task definition.
 	defPath string
 	// closer is used to clean up TaskDirectory.
@@ -26,8 +23,6 @@ func New(file string) (TaskDirectory, error) {
 	if err != nil {
 		return td, errors.Wrap(err, "converting local file path to absolute path")
 	}
-	// For a new defPath, assume the root is the directory of the defPath
-	td.rootPath = filepath.Dir(td.defPath)
 	return td, nil
 }
 
@@ -53,22 +48,11 @@ func Open(file string) (TaskDirectory, error) {
 		}
 	}
 
-	// TODO: deprecate this
-	td.rootPath = filepath.Dir(td.defPath)
-
-	if !strings.HasPrefix(td.defPath, td.rootPath+string(filepath.Separator)) {
-		return TaskDirectory{}, errors.Errorf("%s must be inside of the task's root directory: %s", path.Base(td.defPath), td.rootPath)
-	}
-
 	return td, nil
 }
 
 func (td TaskDirectory) DefinitionPath() string {
 	return td.defPath
-}
-
-func (td TaskDirectory) DefinitionRootPath() string {
-	return td.rootPath
 }
 
 func (td TaskDirectory) Close() error {
