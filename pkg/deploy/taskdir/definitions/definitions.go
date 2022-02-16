@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
-	"gopkg.in/yaml.v3"
 )
 
 var jsonRegex = regexp.MustCompile(`{{ *JSON *}}`)
@@ -26,18 +25,6 @@ func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Tas
 		return nil, err
 	}
 	return &def, nil
-}
-
-func tryOlderDefinitions(buf []byte) (DefinitionInterface, error) {
-	var err error
-	if err = validateYAML(buf, Definition_0_1{}); err == nil {
-		var def Definition_0_1
-		if e := yaml.Unmarshal(buf, &def); e != nil {
-			return nil, err
-		}
-		return def.upgrade()
-	}
-	return nil, err
 }
 
 type TaskDefFormat string
