@@ -552,6 +552,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		name       string
 		definition Definition_0_3
 		request    api.UpdateTaskRequest
+		resources  []api.Resource
 	}{
 		{
 			name: "python task",
@@ -642,6 +643,44 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			},
 		},
 		{
+			name: "rest task",
+			definition: Definition_0_3{
+				Name: "REST Task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "rest",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     `{"foo": "bar"}`,
+				},
+			},
+			request: api.UpdateTaskRequest{
+				Name:       "REST Task",
+				Slug:       "rest_task",
+				Parameters: []api.Parameter{},
+				Kind:       build.TaskKindREST,
+				KindOptions: build.KindOptions{
+					"method":    "POST",
+					"path":      "/post",
+					"urlParams": map[string]interface{}{},
+					"headers":   map[string]interface{}{},
+					"bodyType":  "json",
+					"body":      `{"foo": "bar"}`,
+					"formData":  map[string]interface{}{},
+				},
+				Resources: map[string]string{
+					"rest": "rest_id",
+				},
+			},
+			resources: []api.Resource{
+				{
+					ID:   "rest_id",
+					Name: "rest",
+				},
+			},
+		},
+		{
 			name: "test update execute rules",
 			definition: Definition_0_3{
 				Name:        "Test Task",
@@ -703,7 +742,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
 			ctx := context.Background()
-			client := &mock.MockClient{}
+			client := &mock.MockClient{
+				Resources: test.resources,
+			}
 			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
 			assert.NoError(err)
 			assert.Equal(test.request, req)
