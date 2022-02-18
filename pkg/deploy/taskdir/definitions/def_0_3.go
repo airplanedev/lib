@@ -523,6 +523,9 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	if err != nil {
 		return nil, err
 	}
+	if d.Parameters == nil {
+		d.Parameters = map[string]interface{}{}
+	}
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
 		"query":      query,
@@ -641,6 +644,15 @@ func (d *RESTDefinition_0_3) upgradeJST() error {
 }
 
 func (d *RESTDefinition_0_3) getKindOptions() (build.KindOptions, error) {
+	if d.URLParams == nil {
+		d.URLParams = map[string]interface{}{}
+	}
+	if d.Headers == nil {
+		d.Headers = map[string]interface{}{}
+	}
+	if d.FormData == nil {
+		d.FormData = map[string]interface{}{}
+	}
 	return build.KindOptions{
 		"method":    d.Method,
 		"path":      d.Path,
