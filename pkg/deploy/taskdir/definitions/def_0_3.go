@@ -1,6 +1,7 @@
 package definitions
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
@@ -18,8 +19,8 @@ import (
 )
 
 type Definition_0_3 struct {
-	Name        string                    `json:"name"`
 	Slug        string                    `json:"slug"`
+	Name        string                    `json:"name"`
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
 
@@ -40,6 +41,69 @@ type Definition_0_3 struct {
 	Timeout            int                 `json:"timeout,omitempty"`
 
 	buildConfig build.BuildConfig
+}
+
+func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
+	cm := yaml.CommentMap{
+		"$.slug": yaml.HeadComment(" This is how Airplane identifies your task."),
+		"$.name": yaml.HeadComment(" A human-readable name for your task."),
+	}
+
+	nextComments := []string{}
+	addComment := func(key string, doAdd bool, example string, comment ...string) {
+		nextComments = append(nextComments, "")
+		for _, c := range comment {
+			nextComments = append(nextComments, " "+c)
+		}
+		if doAdd {
+			cm[key] = yaml.HeadComment(nextComments...)
+			nextComments = []string{}
+		} else {
+			for _, e := range strings.Split(example, "\n") {
+				nextComments = append(nextComments, " "+e)
+			}
+		}
+	}
+
+	addComment("$.parameters", len(d.Parameters) > 0, `parameters:
+- slug: email
+  name: Email
+  type: shorttext`, "Parameters allow you to configure inputs to your task.")
+
+	kind, err := d.Kind()
+	if err != nil {
+		return yaml.CommentMap{}, nil, err
+	}
+
+	switch kind {
+	case build.TaskKindDeno:
+	case build.TaskKindDockerfile:
+	case build.TaskKindGo:
+	case build.TaskKindImage:
+		addComment("$.image", true, "", "Configuration for a Docker image task.")
+		addComment("$.image.image", true, "", "The Docker image to use.")
+		addComment("$.image.entrypoint", d.Image.Entrypoint != "", `entrypoint: "bash"`, "Specify a Docker entrypoint to override the default image entrypoint.")
+		addComment("$.image.command", true, "", "The Docker command to run. Supports JSE interpolation.")
+	case build.TaskKindNode:
+		addComment("$.node", true, "", "Configuration for a Node task.")
+	case build.TaskKindPython:
+		addComment("$.python", true, "", "Configuration for a Python task.")
+	case build.TaskKindShell:
+	case build.TaskKindSQL:
+	case build.TaskKindREST:
+	default:
+		return yaml.CommentMap{}, nil, errors.Errorf("unknown task kind: %s", kind)
+	}
+
+	addComment("$.requireRequests", d.RequireRequests, `requireRequests: true`, "Set to true to disable direct execution of this task. Defaults to false.")
+	addComment("$.timeout", d.Timeout != 0, `timeout: 600`, "Specify a timeout in seconds. If the task does not complete within this time, it is automatically timed out.")
+
+	var leftover []byte
+	if len(nextComments) > 0 {
+		leftover = []byte("#" + strings.Join(nextComments, "\n#") + "\n")
+	}
+
+	return cm, leftover, nil
 }
 
 type taskKind_0_3 interface {
@@ -766,24 +830,29 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 }
 
 func (d Definition_0_3) Marshal(format TaskDefFormat) ([]byte, error) {
-	buf, err := json.MarshalIndent(d, "", "\t")
-	if err != nil {
-		return nil, err
-	}
-
 	switch format {
 	case TaskDefFormatYAML:
-		buf, err = yaml.JSONToYAML(buf)
+		buf := new(bytes.Buffer)
+		cm, leftover, err := d.getCommentMap()
 		if err != nil {
 			return nil, err
 		}
+		if err := yaml.NewEncoder(buf, yaml.UseJSONMarshaler(), yaml.WithComment(cm)).Encode(d); err != nil {
+			return nil, err
+		}
+		if _, err := buf.Write(leftover); err != nil {
+			return nil, err
+		}
+		return buf.Bytes(), nil
 	case TaskDefFormatJSON:
-		// nothing
+		buf, err := json.MarshalIndent(d, "", "\t")
+		if err != nil {
+			return nil, err
+		}
+		return buf, nil
 	default:
 		return nil, errors.Errorf("unknown format: %s", format)
 	}
-
-	return buf, nil
 }
 
 func (d *Definition_0_3) Unmarshal(format TaskDefFormat, buf []byte) error {
