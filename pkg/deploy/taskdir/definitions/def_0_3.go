@@ -45,7 +45,7 @@ type Definition_0_3 struct {
 
 func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	cm := yaml.CommentMap{
-		"$.slug": yaml.HeadComment(" This is how Airplane identifies your task."),
+		"$.slug": yaml.HeadComment(" Used by Airplane to identify your task. Do not change."),
 		"$.name": yaml.HeadComment(" A human-readable name for your task."),
 	}
 
