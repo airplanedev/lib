@@ -59,7 +59,7 @@ type ImageDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint,omitempty"`
 	Command    []string    `json:"command"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -102,7 +102,7 @@ func (d *ImageDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
@@ -110,7 +110,7 @@ var _ taskKind_0_3 = &DenoDefinition_0_3{}
 type DenoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -148,7 +148,7 @@ func (d *DenoDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *DenoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
@@ -156,7 +156,7 @@ var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
 type DockerfileDefinition_0_3 struct {
 	Dockerfile string      `json:"dockerfile"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -193,7 +193,7 @@ func (d *DockerfileDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &GoDefinition_0_3{}
@@ -201,7 +201,7 @@ var _ taskKind_0_3 = &GoDefinition_0_3{}
 type GoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -239,7 +239,7 @@ func (d *GoDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
@@ -248,7 +248,7 @@ type NodeDefinition_0_3 struct {
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	Root        string      `json:"root,omitempty"`
-	Env         api.TaskEnv `json:"env,omitempty"`
+	EnvVars     api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -294,7 +294,7 @@ func (d *NodeDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
@@ -302,7 +302,7 @@ var _ taskKind_0_3 = &PythonDefinition_0_3{}
 type PythonDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -340,7 +340,7 @@ func (d *PythonDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
@@ -348,7 +348,7 @@ var _ taskKind_0_3 = &ShellDefinition_0_3{}
 type ShellDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	Root       string      `json:"root,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -386,7 +386,7 @@ func (d *ShellDefinition_0_3) getRoot() (string, error) {
 }
 
 func (d *ShellDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &SQLDefinition_0_3{}

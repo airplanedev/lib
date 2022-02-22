@@ -12,7 +12,7 @@
               "properties": {
                 "entrypoint": { "type": "string" },
                 "nodeVersion": { "enum": ["12", "14", "15", "16"] },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["entrypoint", "nodeVersion"]
@@ -32,7 +32,7 @@
               "type": "object",
               "properties": {
                 "entrypoint": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["entrypoint"]
@@ -52,7 +52,7 @@
               "type": "object",
               "properties": {
                 "entrypoint": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["entrypoint"]
@@ -74,7 +74,7 @@
                 "image": { "type": "string" },
                 "command": { "type": "array", "items": { "type": "string" } },
                 "entrypoint": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["image"]
@@ -94,7 +94,7 @@
               "type": "object",
               "properties": {
                 "entrypoint": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["entrypoint"]
@@ -114,7 +114,7 @@
               "type": "object",
               "properties": {
                 "entrypoint": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["entrypoint"]
@@ -134,7 +134,7 @@
               "type": "object",
               "properties": {
                 "dockerfile": { "type": "string" },
-                "env": { "$ref": "#/$defs/env" }
+                "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["dockerfile"]
@@ -277,7 +277,7 @@
       "additionalProperties": false,
       "required": ["name", "slug", "type"]
     },
-    "env": {
+    "envVars": {
       "type": "object",
       "patternProperties": {
         ".*": {
