@@ -11,6 +11,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils"
 	"github.com/alessio/shellescape"
 	"github.com/flynn/go-shlex"
 	"github.com/goccy/go-yaml"
@@ -53,7 +54,9 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	addComment := func(key string, doAdd bool, example string, comment ...string) {
 		nextComments = append(nextComments, "")
 		for _, c := range comment {
-			nextComments = append(nextComments, " "+c)
+			for _, l := range utils.BreakLines(c, 78) {
+				nextComments = append(nextComments, " "+l)
+			}
 		}
 		if doAdd {
 			cm[key] = yaml.HeadComment(nextComments...)
