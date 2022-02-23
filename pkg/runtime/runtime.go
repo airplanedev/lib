@@ -78,6 +78,10 @@ type Interface interface {
 	// If running the script locally is not supported the method returns
 	// an `ErrNotImplemented`.
 	PrepareRun(ctx context.Context, logger logger.Logger, opts PrepareRunOptions) (rexprs []string, closer io.Closer, err error)
+
+	// SupportsLocalExecution returns true if PrepareRun does not return
+	// `ErrNotImplemented`.
+	SupportsLocalExecution() bool
 }
 
 type PrepareRunOptions struct {
