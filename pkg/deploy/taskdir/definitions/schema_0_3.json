@@ -156,7 +156,7 @@
               "properties": {
                 "resource": { "type": "string" },
                 "entrypoint": { "type": "string" },
-                "parameters": {
+                "queryArgs": {
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }

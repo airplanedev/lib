@@ -395,7 +395,7 @@ var _ taskKind_0_3 = &SQLDefinition_0_3{}
 type SQLDefinition_0_3 struct {
 	Resource   string                 `json:"resource"`
 	Entrypoint string                 `json:"entrypoint"`
-	Parameters map[string]interface{} `json:"parameters,omitempty"`
+	QueryArgs  map[string]interface{} `json:"queryArgs,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
@@ -453,7 +453,7 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	}
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
-			d.Parameters = mv
+			d.QueryArgs = mv
 		} else {
 			return errors.Errorf("expected map queryArgs, got %T instead", v)
 		}
@@ -471,13 +471,13 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	if err != nil {
 		return nil, err
 	}
-	if d.Parameters == nil {
-		d.Parameters = map[string]interface{}{}
+	if d.QueryArgs == nil {
+		d.QueryArgs = map[string]interface{}{}
 	}
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
 		"query":      query,
-		"queryArgs":  d.Parameters,
+		"queryArgs":  d.QueryArgs,
 	}, nil
 }
 
