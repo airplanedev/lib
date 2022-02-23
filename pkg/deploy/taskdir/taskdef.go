@@ -1,6 +1,7 @@
 package taskdir
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -25,7 +26,16 @@ func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error
 
 	def := definitions.Definition_0_3{}
 	if err := def.Unmarshal(definitions.GetTaskDefFormat(defPath), buf); err != nil {
-		return nil, errors.Wrap(err, "unmarshalling task definition")
+		switch err := errors.Cause(err).(type) {
+		case definitions.ErrSchemaValidation:
+			errorMsgs := []string{}
+			for _, verr := range err.Errors {
+				errorMsgs = append(errorMsgs, fmt.Sprintf("%s: %s", verr.Field(), verr.Description()))
+			}
+			return nil, definitions.NewErrReadDefinition(fmt.Sprintf("Error reading %s", defPath), errorMsgs...)
+		default:
+			return nil, errors.Wrap(err, "unmarshalling task definition")
+		}
 	}
 	return &def, nil
 }
