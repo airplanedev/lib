@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
@@ -39,12 +40,14 @@ type Definition_0_3 struct {
 	Timeout            int                 `json:"timeout,omitempty"`
 
 	buildConfig build.BuildConfig
+	defnPath    string
 }
 
 type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
 	hydrateFromTask(context.Context, api.IAPIClient, *api.Task) error
 	setEntrypoint(string) error
+	setDefnPath(string)
 	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
@@ -85,6 +88,9 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 func (d *ImageDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *ImageDefinition_0_3) setDefnPath(defnPath string) {
 }
 
 func (d *ImageDefinition_0_3) upgradeJST() error {
@@ -133,6 +139,9 @@ func (d *DenoDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *DenoDefinition_0_3) setDefnPath(defnPath string) {
+}
+
 func (d *DenoDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -176,6 +185,9 @@ func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client a
 
 func (d *DockerfileDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return ErrNoEntrypoint
+}
+
+func (d *DockerfileDefinition_0_3) setDefnPath(defnPath string) {
 }
 
 func (d *DockerfileDefinition_0_3) upgradeJST() error {
@@ -224,6 +236,9 @@ func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIC
 func (d *GoDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *GoDefinition_0_3) setDefnPath(defnPath string) {
 }
 
 func (d *GoDefinition_0_3) upgradeJST() error {
@@ -283,6 +298,9 @@ func (d *NodeDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *NodeDefinition_0_3) setDefnPath(defnPath string) {
+}
+
 func (d *NodeDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -331,6 +349,9 @@ func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.I
 func (d *PythonDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *PythonDefinition_0_3) setDefnPath(defnPath string) {
 }
 
 func (d *PythonDefinition_0_3) upgradeJST() error {
@@ -382,6 +403,9 @@ func (d *ShellDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *ShellDefinition_0_3) setDefnPath(defnPath string) {
+}
+
 func (d *ShellDefinition_0_3) upgradeJST() error {
 	d.Arguments = upgradeArguments(d.Arguments)
 	return nil
@@ -410,11 +434,13 @@ type SQLDefinition_0_3 struct {
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
+	defnPath           string `json:"-"`
 }
 
 func (d *SQLDefinition_0_3) GetQuery() (string, error) {
 	if d.entrypointContents == "" {
-		queryBytes, err := os.ReadFile(d.Entrypoint)
+		entrypoint := filepath.Join(filepath.Dir(d.defnPath), d.Entrypoint)
+		queryBytes, err := os.ReadFile(entrypoint)
 		if err != nil {
 			return "", errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
 		}
@@ -475,6 +501,10 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 func (d *SQLDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *SQLDefinition_0_3) setDefnPath(defnPath string) {
+	d.defnPath = defnPath
 }
 
 func (d *SQLDefinition_0_3) upgradeJST() error {
@@ -593,6 +623,9 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 
 func (d *RESTDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return ErrNoEntrypoint
+}
+
+func (d *RESTDefinition_0_3) setDefnPath(defnPath string) {
 }
 
 func (d *RESTDefinition_0_3) upgradeJST() error {
@@ -757,6 +790,23 @@ func (d *Definition_0_3) Unmarshal(format TaskDefFormat, buf []byte) error {
 	if err = json.Unmarshal(buf, &d); err != nil {
 		return err
 	}
+	return nil
+}
+
+func (d *Definition_0_3) SetDefinitionPath(path string) error {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return errors.Wrap(err, "getting absolute path for definition")
+	}
+
+	taskKind, err := d.taskKind()
+	if err != nil {
+		return err
+	}
+
+	d.defnPath = absPath
+	taskKind.setDefnPath(absPath)
+
 	return nil
 }
 

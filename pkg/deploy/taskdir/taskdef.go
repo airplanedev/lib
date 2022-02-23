@@ -27,5 +27,6 @@ func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error
 	if err := def.Unmarshal(definitions.GetTaskDefFormat(defPath), buf); err != nil {
 		return nil, errors.Wrap(err, "unmarshalling task definition")
 	}
+	def.SetDefinitionPath(defPath)
 	return &def, nil
 }
