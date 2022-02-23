@@ -60,7 +60,6 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, fi
 		TaskEntrypoint: absFile,
 		Def:            &def,
 		Task:           task,
-		FilePath:       absFile,
 	}, nil
 }
 

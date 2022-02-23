@@ -336,10 +336,6 @@ func (def *Definition) SetBuildConfig(key string, value interface{}) {
 	def.buildConfig[key] = value
 }
 
-func (def *Definition) Write(path string) error {
-	return errors.New("not implemented")
-}
-
 func UnmarshalDefinition(buf []byte, defPath string) (Definition, error) {
 	// Validate definition against our Definition struct
 	if err := validateYAML(buf, Definition{}); err != nil {
