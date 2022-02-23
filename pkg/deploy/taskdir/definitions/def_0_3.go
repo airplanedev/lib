@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path"
 	"strings"
@@ -1144,6 +1145,18 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
+}
+
+func (d *Definition_0_3) Write(path string) error {
+	defFormat := GetTaskDefFormat(path)
+	buf, err := d.Marshal(TaskDefFormat(defFormat))
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(path, buf, 0644); err != nil {
+		return errors.Wrap(err, "writing definition file")
+	}
+	return nil
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
