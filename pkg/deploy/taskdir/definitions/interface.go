@@ -18,6 +18,9 @@ type DefinitionInterface interface {
 	// excluded from GetBuildConfig; used to mask values that exist in KindOptions.
 	SetBuildConfig(key string, value interface{})
 
+	// SetDefinitionPath sets the definition path for this definition.
+	SetDefinitionPath(path string) error
+
 	GetKindAndOptions() (build.TaskKind, build.KindOptions, error)
 	GetEnv() (api.TaskEnv, error)
 	GetSlug() string

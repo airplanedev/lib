@@ -22,6 +22,7 @@ func TestDiscoverTasks(t *testing.T) {
 		expectedErr   bool
 		want          []TaskConfig
 		buildConfigs  []build.BuildConfig
+		defnPaths     []string
 	}{
 		{
 			name:  "single script",
@@ -156,6 +157,9 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
+			defnPaths: []string{
+				fixturesPath + "/defn.task.yaml",
+			},
 		},
 		{
 			name:          "task not returned by api - deploy skipped",
@@ -190,6 +194,9 @@ func TestDiscoverTasks(t *testing.T) {
 				{
 					"workdir": "",
 				},
+			},
+			defnPaths: []string{
+				fixturesPath + "/defn.task.yaml",
 			},
 		},
 		{
@@ -246,6 +253,9 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "subdir/single_task.js",
 				},
 			},
+			defnPaths: []string{
+				fixturesPath + "/subdir/defn.task.yaml",
+			},
 		},
 	}
 	for _, tC := range tests {
@@ -276,6 +286,9 @@ func TestDiscoverTasks(t *testing.T) {
 			for i := range tC.want {
 				for k, v := range tC.buildConfigs[i] {
 					tC.want[i].Def.SetBuildConfig(k, v)
+				}
+				if i < len(tC.defnPaths) {
+					tC.want[i].Def.SetDefinitionPath(tC.defnPaths[i])
 				}
 				require.Equal(tC.want[i], got[i])
 			}
