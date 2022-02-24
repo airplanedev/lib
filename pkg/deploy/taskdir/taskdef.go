@@ -43,12 +43,20 @@ func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error
 	} else if err != nil {
 		return nil, err
 	} else {
-		defnDir := filepath.Dir(td.defPath)
-		absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
-		if err != nil {
-			return nil, err
+		if filepath.IsAbs(entrypoint) {
+			if err := def.SetAbsoluteEntrypoint(entrypoint); err != nil {
+				return nil, err
+			}
+		} else {
+			defnDir := filepath.Dir(td.defPath)
+			absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
+			if err != nil {
+				return nil, err
+			}
+			if err := def.SetAbsoluteEntrypoint(absEntrypoint); err != nil {
+				return nil, err
+			}
 		}
-		def.SetAbsoluteEntrypoint(absEntrypoint)
 	}
 	return &def, nil
 }
