@@ -37,6 +37,18 @@ func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error
 			return nil, errors.Wrap(err, "unmarshalling task definition")
 		}
 	}
-	def.SetDefinitionPath(defPath)
+	entrypoint, err := def.Entrypoint()
+	if err == definitions.ErrNoEntrypoint {
+		// nothing
+	} else if err != nil {
+		return nil, err
+	} else {
+		defnDir := filepath.Dir(td.defPath)
+		absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
+		if err != nil {
+			return nil, err
+		}
+		def.SetAbsoluteEntrypoint(absEntrypoint)
+	}
 	return &def, nil
 }
