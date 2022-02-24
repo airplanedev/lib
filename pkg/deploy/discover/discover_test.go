@@ -16,12 +16,13 @@ import (
 func TestDiscoverTasks(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
 	tests := []struct {
-		name          string
-		paths         []string
-		existingTasks map[string]api.Task
-		expectedErr   bool
-		want          []TaskConfig
-		buildConfigs  []build.BuildConfig
+		name           string
+		paths          []string
+		existingTasks  map[string]api.Task
+		expectedErr    bool
+		want           []TaskConfig
+		buildConfigs   []build.BuildConfig
+		absEntrypoints []string
 	}{
 		{
 			name:  "single script",
@@ -162,6 +163,9 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
+			absEntrypoints: []string{
+				fixturesPath + "/single_task.js",
+			},
 		},
 		{
 			name:          "task not returned by api - deploy skipped",
@@ -197,6 +201,9 @@ func TestDiscoverTasks(t *testing.T) {
 				{
 					"workdir": "",
 				},
+			},
+			absEntrypoints: []string{
+				fixturesPath + "/single_task.js",
 			},
 		},
 		{
@@ -255,6 +262,9 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "subdir/single_task.js",
 				},
 			},
+			absEntrypoints: []string{
+				fixturesPath + "/subdir/single_task.js",
+			},
 		},
 	}
 	for _, tC := range tests {
@@ -285,6 +295,9 @@ func TestDiscoverTasks(t *testing.T) {
 			for i := range tC.want {
 				for k, v := range tC.buildConfigs[i] {
 					tC.want[i].Def.SetBuildConfig(k, v)
+				}
+				if i < len(tC.absEntrypoints) {
+					tC.want[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
 				}
 				require.Equal(tC.want[i], got[i])
 			}

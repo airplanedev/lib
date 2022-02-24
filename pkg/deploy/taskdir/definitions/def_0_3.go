@@ -46,6 +46,8 @@ type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
 	hydrateFromTask(context.Context, api.IAPIClient, *api.Task) error
 	setEntrypoint(string) error
+	setAbsoluteEntrypoint(string) error
+	getAbsoluteEntrypoint() (string, error)
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
 	getEnv() (api.TaskEnv, error)
@@ -58,6 +60,8 @@ type ImageDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint,omitempty"`
 	Command    []string    `json:"command"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -87,6 +91,18 @@ func (d *ImageDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *ImageDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *ImageDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
+}
+
 func (d *ImageDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return nil, nil
 }
@@ -104,6 +120,8 @@ var _ taskKind_0_3 = &DenoDefinition_0_3{}
 type DenoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -124,6 +142,18 @@ func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 func (d *DenoDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *DenoDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *DenoDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
 }
 
 func (d *DenoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
@@ -166,6 +196,14 @@ func (d *DockerfileDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return ErrNoEntrypoint
 }
 
+func (d *DockerfileDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	return ErrNoEntrypoint
+}
+
+func (d *DockerfileDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	return "", ErrNoEntrypoint
+}
+
 func (d *DockerfileDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"dockerfile": d.Dockerfile,
@@ -185,6 +223,8 @@ var _ taskKind_0_3 = &GoDefinition_0_3{}
 type GoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -207,6 +247,18 @@ func (d *GoDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *GoDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *GoDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
+}
+
 func (d *GoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -227,6 +279,8 @@ type NodeDefinition_0_3 struct {
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
 	EnvVars     api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -256,6 +310,18 @@ func (d *NodeDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *NodeDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *NodeDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
+}
+
 func (d *NodeDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint":  d.Entrypoint,
@@ -276,6 +342,8 @@ var _ taskKind_0_3 = &PythonDefinition_0_3{}
 type PythonDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -298,6 +366,18 @@ func (d *PythonDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return nil
 }
 
+func (d *PythonDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *PythonDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
+}
+
 func (d *PythonDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -317,6 +397,8 @@ var _ taskKind_0_3 = &ShellDefinition_0_3{}
 type ShellDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
+
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -337,6 +419,18 @@ func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 func (d *ShellDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *ShellDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *ShellDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
 }
 
 func (d *ShellDefinition_0_3) getKindOptions() (build.KindOptions, error) {
@@ -362,11 +456,15 @@ type SQLDefinition_0_3 struct {
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
+	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *SQLDefinition_0_3) GetQuery() (string, error) {
 	if d.entrypointContents == "" {
-		queryBytes, err := os.ReadFile(d.Entrypoint)
+		if d.absoluteEntrypoint == "" {
+			return "", ErrNoAbsoluteEntrypoint
+		}
+		queryBytes, err := os.ReadFile(d.absoluteEntrypoint)
 		if err != nil {
 			return "", errors.Wrapf(err, "reading SQL entrypoint %s", d.Entrypoint)
 		}
@@ -427,6 +525,18 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 func (d *SQLDefinition_0_3) setEntrypoint(entrypoint string) error {
 	d.Entrypoint = entrypoint
 	return nil
+}
+
+func (d *SQLDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	d.absoluteEntrypoint = entrypoint
+	return nil
+}
+
+func (d *SQLDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	if d.absoluteEntrypoint == "" {
+		return "", ErrNoAbsoluteEntrypoint
+	}
+	return d.absoluteEntrypoint, nil
 }
 
 func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
@@ -544,6 +654,14 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 
 func (d *RESTDefinition_0_3) setEntrypoint(entrypoint string) error {
 	return ErrNoEntrypoint
+}
+
+func (d *RESTDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
+	return ErrNoEntrypoint
+}
+
+func (d *RESTDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
+	return "", ErrNoEntrypoint
 }
 
 func (d *RESTDefinition_0_3) getKindOptions() (build.KindOptions, error) {
@@ -715,6 +833,24 @@ func (d *Definition_0_3) Unmarshal(format TaskDefFormat, buf []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (d *Definition_0_3) SetAbsoluteEntrypoint(entrypoint string) error {
+	taskKind, err := d.taskKind()
+	if err != nil {
+		return err
+	}
+
+	return taskKind.setAbsoluteEntrypoint(entrypoint)
+}
+
+func (d *Definition_0_3) GetAbsoluteEntrypoint() (string, error) {
+	taskKind, err := d.taskKind()
+	if err != nil {
+		return "", err
+	}
+
+	return taskKind.getAbsoluteEntrypoint()
 }
 
 func (d Definition_0_3) Kind() (build.TaskKind, error) {
