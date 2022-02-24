@@ -31,8 +31,6 @@ parameters:
   required: true
 python:
   entrypoint: hello_world.py
-  arguments:
-  - "{{JSON.stringify(params)}}"
 timeout: 3600
 `)
 
@@ -52,10 +50,7 @@ var fullJSON = []byte(
 		}
 	],
 	"python": {
-		"entrypoint": "hello_world.py",
-		"arguments": [
-			"{{JSON.stringify(params)}}"
-		]
+		"entrypoint": "hello_world.py"
 	},
 	"timeout": 3600
 }`)
@@ -72,8 +67,6 @@ parameters:
   default: World
 python:
   entrypoint: hello_world.py
-  arguments:
-  - "{{JSON.stringify(params)}}"
 timeout: 3600
 `)
 
@@ -92,10 +85,7 @@ var jsonWithDefault = []byte(
 		}
 	],
 	"python": {
-		"entrypoint": "hello_world.py",
-		"arguments": [
-			"{{JSON.stringify(params)}}"
-		]
+		"entrypoint": "hello_world.py"
 	},
 	"timeout": 3600
 }`)
@@ -116,7 +106,6 @@ var fullDef = Definition_0_3{
 	},
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
-		Arguments:  []string{"{{JSON.stringify(params)}}"},
 	},
 	Timeout: 3600,
 }
@@ -136,7 +125,6 @@ var defWithDefault = Definition_0_3{
 	},
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
-		Arguments:  []string{"{{JSON.stringify(params)}}"},
 	},
 	Timeout: 3600,
 }
@@ -236,7 +224,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Slug:        "python_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 			},
@@ -257,7 +244,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name: "Node Task",
 				Slug: "node_task",
 				Node: &NodeDefinition_0_3{
-					Arguments:   []string{"{{JSON.stringify(params)}}"},
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
 				},
@@ -278,7 +264,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
-					Arguments:  []string{},
 					Entrypoint: "main.sh",
 				},
 			},
@@ -476,7 +461,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					},
 				},
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 			},
@@ -500,7 +484,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name: "Test Task",
 				Slug: "test_task",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
@@ -526,7 +509,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name: "Test Task",
 				Slug: "test_task",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
@@ -561,7 +543,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 			},
@@ -570,7 +551,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Parameters:  []api.Parameter{},
-				Arguments:   []string{"{{JSON.stringify(params)}}"},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
@@ -583,7 +563,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name: "Node Task",
 				Slug: "node_task",
 				Node: &NodeDefinition_0_3{
-					Arguments:   []string{"{{JSON.stringify(params)}}"},
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
 				},
@@ -592,7 +571,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Node Task",
 				Slug:       "node_task",
 				Parameters: []api.Parameter{},
-				Arguments:  []string{"{{JSON.stringify(params)}}"},
 				Kind:       build.TaskKindNode,
 				KindOptions: build.KindOptions{
 					"entrypoint":  "main.ts",
@@ -606,7 +584,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
-					Arguments:  []string{},
 					Entrypoint: "main.sh",
 				},
 			},
@@ -614,7 +591,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Shell Task",
 				Slug:       "shell_task",
 				Parameters: []api.Parameter{},
-				Arguments:  []string{},
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
@@ -687,7 +663,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
@@ -698,7 +673,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
 				Description: "A task for testing",
-				Arguments:   []string{"{{JSON.stringify(params)}}"},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
@@ -716,7 +690,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
@@ -727,7 +700,6 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
 				Description: "A task for testing",
-				Arguments:   []string{"{{JSON.stringify(params)}}"},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
