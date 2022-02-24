@@ -36,7 +36,7 @@ type DefinitionInterface interface {
 	SetWorkdir(taskroot, workdir string) error
 
 	// Entrypoint returns ErrNoEntrypoint if the task kind definition requires no entrypoint. May be
-	// empty. This is relative to the defn file, if one exists; otherwise, it's not super useful.
+	// empty. May be absolute or relative; if relative, it is relative to the defn file.
 	Entrypoint() (string, error)
 
 	// Write writes the task definition to the given path.
