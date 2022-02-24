@@ -252,10 +252,6 @@ func (def *Definition_0_2) SetWorkdir(taskroot, workdir string) error {
 	return nil
 }
 
-func (def *Definition_0_2) SetDefinitionPath(path string) error {
-	return nil
-}
-
 func (def Definition_0_2) Validate() (Definition_0_2, error) {
 	if def.Slug == "" {
 		return def, errors.New("Expected a task slug")
