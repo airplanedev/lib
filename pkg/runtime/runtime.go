@@ -79,8 +79,8 @@ type Interface interface {
 	// an `ErrNotImplemented`.
 	PrepareRun(ctx context.Context, logger logger.Logger, opts PrepareRunOptions) (rexprs []string, closer io.Closer, err error)
 
-	// SupportsLocalExecution returns true if PrepareRun does not return
-	// `ErrNotImplemented`.
+	// SupportsLocalExecution returns true if local execution is supported.
+	// This is expected to match whether PrepareRun returns `ErrNotImplemented`.
 	SupportsLocalExecution() bool
 }
 
