@@ -241,6 +241,11 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	return []string{"node", res.OutputFiles[0].Path, string(pv)}, closer, nil
 }
 
+// SupportsLocalExecution implementation.
+func (r Runtime) SupportsLocalExecution() bool {
+	return true
+}
+
 // checkNodeVersion compares the major version of the currently installed
 // node binary with that of the configured task and logs a warning if they
 // do not match.
