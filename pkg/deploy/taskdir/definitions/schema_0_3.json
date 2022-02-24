@@ -332,7 +332,6 @@
         "allowSelfApprovals": { "type": "boolean" },
         "timeout": {
           "type": "number",
-          "maximum": 3600,
           "exclusiveMinimum": 0
         }
       },
