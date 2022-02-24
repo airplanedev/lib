@@ -392,6 +392,10 @@ func (def *Definition_0_2) Entrypoint() (string, error) {
 	}
 }
 
+func (def *Definition_0_2) Write(path string) error {
+	return errors.New("not implemented")
+}
+
 func (d Definition_0_2) upgrade() (DefinitionInterface, error) {
 	return nil, errors.New("not implemented")
 }

@@ -4,6 +4,7 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,7 +49,6 @@ type taskKind_0_3 interface {
 	hydrateFromTask(context.Context, api.IAPIClient, *api.Task) error
 	setEntrypoint(string) error
 	setDefnPath(string)
-	upgradeJST() error
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
 	getEnv() (api.TaskEnv, error)
@@ -60,7 +60,7 @@ type ImageDefinition_0_3 struct {
 	Image      string      `json:"image"`
 	Entrypoint string      `json:"entrypoint,omitempty"`
 	Command    []string    `json:"command"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -93,10 +93,6 @@ func (d *ImageDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *ImageDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *ImageDefinition_0_3) upgradeJST() error {
-	return nil
-}
-
 func (d *ImageDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return nil, nil
 }
@@ -106,24 +102,21 @@ func (d *ImageDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
 
 type DenoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
-	Arguments  []string    `json:"arguments,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Arguments = d.Arguments
 	return nil
 }
 
 func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	d.Arguments = t.Arguments
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -142,11 +135,6 @@ func (d *DenoDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *DenoDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *DenoDefinition_0_3) upgradeJST() error {
-	d.Arguments = upgradeArguments(d.Arguments)
-	return nil
-}
-
 func (d *DenoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -158,14 +146,14 @@ func (d *DenoDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *DenoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
 
 type DockerfileDefinition_0_3 struct {
 	Dockerfile string      `json:"dockerfile"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -190,10 +178,6 @@ func (d *DockerfileDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *DockerfileDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *DockerfileDefinition_0_3) upgradeJST() error {
-	return nil
-}
-
 func (d *DockerfileDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"dockerfile": d.Dockerfile,
@@ -205,24 +189,21 @@ func (d *DockerfileDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &GoDefinition_0_3{}
 
 type GoDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
-	Arguments  []string    `json:"arguments,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Arguments = d.Arguments
 	return nil
 }
 
 func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	d.Arguments = t.Arguments
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -241,11 +222,6 @@ func (d *GoDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *GoDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *GoDefinition_0_3) upgradeJST() error {
-	d.Arguments = upgradeArguments(d.Arguments)
-	return nil
-}
-
 func (d *GoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -257,7 +233,7 @@ func (d *GoDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
@@ -265,17 +241,14 @@ var _ taskKind_0_3 = &NodeDefinition_0_3{}
 type NodeDefinition_0_3 struct {
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
-	Arguments   []string    `json:"arguments,omitempty"`
-	Env         api.TaskEnv `json:"env,omitempty"`
+	EnvVars     api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Arguments = d.Arguments
 	return nil
 }
 
 func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	d.Arguments = t.Arguments
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -301,11 +274,6 @@ func (d *NodeDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *NodeDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *NodeDefinition_0_3) upgradeJST() error {
-	d.Arguments = upgradeArguments(d.Arguments)
-	return nil
-}
-
 func (d *NodeDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint":  d.Entrypoint,
@@ -318,24 +286,21 @@ func (d *NodeDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
 
 type PythonDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
-	Arguments  []string    `json:"arguments,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Arguments = d.Arguments
 	return nil
 }
 
 func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	d.Arguments = t.Arguments
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -354,11 +319,6 @@ func (d *PythonDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *PythonDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *PythonDefinition_0_3) upgradeJST() error {
-	d.Arguments = upgradeArguments(d.Arguments)
-	return nil
-}
-
 func (d *PythonDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -370,24 +330,21 @@ func (d *PythonDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
 
 type ShellDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint"`
-	Arguments  []string    `json:"arguments,omitempty"`
-	Env        api.TaskEnv `json:"env,omitempty"`
+	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Arguments = d.Arguments
 	return nil
 }
 
 func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	d.Arguments = t.Arguments
 	if v, ok := t.KindOptions["entrypoint"]; ok {
 		if sv, ok := v.(string); ok {
 			d.Entrypoint = sv
@@ -406,11 +363,6 @@ func (d *ShellDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *ShellDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *ShellDefinition_0_3) upgradeJST() error {
-	d.Arguments = upgradeArguments(d.Arguments)
-	return nil
-}
-
 func (d *ShellDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -422,7 +374,7 @@ func (d *ShellDefinition_0_3) getEntrypoint() (string, error) {
 }
 
 func (d *ShellDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.Env, nil
+	return d.EnvVars, nil
 }
 
 var _ taskKind_0_3 = &SQLDefinition_0_3{}
@@ -507,14 +459,13 @@ func (d *SQLDefinition_0_3) setDefnPath(defnPath string) {
 	d.defnPath = defnPath
 }
 
-func (d *SQLDefinition_0_3) upgradeJST() error {
-	return nil
-}
-
 func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	query, err := d.GetQuery()
 	if err != nil {
 		return nil, err
+	}
+	if d.Parameters == nil {
+		d.Parameters = map[string]interface{}{}
 	}
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
@@ -628,11 +579,16 @@ func (d *RESTDefinition_0_3) setEntrypoint(entrypoint string) error {
 func (d *RESTDefinition_0_3) setDefnPath(defnPath string) {
 }
 
-func (d *RESTDefinition_0_3) upgradeJST() error {
-	return nil
-}
-
 func (d *RESTDefinition_0_3) getKindOptions() (build.KindOptions, error) {
+	if d.URLParams == nil {
+		d.URLParams = map[string]interface{}{}
+	}
+	if d.Headers == nil {
+		d.Headers = map[string]interface{}{}
+	}
+	if d.FormData == nil {
+		d.FormData = map[string]interface{}{}
+	}
 	return build.KindOptions{
 		"method":    d.Method,
 		"path":      d.Path,
@@ -717,7 +673,8 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 		def.Image = &ImageDefinition_0_3{}
 	case build.TaskKindNode:
 		def.Node = &NodeDefinition_0_3{
-			Entrypoint: entrypoint,
+			Entrypoint:  entrypoint,
+			NodeVersion: "14",
 		}
 	case build.TaskKindPython:
 		def.Python = &PythonDefinition_0_3{
@@ -982,11 +939,7 @@ func (d Definition_0_3) Entrypoint() (string, error) {
 }
 
 func (d *Definition_0_3) UpgradeJST() error {
-	taskKind, err := d.taskKind()
-	if err != nil {
-		return err
-	}
-	return taskKind.upgradeJST()
+	return nil
 }
 
 func (d *Definition_0_3) GetKindAndOptions() (build.TaskKind, build.KindOptions, error) {
@@ -1183,6 +1136,18 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
+}
+
+func (d *Definition_0_3) Write(path string) error {
+	defFormat := GetTaskDefFormat(path)
+	buf, err := d.Marshal(TaskDefFormat(defFormat))
+	if err != nil {
+		return err
+	}
+	if err := ioutil.WriteFile(path, buf, 0644); err != nil {
+		return errors.Wrap(err, "writing definition file")
+	}
+	return nil
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

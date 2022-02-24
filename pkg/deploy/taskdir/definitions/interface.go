@@ -30,6 +30,9 @@ type DefinitionInterface interface {
 
 	// Entrypoint returns ErrEntrypoint if the definition doesn't define an entrypoint. May be empty.
 	Entrypoint() (string, error)
+
+	// Write writes the task definition to the given path.
+	Write(path string) error
 }
 
 var ErrNoEntrypoint = errors.New("No entrypoint")

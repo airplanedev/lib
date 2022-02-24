@@ -47,8 +47,9 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file
 	}
 
 	tc := TaskConfig{
-		Task: task,
-		Def:  def,
+		Task:     task,
+		Def:      def,
+		FilePath: dir.DefinitionPath(),
 	}
 
 	entrypoint, err := def.Entrypoint()
