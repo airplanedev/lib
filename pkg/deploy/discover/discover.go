@@ -31,9 +31,7 @@ type TaskConfig struct {
 	TaskEntrypoint string
 	Task           api.Task
 	Def            definitions.DefinitionInterface
-	// Path to script for script discovery; path to defn for defn discovery.
-	FilePath string
-	From     TaskConfigSource
+	From           TaskConfigSource
 }
 
 type TaskDiscoverer interface {

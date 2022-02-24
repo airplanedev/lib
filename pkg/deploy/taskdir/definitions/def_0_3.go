@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -452,7 +451,7 @@ var _ taskKind_0_3 = &SQLDefinition_0_3{}
 type SQLDefinition_0_3 struct {
 	Resource   string                 `json:"resource"`
 	Entrypoint string                 `json:"entrypoint"`
-	Parameters map[string]interface{} `json:"parameters,omitempty"`
+	QueryArgs  map[string]interface{} `json:"queryArgs,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
@@ -514,7 +513,7 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	}
 	if v, ok := t.KindOptions["queryArgs"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
-			d.Parameters = mv
+			d.QueryArgs = mv
 		} else {
 			return errors.Errorf("expected map queryArgs, got %T instead", v)
 		}
@@ -544,13 +543,13 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	if err != nil {
 		return nil, err
 	}
-	if d.Parameters == nil {
-		d.Parameters = map[string]interface{}{}
+	if d.QueryArgs == nil {
+		d.QueryArgs = map[string]interface{}{}
 	}
 	return build.KindOptions{
 		"entrypoint": d.Entrypoint,
 		"query":      query,
-		"queryArgs":  d.Parameters,
+		"queryArgs":  d.QueryArgs,
 	}, nil
 }
 
@@ -1222,18 +1221,6 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
-}
-
-func (d *Definition_0_3) Write(path string) error {
-	defFormat := GetTaskDefFormat(path)
-	buf, err := d.Marshal(TaskDefFormat(defFormat))
-	if err != nil {
-		return err
-	}
-	if err := ioutil.WriteFile(path, buf, 0644); err != nil {
-		return errors.Wrap(err, "writing definition file")
-	}
-	return nil
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

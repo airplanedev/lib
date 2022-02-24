@@ -157,7 +157,7 @@
               "properties": {
                 "resource": { "type": "string" },
                 "entrypoint": { "type": "string" },
-                "parameters": {
+                "queryArgs": {
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
@@ -354,7 +354,6 @@
         "allowSelfApprovals": { "type": "boolean" },
         "timeout": {
           "type": "number",
-          "maximum": 3600,
           "exclusiveMinimum": 0
         }
       },
