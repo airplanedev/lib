@@ -174,10 +174,13 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	}
 
 	addComment(comment{
-		key:     "$.constraints",
-		doAdd:   d.Constraints != nil && !d.Constraints.IsEmpty(),
-		example: ``,
-		text:    "",
+		key:   "$.constraints",
+		doAdd: d.Constraints != nil && !d.Constraints.IsEmpty(),
+		example: `constraints:
+  labels:
+  - key: aws-region
+    value: us-west-2`,
+		text: "Set label constraints to restrict this task to run only on agents with matching labels.",
 	})
 	addComment(comment{
 		key:     "$.requireRequests",
