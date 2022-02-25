@@ -59,8 +59,6 @@ type ImageDefinition_0_3 struct {
 	Entrypoint string      `json:"entrypoint,omitempty"`
 	Command    []string    `json:"command"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
-
-	absoluteEntrypoint string `json:"-"`
 }
 
 func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -86,20 +84,15 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 }
 
 func (d *ImageDefinition_0_3) setEntrypoint(entrypoint string) error {
-	d.Entrypoint = entrypoint
-	return nil
+	return ErrNoEntrypoint
 }
 
 func (d *ImageDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
-	d.absoluteEntrypoint = entrypoint
-	return nil
+	return ErrNoEntrypoint
 }
 
 func (d *ImageDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
-	if d.absoluteEntrypoint == "" {
-		return "", ErrNoAbsoluteEntrypoint
-	}
-	return d.absoluteEntrypoint, nil
+	return "", ErrNoEntrypoint
 }
 
 func (d *ImageDefinition_0_3) getKindOptions() (build.KindOptions, error) {
