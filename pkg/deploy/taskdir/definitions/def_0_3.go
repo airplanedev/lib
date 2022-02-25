@@ -33,10 +33,10 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Constraints        *api.RunConstraints `json:"constraints,omitempty"`
-	RequireRequests    bool                `json:"requireRequests,omitempty"`
-	AllowSelfApprovals *bool               `json:"allowSelfApprovals,omitempty"`
-	Timeout            int                 `json:"timeout,omitempty"`
+	Constraints        map[string]string `json:"constraints,omitempty"`
+	RequireRequests    bool              `json:"requireRequests,omitempty"`
+	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
+	Timeout            int               `json:"timeout,omitempty"`
 
 	buildConfig build.BuildConfig
 }
@@ -909,8 +909,17 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		return api.UpdateTaskRequest{}, err
 	}
 
-	if d.Constraints != nil && !d.Constraints.IsEmpty() {
-		req.Constraints = *d.Constraints
+	if d.Constraints != nil {
+		labels := []api.AgentLabel{}
+		for key, val := range d.Constraints {
+			labels = append(labels, api.AgentLabel{
+				Key:   key,
+				Value: val,
+			})
+		}
+		req.Constraints = api.RunConstraints{
+			Labels: labels,
+		}
 	}
 
 	if d.RequireRequests {
@@ -1092,8 +1101,9 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		return Definition_0_3{}, err
 	}
 
-	if !t.Constraints.IsEmpty() {
-		d.Constraints = &t.Constraints
+	d.Constraints = map[string]string{}
+	for _, label := range t.Constraints.Labels {
+		d.Constraints[label.Key] = label.Value
 	}
 
 	if t.ExecuteRules.DisallowSelfApprove {

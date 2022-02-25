@@ -335,20 +335,9 @@
         },
         "constraints": {
           "type": "object",
-          "properties": {
-            "labels": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "key": { "type": "string" },
-                  "value": { "type": "string" }
-                },
-                "additionalProperties": false
-              }
-            }
-          },
-          "additionalProperties": false
+          "patternProperties": {
+            ".*": { "type": "string" }
+          }
         },
         "requireRequests": { "type": "boolean" },
         "allowSelfApprovals": { "type": "boolean" },
