@@ -51,14 +51,22 @@ type comment struct {
 	text    string
 }
 
+// getCommentMap dynamically creates the comment map for the definition. This is necessary because
+// the yaml library we're using runs into nil pointer exceptions if you try to leave a comment on a
+// field that doesn't end up in the YAML file (e.g., because it's empty). Returns the comment map
+// plus a set of bytes that should be tacked on to the end of the YAML file (because it's
+// impossible to specify comments to go at the end of the YAML file in the CommentMap).
 func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	cm := yaml.CommentMap{}
 	nextComments := []string{}
 	addComment := func(c comment) {
+		// Add an empty line, then break the text into lines of max 78 characters.
 		nextComments = append(nextComments, "")
 		for _, l := range utils.BreakLines(c.text, 78) {
 			nextComments = append(nextComments, " "+l)
 		}
+
+		// Add the example to the comment cache, or add the comment & reset the cache.
 		if c.doAdd {
 			cm[c.key] = yaml.HeadComment(nextComments...)
 			nextComments = []string{}
@@ -102,9 +110,8 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	}
 
 	switch kind {
-	case build.TaskKindDeno:
-	case build.TaskKindDockerfile:
-	case build.TaskKindGo:
+	case build.TaskKindDeno, build.TaskKindDockerfile, build.TaskKindGo:
+		// Skip these, we don't want to tell people about them anyway.
 	case build.TaskKindImage:
 		addComment(comment{
 			key:   "$.image",
