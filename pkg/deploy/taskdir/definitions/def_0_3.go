@@ -85,6 +85,7 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 		example: `description: This is a new task.`,
 		text:    "A human-readable description for your task. Supports Markdown.",
 	})
+	// TODO: flesh this one out
 	addComment(comment{
 		key:   "$.parameters",
 		doAdd: len(d.Parameters) > 0,
@@ -132,30 +133,35 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 			doAdd: true,
 			text:  "Configuration for a Node task.",
 		})
+		// TODO: Documentation for Node-specific options.
 	case build.TaskKindPython:
 		addComment(comment{
 			key:   "$.python",
 			doAdd: true,
 			text:  "Configuration for a Python task.",
 		})
+		// TODO: Documentation for Python-specific options.
 	case build.TaskKindShell:
 		addComment(comment{
 			key:   "$.shell",
 			doAdd: true,
 			text:  "Configuration for a shell task.",
 		})
+		// TODO: Documentation for shell-specific options.
 	case build.TaskKindSQL:
 		addComment(comment{
 			key:   "$.sql",
 			doAdd: true,
 			text:  "Configuration for a SQL task.",
 		})
+		// TODO: Documentation for SQL-specific options.
 	case build.TaskKindREST:
 		addComment(comment{
 			key:   "$.rest",
 			doAdd: true,
 			text:  "Configuration for a REST task.",
 		})
+		// TODO: Documentation for REST-specific options.
 	default:
 		return yaml.CommentMap{}, nil, errors.Errorf("unknown task kind: %s", kind)
 	}
