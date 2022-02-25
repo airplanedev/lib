@@ -44,34 +44,56 @@ type Definition_0_3 struct {
 	buildConfig build.BuildConfig
 }
 
-func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
-	cm := yaml.CommentMap{
-		"$.slug": yaml.HeadComment(" Used by Airplane to identify your task. Do not change."),
-		"$.name": yaml.HeadComment(" A human-readable name for your task."),
-	}
+type comment struct {
+	key     string
+	doAdd   bool
+	example string
+	text    string
+}
 
+func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
+	cm := yaml.CommentMap{}
 	nextComments := []string{}
-	addComment := func(key string, doAdd bool, example string, comment ...string) {
+	addComment := func(c comment) {
 		nextComments = append(nextComments, "")
-		for _, c := range comment {
-			for _, l := range utils.BreakLines(c, 78) {
-				nextComments = append(nextComments, " "+l)
-			}
+		for _, l := range utils.BreakLines(c.text, 78) {
+			nextComments = append(nextComments, " "+l)
 		}
-		if doAdd {
-			cm[key] = yaml.HeadComment(nextComments...)
+		if c.doAdd {
+			cm[c.key] = yaml.HeadComment(nextComments...)
 			nextComments = []string{}
 		} else {
-			for _, e := range strings.Split(example, "\n") {
+			for _, e := range strings.Split(c.example, "\n") {
 				nextComments = append(nextComments, " "+e)
 			}
 		}
 	}
 
-	addComment("$.parameters", len(d.Parameters) > 0, `parameters:
+	addComment(comment{
+		key:   "$.slug",
+		doAdd: true,
+		text:  "Used by Airplane to identify your task. Do not change.",
+	})
+	addComment(comment{
+		key:   "$.name",
+		doAdd: true,
+		text:  "A human-readable name for your task.",
+	})
+	addComment(comment{
+		key:     "$.description",
+		doAdd:   d.Description != "",
+		example: `description: This is a new task.`,
+		text:    "A human-readable description for your task. Supports Markdown.",
+	})
+	addComment(comment{
+		key:   "$.parameters",
+		doAdd: len(d.Parameters) > 0,
+		example: `parameters:
 - slug: email
   name: Email
-  type: shorttext`, "Parameters allow you to configure inputs to your task.")
+  type: shorttext`,
+		text: "Parameters allow you to configure inputs to your task.",
+	})
 
 	kind, err := d.Kind()
 	if err != nil {
@@ -83,23 +105,85 @@ func (d Definition_0_3) getCommentMap() (yaml.CommentMap, []byte, error) {
 	case build.TaskKindDockerfile:
 	case build.TaskKindGo:
 	case build.TaskKindImage:
-		addComment("$.image", true, "", "Configuration for a Docker image task.")
-		addComment("$.image.image", true, "", "The Docker image to use.")
-		addComment("$.image.entrypoint", d.Image.Entrypoint != "", `entrypoint: "bash"`, "Specify a Docker entrypoint to override the default image entrypoint.")
-		addComment("$.image.command", true, "", "The Docker command to run. Supports JSE interpolation.")
+		addComment(comment{
+			key:   "$.image",
+			doAdd: true,
+			text:  "Configuration for a Docker image task.",
+		})
+		addComment(comment{
+			key:   "$.image.image",
+			doAdd: true,
+			text:  "The Docker image to use.",
+		})
+		addComment(comment{
+			key:     "$.image.entrypoint",
+			doAdd:   d.Image.Entrypoint != "",
+			example: `entrypoint: "bash"`,
+			text:    "Specify a Docker entrypoint to override the default image entrypoint.",
+		})
+		addComment(comment{
+			key:   "$.image.command",
+			doAdd: true,
+			text:  "The Docker command to run. Supports JSE interpolation.",
+		})
 	case build.TaskKindNode:
-		addComment("$.node", true, "", "Configuration for a Node task.")
+		addComment(comment{
+			key:   "$.node",
+			doAdd: true,
+			text:  "Configuration for a Node task.",
+		})
 	case build.TaskKindPython:
-		addComment("$.python", true, "", "Configuration for a Python task.")
+		addComment(comment{
+			key:   "$.python",
+			doAdd: true,
+			text:  "Configuration for a Python task.",
+		})
 	case build.TaskKindShell:
+		addComment(comment{
+			key:   "$.shell",
+			doAdd: true,
+			text:  "Configuration for a shell task.",
+		})
 	case build.TaskKindSQL:
+		addComment(comment{
+			key:   "$.sql",
+			doAdd: true,
+			text:  "Configuration for a SQL task.",
+		})
 	case build.TaskKindREST:
+		addComment(comment{
+			key:   "$.rest",
+			doAdd: true,
+			text:  "Configuration for a REST task.",
+		})
 	default:
 		return yaml.CommentMap{}, nil, errors.Errorf("unknown task kind: %s", kind)
 	}
 
-	addComment("$.requireRequests", d.RequireRequests, `requireRequests: true`, "Set to true to disable direct execution of this task. Defaults to false.")
-	addComment("$.timeout", d.Timeout != 0, `timeout: 600`, "Specify a timeout in seconds. If the task does not complete within this time, it is automatically timed out.")
+	addComment(comment{
+		key:     "$.constraints",
+		doAdd:   d.Constraints != nil && !d.Constraints.IsEmpty(),
+		example: ``,
+		text:    "",
+	})
+	addComment(comment{
+		key:     "$.requireRequests",
+		doAdd:   d.RequireRequests,
+		example: `requireRequests: true`,
+		text:    "Set to true to disable direct execution of this task. Defaults to false.",
+	})
+	addComment(comment{
+		key:     "$.allowSelfApprovals",
+		doAdd:   d.AllowSelfApprovals != nil,
+		example: `allowSelfApprovals: false`,
+		text:    "Set to false to disallow requesters from approving their own requests for this task. Defaults to true.",
+	})
+	addComment(comment{
+		key:     "$.timeout",
+		doAdd:   d.Timeout != 0,
+		example: `timeout: 600`,
+		text:    "Specify a timeout in seconds. If the task does not complete within this time, it is automatically timed out.",
+	})
 
 	var leftover []byte
 	if len(nextComments) > 0 {
