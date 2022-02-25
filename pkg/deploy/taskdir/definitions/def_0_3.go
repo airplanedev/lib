@@ -25,7 +25,7 @@ type Definition_0_3 struct {
 	Deno       *DenoDefinition_0_3       `json:"deno,omitempty"`
 	Dockerfile *DockerfileDefinition_0_3 `json:"dockerfile,omitempty"`
 	Go         *GoDefinition_0_3         `json:"go,omitempty"`
-	Image      *ImageDefinition_0_3      `json:"image,omitempty"`
+	Image      *ImageDefinition_0_3      `json:"docker,omitempty"`
 	Node       *NodeDefinition_0_3       `json:"node,omitempty"`
 	Python     *PythonDefinition_0_3     `json:"python,omitempty"`
 	Shell      *ShellDefinition_0_3      `json:"shell,omitempty"`

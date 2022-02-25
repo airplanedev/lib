@@ -69,7 +69,7 @@
         {
           "type": "object",
           "properties": {
-            "image": {
+            "docker": {
               "type": "object",
               "properties": {
                 "image": { "type": "string" },
@@ -81,7 +81,7 @@
               "required": ["image"]
             }
           },
-          "required": ["image"]
+          "required": ["docker"]
         }
       ]
     },
@@ -229,8 +229,8 @@
     "node": true,
     "python": true,
     "shell": true,
-    "image": true,
     "deno": true,
+    "docker": true,
     "go": true,
     "dockerfile": true,
     "sql": true,
