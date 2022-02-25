@@ -7,7 +7,7 @@ import (
 
 func BreakLines(line string, lineLength int) []string {
 	start := 0
-	lastWhitespaceIdx := 0
+	lastWhitespaceIdx := -1
 	lines := []string{}
 	for i, r := range line {
 		if unicode.IsSpace(r) {

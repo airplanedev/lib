@@ -61,6 +61,12 @@ func TestBreakLines(tt *testing.T) {
 				"whitespace.",
 			},
 		},
+		{
+			name:     "start with a one-character word",
+			line:     "A line with a one-character word",
+			length:   100,
+			expected: []string{"A line with a one-character word"},
+		},
 	} {
 		tt.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
