@@ -73,7 +73,7 @@
               "type": "object",
               "properties": {
                 "image": { "type": "string" },
-                "command": { "type": "array", "items": { "type": "string" } },
+                "command": { "type": "string" },
                 "entrypoint": { "type": "string" },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },

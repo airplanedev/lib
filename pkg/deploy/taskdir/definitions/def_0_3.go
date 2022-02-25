@@ -57,7 +57,7 @@ var _ taskKind_0_3 = &ImageDefinition_0_3{}
 type ImageDefinition_0_3 struct {
 	Image      string      `json:"image"`
 	Entrypoint string      `json:"entrypoint,omitempty"`
-	Command    []string    `json:"command"`
+	Command    string      `json:"command"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
@@ -65,7 +65,11 @@ func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, clien
 	if d.Image != "" {
 		req.Image = &d.Image
 	}
-	req.Arguments = d.Command
+	if args, err := shlex.Split(d.Command); err != nil {
+		return err
+	} else {
+		req.Arguments = args
+	}
 	if cmd, err := shlex.Split(d.Entrypoint); err != nil {
 		return err
 	} else {
@@ -78,7 +82,7 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	if t.Image != nil {
 		d.Image = *t.Image
 	}
-	d.Command = t.Arguments
+	d.Command = shellescape.QuoteCommand(t.Arguments)
 	d.Entrypoint = shellescape.QuoteCommand(t.Command)
 	return nil
 }
