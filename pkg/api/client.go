@@ -150,8 +150,8 @@ type Resources map[string]string
 type TaskEnv map[string]EnvVarValue
 
 type EnvVarValue struct {
-	Value  *string `json:"value" yaml:"value,omitempty"`
-	Config *string `json:"config" yaml:"config,omitempty"`
+	Value  *string `json:"value,omitempty" yaml:"value,omitempty"`
+	Config *string `json:"config,omitempty" yaml:"config,omitempty"`
 }
 
 var _ yaml.Unmarshaler = &EnvVarValue{}
