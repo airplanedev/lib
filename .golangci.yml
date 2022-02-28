@@ -1,0 +1,16 @@
+linters:
+  enable:
+    - bidichk
+    - bodyclose
+    - contextcheck
+    - durationcheck
+    - errchkjson
+    - exportloopref
+    - forbidigo
+    - gci
+    - gofmt
+    - makezero
+    - nakedret
+    - noctx
+    - predeclared
+    - tenv

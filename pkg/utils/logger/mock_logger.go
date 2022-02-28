@@ -1,3 +1,4 @@
+// nolint:forbidigo
 package logger
 
 import "fmt"
