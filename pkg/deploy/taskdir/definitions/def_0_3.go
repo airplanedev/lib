@@ -75,6 +75,7 @@ func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, clien
 	} else {
 		req.Command = cmd
 	}
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -84,6 +85,7 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	}
 	d.Command = shellescape.QuoteCommand(t.Arguments)
 	d.Entrypoint = shellescape.QuoteCommand(t.Command)
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -121,6 +123,7 @@ type DenoDefinition_0_3 struct {
 }
 
 func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -132,6 +135,7 @@ func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -174,6 +178,7 @@ type DockerfileDefinition_0_3 struct {
 }
 
 func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -185,6 +190,7 @@ func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client a
 			return errors.Errorf("expected string dockerfile, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -224,6 +230,7 @@ type GoDefinition_0_3 struct {
 }
 
 func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -235,6 +242,7 @@ func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIC
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -280,6 +288,7 @@ type NodeDefinition_0_3 struct {
 }
 
 func (d *NodeDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -298,6 +307,7 @@ func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 			return errors.Errorf("expected string nodeVersion, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -343,6 +353,7 @@ type PythonDefinition_0_3 struct {
 }
 
 func (d *PythonDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -354,6 +365,7 @@ func (d *PythonDefinition_0_3) hydrateFromTask(ctx context.Context, client api.I
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
@@ -398,6 +410,7 @@ type ShellDefinition_0_3 struct {
 }
 
 func (d *ShellDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	req.Env = d.EnvVars
 	return nil
 }
 
@@ -409,6 +422,7 @@ func (d *ShellDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 			return errors.Errorf("expected string entrypoint, got %T instead", v)
 		}
 	}
+	d.EnvVars = t.Env
 	return nil
 }
 
