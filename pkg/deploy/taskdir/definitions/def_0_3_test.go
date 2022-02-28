@@ -218,6 +218,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: newStringPtr("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: newStringPtr("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name:        "Python Task",
@@ -225,6 +233,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: newStringPtr("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: newStringPtr("config"),
+						},
+					},
 				},
 			},
 		},
@@ -239,6 +255,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: newStringPtr("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: newStringPtr("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Node Task",
@@ -246,6 +270,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Node: &NodeDefinition_0_3{
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: newStringPtr("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: newStringPtr("config"),
+						},
+					},
 				},
 			},
 		},
@@ -259,12 +291,28 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: newStringPtr("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: newStringPtr("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
 					Entrypoint: "main.sh",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: newStringPtr("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: newStringPtr("config"),
+						},
+					},
 				},
 			},
 		},
@@ -274,10 +322,18 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name:        "Image Task",
 				Slug:        "image_task",
 				Command:     []string{"bash"},
-				Arguments:   []string{"-c", "echo 'foobar'"},
+				Arguments:   []string{"-c", `echo "foobar"`},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
 				Image:       newStringPtr("ubuntu:latest"),
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: newStringPtr("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: newStringPtr("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Image Task",
@@ -285,7 +341,15 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: newStringPtr("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: newStringPtr("config"),
+						},
+					},
 				},
 			},
 		},
@@ -605,7 +669,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
 				},
 			},
 			request: api.UpdateTaskRequest{
@@ -613,7 +677,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:       "image_task",
 				Parameters: []api.Parameter{},
 				Command:    []string{"bash"},
-				Arguments:  []string{"-c", "echo 'foobar'"},
+				Arguments:  []string{"-c", `echo "foobar"`},
 				Kind:       build.TaskKindImage,
 				Image:      newStringPtr("ubuntu:latest"),
 			},
