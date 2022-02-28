@@ -322,7 +322,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name:        "Image Task",
 				Slug:        "image_task",
 				Command:     []string{"bash"},
-				Arguments:   []string{"-c", "echo 'foobar'"},
+				Arguments:   []string{"-c", `echo "foobar"`},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
 				Image:       newStringPtr("ubuntu:latest"),
@@ -341,7 +341,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
 					EnvVars: api.TaskEnv{
 						"value": api.EnvVarValue{
 							Value: newStringPtr("value"),
@@ -669,7 +669,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
 				},
 			},
 			request: api.UpdateTaskRequest{
@@ -677,7 +677,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:       "image_task",
 				Parameters: []api.Parameter{},
 				Command:    []string{"bash"},
-				Arguments:  []string{"-c", "echo 'foobar'"},
+				Arguments:  []string{"-c", `echo "foobar"`},
 				Kind:       build.TaskKindImage,
 				Image:      newStringPtr("ubuntu:latest"),
 			},
