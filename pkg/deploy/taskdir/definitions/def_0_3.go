@@ -25,7 +25,7 @@ type Definition_0_3 struct {
 	Deno       *DenoDefinition_0_3       `json:"deno,omitempty"`
 	Dockerfile *DockerfileDefinition_0_3 `json:"dockerfile,omitempty"`
 	Go         *GoDefinition_0_3         `json:"go,omitempty"`
-	Image      *ImageDefinition_0_3      `json:"image,omitempty"`
+	Image      *ImageDefinition_0_3      `json:"docker,omitempty"`
 	Node       *NodeDefinition_0_3       `json:"node,omitempty"`
 	Python     *PythonDefinition_0_3     `json:"python,omitempty"`
 	Shell      *ShellDefinition_0_3      `json:"shell,omitempty"`
@@ -33,10 +33,10 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Constraints        *api.RunConstraints `json:"constraints,omitempty"`
-	RequireRequests    bool                `json:"requireRequests,omitempty"`
-	AllowSelfApprovals *bool               `json:"allowSelfApprovals,omitempty"`
-	Timeout            int                 `json:"timeout,omitempty"`
+	Constraints        map[string]string `json:"constraints,omitempty"`
+	RequireRequests    bool              `json:"requireRequests,omitempty"`
+	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
+	Timeout            int               `json:"timeout,omitempty"`
 
 	buildConfig build.BuildConfig
 }
@@ -57,7 +57,7 @@ var _ taskKind_0_3 = &ImageDefinition_0_3{}
 type ImageDefinition_0_3 struct {
 	Image      string      `json:"image"`
 	Entrypoint string      `json:"entrypoint,omitempty"`
-	Command    []string    `json:"command"`
+	Command    string      `json:"command"`
 	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
 }
 
@@ -65,7 +65,11 @@ func (d *ImageDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, clien
 	if d.Image != "" {
 		req.Image = &d.Image
 	}
-	req.Arguments = d.Command
+	if args, err := shlex.Split(d.Command); err != nil {
+		return err
+	} else {
+		req.Arguments = args
+	}
 	if cmd, err := shlex.Split(d.Entrypoint); err != nil {
 		return err
 	} else {
@@ -78,7 +82,7 @@ func (d *ImageDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IA
 	if t.Image != nil {
 		d.Image = *t.Image
 	}
-	d.Command = t.Arguments
+	d.Command = shellescape.QuoteCommand(t.Arguments)
 	d.Entrypoint = shellescape.QuoteCommand(t.Command)
 	return nil
 }
@@ -749,7 +753,7 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 	case build.TaskKindImage:
 		def.Image = &ImageDefinition_0_3{
 			Image:   "alpine:3",
-			Command: []string{"echo", "hello world"},
+			Command: `echo "hello world"`,
 		}
 	case build.TaskKindNode:
 		def.Node = &NodeDefinition_0_3{
@@ -913,8 +917,17 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		return api.UpdateTaskRequest{}, err
 	}
 
-	if d.Constraints != nil && !d.Constraints.IsEmpty() {
-		req.Constraints = *d.Constraints
+	if len(d.Constraints) > 0 {
+		labels := []api.AgentLabel{}
+		for key, val := range d.Constraints {
+			labels = append(labels, api.AgentLabel{
+				Key:   key,
+				Value: val,
+			})
+		}
+		req.Constraints = api.RunConstraints{
+			Labels: labels,
+		}
 	}
 
 	if d.RequireRequests {
@@ -1097,7 +1110,10 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	}
 
 	if !t.Constraints.IsEmpty() {
-		d.Constraints = &t.Constraints
+		d.Constraints = map[string]string{}
+		for _, label := range t.Constraints.Labels {
+			d.Constraints[label.Key] = label.Value
+		}
 	}
 
 	if t.ExecuteRules.DisallowSelfApprove {

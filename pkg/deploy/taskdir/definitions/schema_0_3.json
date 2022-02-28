@@ -69,11 +69,11 @@
         {
           "type": "object",
           "properties": {
-            "image": {
+            "docker": {
               "type": "object",
               "properties": {
                 "image": { "type": "string" },
-                "command": { "type": "array", "items": { "type": "string" } },
+                "command": { "type": "string" },
                 "entrypoint": { "type": "string" },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
@@ -81,7 +81,7 @@
               "required": ["image"]
             }
           },
-          "required": ["image"]
+          "required": ["docker"]
         }
       ]
     },
@@ -229,8 +229,8 @@
     "node": true,
     "python": true,
     "shell": true,
-    "image": true,
     "deno": true,
+    "docker": true,
     "go": true,
     "dockerfile": true,
     "sql": true,
@@ -335,20 +335,9 @@
         },
         "constraints": {
           "type": "object",
-          "properties": {
-            "labels": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "key": { "type": "string" },
-                  "value": { "type": "string" }
-                },
-                "additionalProperties": false
-              }
-            }
-          },
-          "additionalProperties": false
+          "patternProperties": {
+            ".*": { "type": "string" }
+          }
         },
         "requireRequests": { "type": "boolean" },
         "allowSelfApprovals": { "type": "boolean" },
