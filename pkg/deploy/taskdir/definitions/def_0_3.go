@@ -747,7 +747,10 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 			Entrypoint: entrypoint,
 		}
 	case build.TaskKindImage:
-		def.Image = &ImageDefinition_0_3{}
+		def.Image = &ImageDefinition_0_3{
+			Image:   "alpine:3",
+			Command: []string{"echo", "hello world"},
+		}
 	case build.TaskKindNode:
 		def.Node = &NodeDefinition_0_3{
 			Entrypoint:  entrypoint,
