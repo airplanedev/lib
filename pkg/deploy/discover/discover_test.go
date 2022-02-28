@@ -288,7 +288,8 @@ func TestDiscoverTasks(t *testing.T) {
 					tC.want[i].Def.SetBuildConfig(k, v)
 				}
 				if i < len(tC.absEntrypoints) {
-					tC.want[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
+					err := tC.want[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
+					require.NoError(err)
 				}
 				require.Equal(tC.want[i], got[i])
 			}

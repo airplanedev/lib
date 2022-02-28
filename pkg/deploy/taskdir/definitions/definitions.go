@@ -2,22 +2,10 @@ package definitions
 
 import (
 	"context"
-	"regexp"
 	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
 )
-
-var jsonRegex = regexp.MustCompile(`{{ *JSON *}}`)
-
-func upgradeArguments(args []string) []string {
-	upgraded := make([]string, len(args))
-	for i, arg := range args {
-		jstArg := jsonRegex.ReplaceAllString(arg, "{{JSON.stringify(params)}}")
-		upgraded[i] = jstArg
-	}
-	return upgraded
-}
 
 func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Task) (DefinitionInterface, error) {
 	def, err := NewDefinitionFromTask_0_3(ctx, client, t)

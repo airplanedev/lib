@@ -3,7 +3,6 @@ package build
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"path/filepath"
 	"strings"
@@ -122,7 +121,6 @@ func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image st
 		AppendNewline: true,
 	}))
 	require.NoError(err)
-	fmt.Print(string(logs))
 
 	select {
 	case result := <-resultC:
