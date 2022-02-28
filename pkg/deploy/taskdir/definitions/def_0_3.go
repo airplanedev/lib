@@ -766,7 +766,12 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 			Entrypoint: entrypoint,
 		}
 	case build.TaskKindREST:
-		def.REST = &RESTDefinition_0_3{}
+		def.REST = &RESTDefinition_0_3{
+			Method:   "POST",
+			Path:     "/",
+			BodyType: "json",
+			Body:     "{}",
+		}
 	default:
 		return Definition_0_3{}, errors.Errorf("unknown kind: %s", kind)
 	}
