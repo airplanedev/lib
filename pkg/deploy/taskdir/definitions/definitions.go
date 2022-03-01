@@ -286,13 +286,14 @@ func (def *Definition) GetName() string {
 	return def.Name
 }
 
-func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error) {
 	kind, options, err := def.GetKindAndOptions()
 	if err != nil {
 		return api.UpdateTaskRequest{}, err
 	}
 
-	utr := api.UpdateTaskRequest{
+	// TODO: update endpoint to make those fields optional
+	return api.UpdateTaskRequest{
 		Slug:             def.Slug,
 		Name:             def.Name,
 		Description:      def.Description,
@@ -307,13 +308,7 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 		KindOptions:      options,
 		Repo:             def.Repo,
 		Timeout:          def.Timeout,
-	}
-	if currentTask != nil {
-		utr.Permissions = currentTask.Permissions
-		utr.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
-		utr.ExecuteRules = currentTask.ExecuteRules
-	}
-	return utr, nil
+	}, nil
 }
 
 func (def *Definition) GetBuildConfig() (build.BuildConfig, error) {

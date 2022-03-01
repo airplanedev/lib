@@ -677,7 +677,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: api.ExecuteRules{
+				ExecuteRules: &api.ExecuteRules{
 					DisallowSelfApprove: true,
 					RequireRequests:     true,
 				},
@@ -704,7 +704,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: api.ExecuteRules{
+				ExecuteRules: &api.ExecuteRules{
 					DisallowSelfApprove: false,
 					RequireRequests:     false,
 				},
@@ -717,7 +717,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			client := &mock.MockClient{
 				Resources: test.resources,
 			}
-			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
+			req, err := test.definition.GetUpdateTaskRequest(ctx, client)
 			assert.NoError(err)
 			assert.Equal(test.request, req)
 		})

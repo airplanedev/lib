@@ -75,9 +75,9 @@ type UpdateTaskRequest struct {
 	Kind                       build.TaskKind    `json:"kind"`
 	KindOptions                build.KindOptions `json:"kindOptions"`
 	Repo                       string            `json:"repo"`
-	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
-	Permissions                Permissions       `json:"permissions"`
-	ExecuteRules               ExecuteRules      `json:"executeRules"`
+	RequireExplicitPermissions *bool             `json:"requireExplicitPermissions"`
+	Permissions                *Permissions      `json:"permissions"`
+	ExecuteRules               *ExecuteRules     `json:"executeRules"`
 	Timeout                    int               `json:"timeout"`
 	BuildID                    *string           `json:"buildID"`
 	InterpolationMode          string            `json:"interpolationMode"`

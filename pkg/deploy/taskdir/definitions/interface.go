@@ -23,5 +23,5 @@ type DefinitionInterface interface {
 	GetName() string
 	UsesJST() bool
 	UpgradeJST() error
-	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error)
+	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
 }

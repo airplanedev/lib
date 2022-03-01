@@ -809,12 +809,16 @@ func (d Definition_0_3) taskKind() (taskKind_0_3, error) {
 	}
 }
 
-func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error) {
 	req := api.UpdateTaskRequest{
 		Slug:        d.Slug,
 		Name:        d.Name,
 		Description: d.Description,
 		Timeout:     d.Timeout,
+		ExecuteRules: &api.ExecuteRules{
+			RequireRequests:     d.RequireRequests,
+			DisallowSelfApprove: false,
+		},
 	}
 
 	if err := d.addParametersToUpdateTaskRequest(ctx, &req); err != nil {
@@ -825,20 +829,12 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		req.Constraints = *d.Constraints
 	}
 
-	if d.RequireRequests {
-		req.ExecuteRules.RequireRequests = true
-	}
-	if d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals {
-		req.ExecuteRules.DisallowSelfApprove = true
+	if d.AllowSelfApprovals != nil {
+		req.ExecuteRules.DisallowSelfApprove = !*d.AllowSelfApprovals
 	}
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
-	}
-
-	if currentTask != nil {
-		req.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
-		req.Permissions = currentTask.Permissions
 	}
 
 	return req, nil
