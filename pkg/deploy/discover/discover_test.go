@@ -252,7 +252,7 @@ func TestDiscoverTasks(t *testing.T) {
 				Tasks: tC.existingTasks,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
-				client: apiClient,
+				Client: apiClient,
 			}
 			defnDiscoverer := &DefnDiscoverer{
 				Client: apiClient,

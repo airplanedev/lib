@@ -16,8 +16,8 @@ import (
 )
 
 type ScriptDiscoverer struct {
-	client  api.IAPIClient
-	envSlug string
+	Client  api.IAPIClient
+	EnvSlug string
 }
 
 var _ TaskDiscoverer = &ScriptDiscoverer{}
@@ -26,9 +26,9 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 	slug := runtime.Slug(file)
 
 	// TODO: handle missing task
-	task, err := sd.client.GetTask(ctx, api.GetTaskRequest{
+	task, err := sd.Client.GetTask(ctx, api.GetTaskRequest{
 		Slug:    slug,
-		EnvSlug: sd.envSlug,
+		EnvSlug: sd.EnvSlug,
 	})
 	if err != nil {
 		// TODO: wrap?
