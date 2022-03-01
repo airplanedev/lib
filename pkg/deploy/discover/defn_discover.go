@@ -21,94 +21,81 @@ type DefnDiscoverer struct {
 
 var _ TaskDiscoverer = &DefnDiscoverer{}
 
-func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (slug string, err error) {
+func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	if !definitions.IsTaskDef(file) {
-		return "", nil
+		return nil, nil
 	}
 
-	def, err := getDef(file)
-	if err != nil {
-		return "", err
-	}
-
-	return def.GetSlug(), nil
-}
-
-func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file string) (TaskConfig, error) {
 	dir, err := taskdir.Open(file, true)
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 	defer dir.Close()
 
 	def, err := dir.ReadDefinition_0_3()
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 
 	tc := TaskConfig{
-		Task: task,
 		Def:  &def,
+		From: dd.TaskConfigSource(),
 	}
+
+	// TODO: set tc.TaskID from the slug and handle missing tasks
 
 	entrypoint, err := def.Entrypoint()
 	if err == definitions.ErrNoEntrypoint {
-		// nothing
+		return &tc, nil
 	} else if err != nil {
-		return TaskConfig{}, err
-	} else {
-		defnDir := filepath.Dir(dir.DefinitionPath())
-		absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
-		if err != nil {
-			return TaskConfig{}, err
-		}
-		tc.TaskEntrypoint = absEntrypoint
-
-		r, err := runtime.Lookup(entrypoint, task.Kind)
-		if err != nil {
-			return TaskConfig{}, err
-		}
-
-		taskroot, err := r.Root(absEntrypoint)
-		if err != nil {
-			return TaskConfig{}, err
-		}
-		tc.TaskRoot = taskroot
-
-		wd, err := r.Workdir(absEntrypoint)
-		if err != nil {
-			return TaskConfig{}, err
-		}
-		if err := def.SetWorkdir(taskroot, wd); err != nil {
-			return TaskConfig{}, err
-		}
-
-		// Entrypoint for builder needs to be relative to taskroot, not definition directory.
-		if defnDir != taskroot {
-			ep, err := filepath.Rel(taskroot, absEntrypoint)
-			if err != nil {
-				return TaskConfig{}, err
-			}
-			def.SetBuildConfig("entrypoint", ep)
-		}
+		return nil, err
 	}
 
-	return tc, nil
+	defnDir := filepath.Dir(dir.DefinitionPath())
+	absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
+	if err != nil {
+		return nil, err
+	}
+	tc.TaskEntrypoint = absEntrypoint
+
+	kind, err := def.Kind()
+	if err != nil {
+		return nil, err
+	}
+
+	r, err := runtime.Lookup(entrypoint, kind)
+	if err != nil {
+		return nil, err
+	}
+
+	taskroot, err := r.Root(absEntrypoint)
+	if err != nil {
+		return nil, err
+	}
+	tc.TaskRoot = taskroot
+
+	wd, err := r.Workdir(absEntrypoint)
+	if err != nil {
+		return nil, err
+	}
+	if err := def.SetWorkdir(taskroot, wd); err != nil {
+		return nil, err
+	}
+
+	// Entrypoint for builder needs to be relative to taskroot, not definition directory.
+	if defnDir != taskroot {
+		ep, err := filepath.Rel(taskroot, absEntrypoint)
+		if err != nil {
+			return nil, err
+		}
+		def.SetBuildConfig("entrypoint", ep)
+	}
+
+	return &tc, nil
 }
 
 func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
 	return TaskConfigSourceDefn
-}
-
-func (dd *DefnDiscoverer) HandleMissingTask(ctx context.Context, file string) (*api.Task, error) {
-	if dd.MissingTaskHandler != nil {
-		def, err := getDef(file)
-		if err != nil {
-			return nil, err
-		}
-		return dd.MissingTaskHandler(ctx, def)
-	}
-	return nil, nil
 }
 
 func getDef(file string) (definitions.DefinitionInterface, error) {

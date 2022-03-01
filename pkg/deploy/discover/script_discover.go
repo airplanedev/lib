@@ -4,7 +4,6 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
@@ -20,53 +19,49 @@ type ScriptDiscoverer struct {
 
 var _ TaskDiscoverer = &ScriptDiscoverer{}
 
-func (sd *ScriptDiscoverer) IsAirplaneTask(ctx context.Context, file string) (slug string, err error) {
+func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	slug, _ = runtime.Slug(file)
-	return
-}
 
-func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, task api.Task, file string) (TaskConfig, error) {
-	r, err := runtime.Lookup(file, task.Kind)
-	if err != nil {
-		return TaskConfig{}, errors.Wrapf(err, "cannot determine how to deploy %q - check your CLI is up to date", file)
-	}
+	// TODO: get task by slug, handle missing task
 
 	def, err := definitions.NewDefinitionFromTask(task)
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
+	}
+
+	r, err := runtime.Lookup(file, task.Kind)
+	if err != nil {
+		return nil, errors.Wrapf(err, "cannot determine how to deploy %q - check your CLI is up to date", file)
 	}
 
 	absFile, err := filepath.Abs(file)
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 
 	taskroot, err := r.Root(absFile)
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 	if err := def.SetEntrypoint(taskroot, absFile); err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 
 	wd, err := r.Workdir(absFile)
 	if err != nil {
-		return TaskConfig{}, err
+		return nil, err
 	}
 	def.SetWorkdir(taskroot, wd)
 
-	return TaskConfig{
+	return &TaskConfig{
+		// TaskID: "TODO",
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
 		Def:            &def,
-		Task:           task,
+		From:           sd.TaskConfigSource(),
 	}, nil
 }
 
 func (sd *ScriptDiscoverer) TaskConfigSource() TaskConfigSource {
 	return TaskConfigSourceScript
-}
-
-func (sd *ScriptDiscoverer) HandleMissingTask(ctx context.Context, file string) (*api.Task, error) {
-	return nil, nil
 }
