@@ -251,6 +251,11 @@ func (def Definition) Validate() (Definition, error) {
 	return def, nil
 }
 
+func (def *Definition) UsesJST() bool {
+	// TODO: how should we determine this?
+	return false
+}
+
 // Upgrades this task definition for JST interpolation.
 // Assumes only usage of expressions is {{JSON}}.
 func (def *Definition) UpgradeJST() error {
