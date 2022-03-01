@@ -31,11 +31,14 @@ type TaskConfig struct {
 	TaskRoot       string
 	TaskEntrypoint string
 	Def            definitions.DefinitionInterface
-	From           TaskConfigSource
+	Source         TaskConfigSource
 }
 
 type TaskDiscoverer interface {
+	// GetTaskConfig inspects a file and if that file represents an Airplane task, it will
+	// return back a fully-qualified task definition.
 	GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error)
+	// TaskConfigSource returns a unique identifier of this TaskDiscoverer.
 	TaskConfigSource() TaskConfigSource
 }
 
@@ -140,7 +143,7 @@ func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskCo
 		found := false
 		for _, td := range d.TaskDiscoverers {
 			for _, tc := range tcs {
-				if td.TaskConfigSource() == tc.From {
+				if td.TaskConfigSource() == tc.Source {
 					taskConfigs[i] = tc
 					found = true
 					break

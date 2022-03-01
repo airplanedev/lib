@@ -39,7 +39,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "single_task.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -65,7 +65,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "single_task.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 				{
 					TaskRoot:       fixturesPath,
@@ -76,7 +76,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "single_task2.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -105,7 +105,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "single_task.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 				{
 					TaskRoot:       fixturesPath + "/nestedScripts",
@@ -116,7 +116,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "single_task2.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -147,7 +147,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					From: TaskConfigSourceDefn,
+					Source: TaskConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -181,7 +181,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					From: TaskConfigSourceDefn,
+					Source: TaskConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -206,7 +206,7 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint: "subdir/single_task.js",
 						},
 					},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -234,7 +234,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					From: TaskConfigSourceDefn,
+					Source: TaskConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -251,7 +251,9 @@ func TestDiscoverTasks(t *testing.T) {
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
 			}
-			scriptDiscoverer := &ScriptDiscoverer{}
+			scriptDiscoverer := &ScriptDiscoverer{
+				client: apiClient,
+			}
 			defnDiscoverer := &DefnDiscoverer{
 				Client: apiClient,
 			}

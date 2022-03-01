@@ -4,6 +4,7 @@ import (
 	"context"
 	"path/filepath"
 
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
@@ -15,14 +16,24 @@ import (
 )
 
 type ScriptDiscoverer struct {
+	client  api.IAPIClient
+	envSlug string
 }
 
 var _ TaskDiscoverer = &ScriptDiscoverer{}
 
 func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
-	slug, _ = runtime.Slug(file)
+	slug := runtime.Slug(file)
 
-	// TODO: get task by slug, handle missing task
+	// TODO: handle missing task
+	task, err := sd.client.GetTask(ctx, api.GetTaskRequest{
+		Slug:    slug,
+		EnvSlug: sd.envSlug,
+	})
+	if err != nil {
+		// TODO: wrap?
+		return nil, err
+	}
 
 	def, err := definitions.NewDefinitionFromTask(task)
 	if err != nil {
@@ -58,7 +69,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
 		Def:            &def,
-		From:           sd.TaskConfigSource(),
+		Source:         sd.TaskConfigSource(),
 	}, nil
 }
 

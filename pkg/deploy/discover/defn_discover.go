@@ -38,8 +38,8 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	}
 
 	tc := TaskConfig{
-		Def:  &def,
-		From: dd.TaskConfigSource(),
+		Def:    &def,
+		Source: dd.TaskConfigSource(),
 	}
 
 	// TODO: set tc.TaskID from the slug and handle missing tasks
@@ -96,19 +96,4 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 
 func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
 	return TaskConfigSourceDefn
-}
-
-func getDef(file string) (definitions.DefinitionInterface, error) {
-	dir, err := taskdir.Open(file, true)
-	if err != nil {
-		return &definitions.Definition_0_3{}, err
-	}
-	defer dir.Close()
-
-	def, err := dir.ReadDefinition_0_3()
-	if err != nil {
-		return &definitions.Definition_0_3{}, err
-	}
-
-	return &def, nil
 }
