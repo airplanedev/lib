@@ -277,6 +277,10 @@ func (def *Definition) GetSlug() string {
 	return def.Slug
 }
 
+func (def *Definition) GetName() string {
+	return def.Name
+}
+
 func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
 	kind, options, err := def.GetKindAndOptions()
 	if err != nil {
