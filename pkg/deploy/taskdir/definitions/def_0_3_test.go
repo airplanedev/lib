@@ -7,16 +7,9 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/api/mock"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils/pointers"
 	"github.com/stretchr/testify/require"
 )
-
-func newBoolPtr(v bool) *bool {
-	return &v
-}
-
-func newStringPtr(v string) *string {
-	return &v
-}
 
 var fullYAML = []byte(
 	`name: Hello World
@@ -101,7 +94,7 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    newBoolPtr(true),
+			Required:    pointers.Bool(true),
 		},
 	},
 	Python: &PythonDefinition_0_3{
@@ -277,7 +270,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Arguments:   []string{"-c", "echo 'foobar'"},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
-				Image:       newStringPtr("ubuntu:latest"),
+				Image:       pointers.String("ubuntu:latest"),
 			},
 			definition: Definition_0_3{
 				Name: "Image Task",
@@ -432,7 +425,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: newBoolPtr(false),
+						Required: pointers.Bool(false),
 					},
 					{
 						Name: "Options",
@@ -487,7 +480,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: newBoolPtr(false),
+				AllowSelfApprovals: pointers.Bool(false),
 			},
 		},
 		{
@@ -615,7 +608,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Command:    []string{"bash"},
 				Arguments:  []string{"-c", "echo 'foobar'"},
 				Kind:       build.TaskKindImage,
-				Image:      newStringPtr("ubuntu:latest"),
+				Image:      pointers.String("ubuntu:latest"),
 			},
 		},
 		{
@@ -666,7 +659,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: newBoolPtr(false),
+				AllowSelfApprovals: pointers.Bool(false),
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -677,9 +670,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: &api.ExecuteRules{
-					DisallowSelfApprove: true,
-					RequireRequests:     true,
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(true),
+					RequireRequests:     pointers.Bool(true),
 				},
 			},
 		},
@@ -704,9 +697,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: &api.ExecuteRules{
-					DisallowSelfApprove: false,
-					RequireRequests:     false,
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
 				},
 			},
 		},

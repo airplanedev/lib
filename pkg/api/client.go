@@ -61,27 +61,32 @@ type Upload struct {
 
 // UpdateTaskRequest updates a task.
 type UpdateTaskRequest struct {
-	Slug                       string            `json:"slug"`
-	Name                       string            `json:"name"`
-	Description                string            `json:"description"`
-	Image                      *string           `json:"image"`
-	Command                    []string          `json:"command"`
-	Arguments                  []string          `json:"arguments"`
-	Parameters                 Parameters        `json:"parameters"`
-	Constraints                RunConstraints    `json:"constraints"`
-	Env                        TaskEnv           `json:"env"`
-	ResourceRequests           map[string]string `json:"resourceRequests"`
-	Resources                  map[string]string `json:"resources"`
-	Kind                       build.TaskKind    `json:"kind"`
-	KindOptions                build.KindOptions `json:"kindOptions"`
-	Repo                       string            `json:"repo"`
-	RequireExplicitPermissions *bool             `json:"requireExplicitPermissions"`
-	Permissions                *Permissions      `json:"permissions"`
-	ExecuteRules               *ExecuteRules     `json:"executeRules"`
-	Timeout                    int               `json:"timeout"`
-	BuildID                    *string           `json:"buildID"`
-	InterpolationMode          string            `json:"interpolationMode"`
-	EnvSlug                    string            `json:"envSlug"`
+	Slug                       string                    `json:"slug"`
+	Name                       string                    `json:"name"`
+	Description                string                    `json:"description"`
+	Image                      *string                   `json:"image"`
+	Command                    []string                  `json:"command"`
+	Arguments                  []string                  `json:"arguments"`
+	Parameters                 Parameters                `json:"parameters"`
+	Constraints                RunConstraints            `json:"constraints"`
+	Env                        TaskEnv                   `json:"env"`
+	ResourceRequests           map[string]string         `json:"resourceRequests"`
+	Resources                  map[string]string         `json:"resources"`
+	Kind                       build.TaskKind            `json:"kind"`
+	KindOptions                build.KindOptions         `json:"kindOptions"`
+	Repo                       string                    `json:"repo"`
+	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
+	Permissions                *Permissions              `json:"permissions"`
+	ExecuteRules               UpdateExecuteRulesRequest `json:"executeRules"`
+	Timeout                    int                       `json:"timeout"`
+	BuildID                    *string                   `json:"buildID"`
+	InterpolationMode          string                    `json:"interpolationMode"`
+	EnvSlug                    string                    `json:"envSlug"`
+}
+
+type UpdateExecuteRulesRequest struct {
+	DisallowSelfApprove *bool `json:"disallowSelfApprove"`
+	RequireRequests     *bool `json:"requireRequests"`
 }
 
 type ListResourcesResponse struct {

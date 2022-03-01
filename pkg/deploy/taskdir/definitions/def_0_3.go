@@ -10,6 +10,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils/pointers"
 	"github.com/alessio/shellescape"
 	"github.com/flynn/go-shlex"
 	"github.com/goccy/go-yaml"
@@ -815,9 +816,9 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Name:        d.Name,
 		Description: d.Description,
 		Timeout:     d.Timeout,
-		ExecuteRules: &api.ExecuteRules{
-			RequireRequests:     d.RequireRequests,
-			DisallowSelfApprove: false,
+		ExecuteRules: api.UpdateExecuteRulesRequest{
+			RequireRequests:     &d.RequireRequests,
+			DisallowSelfApprove: pointers.Bool(false),
 		},
 	}
 
@@ -830,7 +831,8 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 	}
 
 	if d.AllowSelfApprovals != nil {
-		req.ExecuteRules.DisallowSelfApprove = !*d.AllowSelfApprovals
+		disallow := !*d.AllowSelfApprovals
+		req.ExecuteRules.DisallowSelfApprove = &disallow
 	}
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
