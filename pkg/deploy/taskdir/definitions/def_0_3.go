@@ -942,11 +942,6 @@ func (d Definition_0_3) Entrypoint() (string, error) {
 	return taskKind.getEntrypoint()
 }
 
-func (d *Definition_0_3) UsesJST() bool {
-	// By definition, the new definition format always uses JSTs.
-	return false
-}
-
 func (d *Definition_0_3) UpgradeJST() error {
 	return nil
 }

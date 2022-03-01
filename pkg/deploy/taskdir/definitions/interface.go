@@ -21,7 +21,6 @@ type DefinitionInterface interface {
 	GetEnv() (api.TaskEnv, error)
 	GetSlug() string
 	GetName() string
-	UsesJST() bool
 	UpgradeJST() error
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
 }

@@ -66,10 +66,11 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 
 	return &TaskConfig{
 		// TaskID: "TODO",
-		TaskRoot:       taskroot,
-		TaskEntrypoint: absFile,
-		Def:            &def,
-		Source:         sd.TaskConfigSource(),
+		TaskRoot:              taskroot,
+		TaskEntrypoint:        absFile,
+		TaskInterpolationMode: task.InterpolationMode,
+		Def:                   &def,
+		Source:                sd.TaskConfigSource(),
 	}, nil
 }
 
