@@ -54,7 +54,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	if err != nil {
 		var merr *api.TaskMissingError
 		if !errors.As(err, &merr) {
-			return nil, err
+			return nil, errors.Wrap(err, "unable to get task metadata")
 		}
 
 		if dd.MissingTaskHandler == nil {

@@ -548,6 +548,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -569,6 +573,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -587,6 +595,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
 				},
 			},
 		},
@@ -609,6 +621,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Arguments:  []string{"-c", "echo 'foobar'"},
 				Kind:       build.TaskKindImage,
 				Image:      pointers.String("ubuntu:latest"),
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -640,6 +656,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				},
 				Resources: map[string]string{
 					"rest": "rest_id",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
 				},
 			},
 			resources: []api.Resource{

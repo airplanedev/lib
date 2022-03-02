@@ -25,13 +25,17 @@ var _ TaskDiscoverer = &ScriptDiscoverer{}
 func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	slug := runtime.Slug(file)
 
-	// TODO: handle missing task
 	task, err := sd.Client.GetTask(ctx, api.GetTaskRequest{
 		Slug:    slug,
 		EnvSlug: sd.EnvSlug,
 	})
 	if err != nil {
-		return nil, errors.Wrap(err, "unable to get task")
+		var merr *api.TaskMissingError
+		if !errors.As(err, &merr) {
+			return nil, errors.Wrap(err, "unable to get task")
+		}
+
+		return nil, nil
 	}
 
 	def, err := definitions.NewDefinitionFromTask(task)
@@ -64,7 +68,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 	def.SetWorkdir(taskroot, wd)
 
 	return &TaskConfig{
-		// TaskID: "TODO",
+		TaskID:                task.ID,
 		TaskRoot:              taskroot,
 		TaskEntrypoint:        absFile,
 		TaskInterpolationMode: task.InterpolationMode,
