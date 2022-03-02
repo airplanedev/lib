@@ -10,7 +10,9 @@ import (
 )
 
 type IAPIClient interface {
+	// GetTaskMetadata fetches a task by slug. If no slug exists, a *TaskMissingError is returned.
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
+	// GetTaskMetadata fetches a task's metadata by slug. If no slug exists, a *TaskMissingError is returned.
 	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
