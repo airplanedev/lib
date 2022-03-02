@@ -8,14 +8,9 @@ import (
 	"github.com/airplanedev/lib/pkg/deploy/taskdir"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
-	"github.com/airplanedev/lib/pkg/utils/logger"
 )
 
 type DefnDiscoverer struct {
-	Client             api.IAPIClient
-	AssumeYes          bool
-	AssumeNo           bool
-	Logger             logger.Logger
 	MissingTaskHandler func(context.Context, definitions.DefinitionInterface) (*api.Task, error)
 }
 

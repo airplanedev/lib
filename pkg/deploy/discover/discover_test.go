@@ -257,13 +257,8 @@ func TestDiscoverTasks(t *testing.T) {
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
 			require := require.New(t)
-			apiClient := &mock.MockClient{
-				Tasks: tC.existingTasks,
-			}
 			scriptDiscoverer := &ScriptDiscoverer{}
-			defnDiscoverer := &DefnDiscoverer{
-				Client: apiClient,
-			}
+			defnDiscoverer := &DefnDiscoverer{}
 			d := &Discoverer{
 				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
 				Client: &mock.MockClient{
