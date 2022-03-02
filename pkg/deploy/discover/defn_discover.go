@@ -9,6 +9,7 @@ import (
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/logger"
+	"github.com/pkg/errors"
 )
 
 type DefnDiscoverer struct {
@@ -49,10 +50,20 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		TaskInterpolationMode: "jst",
 	}
 
-	// TODO: handle missing tasks
 	metadata, err := dd.Client.GetTaskMetadata(ctx, def.GetSlug())
 	if err != nil {
-		return nil, err
+		var merr *api.TaskMissingError
+		if !errors.As(err, &merr) {
+			return nil, err
+		}
+
+		mptr, err := dd.MissingTaskHandler(ctx, &def)
+		if err != nil {
+			return nil, err
+		} else if mptr == nil {
+			return nil, nil
+		}
+		metadata = *mptr
 	}
 	tc.TaskID = metadata.ID
 
