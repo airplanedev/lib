@@ -44,7 +44,12 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		TaskInterpolationMode: "jst",
 	}
 
-	// TODO: set tc.TaskID from the slug and handle missing tasks
+	// TODO: handle missing tasks
+	metadata, err := dd.Client.GetTaskMetadata(ctx, def.GetSlug())
+	if err != nil {
+		return nil, err
+	}
+	tc.TaskID = metadata.ID
 
 	entrypoint, err := def.Entrypoint()
 	if err == definitions.ErrNoEntrypoint {
