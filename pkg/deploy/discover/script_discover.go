@@ -31,8 +31,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		EnvSlug: sd.EnvSlug,
 	})
 	if err != nil {
-		// TODO: wrap?
-		return nil, err
+		return nil, errors.Wrap(err, "unable to get task")
 	}
 
 	def, err := definitions.NewDefinitionFromTask(task)
