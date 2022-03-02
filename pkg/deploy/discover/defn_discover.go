@@ -12,11 +12,16 @@ import (
 )
 
 type DefnDiscoverer struct {
-	Client             api.IAPIClient
-	AssumeYes          bool
-	AssumeNo           bool
-	Logger             logger.Logger
-	MissingTaskHandler func(context.Context, definitions.DefinitionInterface) (*api.Task, error)
+	Client    api.IAPIClient
+	AssumeYes bool
+	AssumeNo  bool
+	Logger    logger.Logger
+
+	// MissingTaskHandler is fired if `GetTaskConfig` is called when a task ID cannot be found
+	// for a definition file. The handler should either create the task and return the created
+	// task's TaskMetadata, or it should return `nil` to signal that the definition should be
+	// ignored.
+	MissingTaskHandler func(context.Context, definitions.DefinitionInterface) (*api.TaskMetadata, error)
 }
 
 var _ TaskDiscoverer = &DefnDiscoverer{}
