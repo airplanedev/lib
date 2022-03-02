@@ -1,11 +1,13 @@
 package definitions
 
 import (
+	"bytes"
 	"context"
 	_ "embed"
 	"encoding/json"
 	"os"
 	"strings"
+	"text/template"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
@@ -819,6 +821,116 @@ func (d Definition_0_3) Marshal(format TaskDefFormat) ([]byte, error) {
 	}
 
 	return buf, nil
+}
+
+// GenerateCommentedFile generates a commented YAML file under certain circumstances. If the format
+// requested isn't YAML, or if the definition has other things filled in, this method defaults to
+// calling Marshal(format).
+func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, error) {
+	// If it's not YAML, or you have other things defined on your task def, bail.
+	if format != TaskDefFormatYAML ||
+		d.Description != "" ||
+		len(d.Parameters) > 0 ||
+		len(d.Constraints) > 0 ||
+		d.RequireRequests ||
+		(d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals) ||
+		d.Timeout > 0 {
+		return d.Marshal(format)
+	}
+
+	kind, err := d.Kind()
+	if err != nil {
+		return nil, err
+	}
+
+	taskDefinition := new(bytes.Buffer)
+	switch kind {
+	case build.TaskKindImage:
+		if d.Image.Entrypoint != "" || len(d.Image.EnvVars) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("image").Parse(imageTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing image template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.Image); err != nil {
+			return nil, errors.Wrap(err, "executing image template")
+		}
+	case build.TaskKindNode:
+		if len(d.Node.EnvVars) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("node").Parse(nodeTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing node template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.Node); err != nil {
+			return nil, errors.Wrap(err, "executing node template")
+		}
+	case build.TaskKindPython:
+		if len(d.Python.EnvVars) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("python").Parse(pythonTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing python template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.Python); err != nil {
+			return nil, errors.Wrap(err, "executing python template")
+		}
+	case build.TaskKindShell:
+		if len(d.Shell.EnvVars) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("shell").Parse(shellTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing shell template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.Shell); err != nil {
+			return nil, errors.Wrap(err, "executing shell template")
+		}
+	case build.TaskKindSQL:
+		if d.SQL.Resource != "" || len(d.SQL.QueryArgs) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("sql").Parse(sqlTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing SQL template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.SQL); err != nil {
+			return nil, errors.Wrap(err, "executing sql template")
+		}
+	case build.TaskKindREST:
+		if d.REST.Resource != "" ||
+			len(d.REST.URLParams) > 0 ||
+			len(d.REST.Headers) > 0 ||
+			len(d.REST.FormData) > 0 {
+			return d.Marshal(format)
+		}
+		tmpl, err := template.New("rest").Parse(restTemplate)
+		if err != nil {
+			return nil, errors.Wrap(err, "parsing REST template")
+		}
+		if err := tmpl.Execute(taskDefinition, d.REST); err != nil {
+			return nil, errors.Wrap(err, "executing rest template")
+		}
+	default:
+		return d.Marshal(format)
+	}
+
+	tmpl, err := template.New("definition").Parse(definitionTemplate)
+	if err != nil {
+		return nil, errors.Wrap(err, "parsing definition template")
+	}
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, map[string]interface{}{
+		"slug":           d.Slug,
+		"name":           d.Name,
+		"taskDefinition": taskDefinition.String(),
+	}); err != nil {
+		return nil, errors.Wrap(err, "executing definition template")
+	}
+	return buf.Bytes(), nil
 }
 
 func (d *Definition_0_3) Unmarshal(format TaskDefFormat, buf []byte) error {
