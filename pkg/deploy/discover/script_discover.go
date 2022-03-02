@@ -24,6 +24,9 @@ var _ TaskDiscoverer = &ScriptDiscoverer{}
 
 func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	slug := runtime.Slug(file)
+	if slug == "" {
+		return nil, nil
+	}
 
 	task, err := sd.Client.GetTask(ctx, api.GetTaskRequest{
 		Slug:    slug,

@@ -287,7 +287,6 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 		return api.UpdateTaskRequest{}, err
 	}
 
-	// TODO: update endpoint to make those fields optional
 	return api.UpdateTaskRequest{
 		Slug:             def.Slug,
 		Name:             def.Name,
