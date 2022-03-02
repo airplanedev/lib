@@ -36,8 +36,11 @@ type TaskConfig struct {
 }
 
 type TaskDiscoverer interface {
-	// GetTaskConfig inspects a file and if that file represents an Airplane task, it will
-	// return back a fully-qualified task definition.
+	// IsAirplaneTask inspects a file and if that file represents an Airplane task, it returns
+	// that task's slug. If that file is not a task, it will return an empty string.
+	IsAirplaneTask(ctx context.Context, file string) (string, error)
+	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
+	// If the task should not be discovered as an Airplane task, a nil task config is returned.
 	GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error)
 	// TaskConfigSource returns a unique identifier of this TaskDiscoverer.
 	TaskConfigSource() TaskConfigSource
