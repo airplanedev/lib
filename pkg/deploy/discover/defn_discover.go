@@ -21,7 +21,7 @@ type DefnDiscoverer struct {
 	// MissingTaskHandler is fired if `GetTaskConfig` is called when a task ID cannot be found
 	// for a definition file. The handler should either create the task and return the created
 	// task's TaskMetadata, or it should return `nil` to signal that the definition should be
-	// ignored.
+	// ignored. If this handler is not set, these definitions are always ignored.
 	MissingTaskHandler func(context.Context, definitions.DefinitionInterface) (*api.TaskMetadata, error)
 }
 
@@ -55,6 +55,10 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		var merr *api.TaskMissingError
 		if !errors.As(err, &merr) {
 			return nil, err
+		}
+
+		if dd.MissingTaskHandler == nil {
+			return nil, nil
 		}
 
 		mptr, err := dd.MissingTaskHandler(ctx, &def)
