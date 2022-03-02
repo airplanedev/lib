@@ -11,6 +11,7 @@ import (
 
 type IAPIClient interface {
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
+	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 }
@@ -43,6 +44,11 @@ type Task struct {
 type GetTaskRequest struct {
 	Slug    string
 	EnvSlug string
+}
+
+type TaskMetadata struct {
+	ID   string `json:"id"`
+	Slug string `json:"slug"`
 }
 
 type CreateBuildUploadRequest struct {
