@@ -14,7 +14,6 @@ require (
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/goccy/go-yaml v1.9.4
-	github.com/mitchellh/mapstructure v1.1.2
 	github.com/otiai10/copy v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
