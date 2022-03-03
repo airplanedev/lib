@@ -12,11 +12,13 @@ import (
 	_ "github.com/airplanedev/lib/pkg/runtime/shell"
 	_ "github.com/airplanedev/lib/pkg/runtime/sql"
 	_ "github.com/airplanedev/lib/pkg/runtime/typescript"
+	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
 
 type ScriptDiscoverer struct {
 	Client  api.IAPIClient
+	Logger  logger.Logger
 	EnvSlug string
 }
 
@@ -43,6 +45,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 			return nil, errors.Wrap(err, "unable to get task")
 		}
 
+		sd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, slug)
 		return nil, nil
 	}
 

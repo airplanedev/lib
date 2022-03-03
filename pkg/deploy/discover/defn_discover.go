@@ -82,6 +82,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		if err != nil {
 			return nil, err
 		} else if mptr == nil {
+			dd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, def.GetSlug())
 			return nil, nil
 		}
 		metadata = *mptr

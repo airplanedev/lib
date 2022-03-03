@@ -262,9 +262,11 @@ func TestDiscoverTasks(t *testing.T) {
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
 				Client: apiClient,
+				Logger: &logger.MockLogger{},
 			}
 			defnDiscoverer := &DefnDiscoverer{
 				Client: apiClient,
+				Logger: &logger.MockLogger{},
 			}
 			d := &Discoverer{
 				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
