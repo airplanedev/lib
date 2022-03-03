@@ -1,7 +1,6 @@
 package definitions
 
-const definitionTemplate = `
-# Used by Airplane to identify your task. Do not change.",
+const definitionTemplate = `# Used by Airplane to identify your task. Do not change.
 slug: {{.slug}}
 
 # A human-readable name for your task.
@@ -33,9 +32,7 @@ name: {{.name}}
 #   - Bruce Wayne
 #   # A regular expression with which to validate parameter values.
 #   regex: "^[a-zA-Z ]+$"
-
-{{.taskDefinition}}
-
+{{ .taskDefinition }}
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.
 # constraints:
@@ -96,7 +93,7 @@ python:
 
 const shellTemplate = `
 # Configuration for a shell task.
-python:
+shell:
   # The path to the .sh file containing the logic for this task. This can be
   # absolute or relative to the location of the definition file.
   entrypoint: {{.Entrypoint}}
