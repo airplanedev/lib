@@ -31,10 +31,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/single_task.js",
-					TaskInterpolationMode: "handlebars",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{
@@ -59,10 +58,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{
@@ -72,10 +70,9 @@ func TestDiscoverTasks(t *testing.T) {
 					Source: TaskConfigSourceScript,
 				},
 				{
-					TaskID:                "tsk456",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/single_task2.js",
-					TaskInterpolationMode: "handlebars",
+					TaskID:         "tsk456",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task2.js",
 					Def: &definitions.Definition{
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition{
@@ -103,10 +100,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath + "/nestedScripts",
-					TaskEntrypoint:        fixturesPath + "/nestedScripts/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{
@@ -116,10 +112,9 @@ func TestDiscoverTasks(t *testing.T) {
 					Source: TaskConfigSourceScript,
 				},
 				{
-					TaskID:                "tsk456",
-					TaskRoot:              fixturesPath + "/nestedScripts",
-					TaskEntrypoint:        fixturesPath + "/nestedScripts/single_task2.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk456",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task2.js",
 					Def: &definitions.Definition{
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition{
@@ -146,10 +141,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition_0_3{
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
@@ -182,10 +176,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition_0_3{
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
@@ -212,10 +205,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/subdir/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
 					Def: &definitions.Definition{
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition{
@@ -239,10 +231,9 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			want: []TaskConfig{
 				{
-					TaskID:                "tsk123",
-					TaskRoot:              fixturesPath,
-					TaskEntrypoint:        fixturesPath + "/subdir/single_task.js",
-					TaskInterpolationMode: "jst",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
 					Def: &definitions.Definition_0_3{
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",

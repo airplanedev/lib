@@ -65,8 +65,6 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	tc := TaskConfig{
 		Def:    &def,
 		Source: dd.TaskConfigSource(),
-		// By definition, all task definitions use JSTs:
-		TaskInterpolationMode: "jst",
 	}
 
 	metadata, err := dd.Client.GetTaskMetadata(ctx, def.GetSlug())

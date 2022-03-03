@@ -76,12 +76,11 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 	def.SetWorkdir(taskroot, wd)
 
 	return &TaskConfig{
-		TaskID:                task.ID,
-		TaskRoot:              taskroot,
-		TaskEntrypoint:        absFile,
-		TaskInterpolationMode: task.InterpolationMode,
-		Def:                   &def,
-		Source:                sd.TaskConfigSource(),
+		TaskID:         task.ID,
+		TaskRoot:       taskroot,
+		TaskEntrypoint: absFile,
+		Def:            &def,
+		Source:         sd.TaskConfigSource(),
 	}, nil
 }
 
