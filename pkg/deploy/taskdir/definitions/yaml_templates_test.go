@@ -64,6 +64,11 @@ func TestYAMLComments(t *testing.T) {
 			require.NoError(err)
 
 			require.Equal(string(expected), string(got))
+
+			unmarshalled := Definition_0_3{}
+			err = unmarshalled.Unmarshal(TaskDefFormatYAML, got)
+			require.NoError(err)
+			require.Equal(def, unmarshalled)
 		})
 	}
 }
