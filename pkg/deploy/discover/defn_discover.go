@@ -100,20 +100,25 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	} else if err != nil {
 		return nil, err
 	} else {
-		tc.TaskEntrypoint = entrypoint
+		defnDir := filepath.Dir(dir.DefinitionPath())
+		absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
+		if err != nil {
+			return nil, err
+		}
+		tc.TaskEntrypoint = absEntrypoint
 
 		r, err := runtime.Lookup(entrypoint, kind)
 		if err != nil {
 			return nil, err
 		}
 
-		taskroot, err := r.Root(entrypoint)
+		taskroot, err := r.Root(absEntrypoint)
 		if err != nil {
 			return nil, err
 		}
 		tc.TaskRoot = taskroot
 
-		wd, err := r.Workdir(entrypoint)
+		wd, err := r.Workdir(absEntrypoint)
 		if err != nil {
 			return nil, err
 		}
@@ -122,49 +127,13 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		}
 
 		// Entrypoint for builder needs to be relative to taskroot, not definition directory.
-		defnDir := filepath.Dir(dir.DefinitionPath())
 		if defnDir != taskroot {
-			ep, err := filepath.Rel(taskroot, entrypoint)
+			ep, err := filepath.Rel(taskroot, absEntrypoint)
 			if err != nil {
 				return nil, err
 			}
 			def.SetBuildConfig("entrypoint", ep)
 		}
-	}
-
-	defnDir := filepath.Dir(dir.DefinitionPath())
-	absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
-	if err != nil {
-		return nil, err
-	}
-	tc.TaskEntrypoint = absEntrypoint
-
-	r, err := runtime.Lookup(entrypoint, kind)
-	if err != nil {
-		return nil, err
-	}
-
-	taskroot, err := r.Root(absEntrypoint)
-	if err != nil {
-		return nil, err
-	}
-	tc.TaskRoot = taskroot
-
-	wd, err := r.Workdir(absEntrypoint)
-	if err != nil {
-		return nil, err
-	}
-	if err := def.SetWorkdir(taskroot, wd); err != nil {
-		return nil, err
-	}
-
-	// Entrypoint for builder needs to be relative to taskroot, not definition directory.
-	if defnDir != taskroot {
-		ep, err := filepath.Rel(taskroot, absEntrypoint)
-		if err != nil {
-			return nil, err
-		}
-		def.SetBuildConfig("entrypoint", ep)
 	}
 
 	return &tc, nil
