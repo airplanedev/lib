@@ -7,7 +7,7 @@ require (
 	github.com/airplanedev/archiver v1.1.3-0.20210823174045-ee4b23880021
 	github.com/airplanedev/ojson v0.1.0
 	github.com/airplanedev/path v0.0.1
-	github.com/alecthomas/jsonschema v0.0.0-20220203024042-cc89723c9db0
+	github.com/alecthomas/jsonschema v0.0.0-20220216202328-9eeeec9d044b
 	github.com/alessio/shellescape v1.4.1
 	github.com/aymerick/raymond v2.0.2+incompatible
 	github.com/blang/semver/v4 v4.0.0
