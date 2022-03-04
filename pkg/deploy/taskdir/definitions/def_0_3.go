@@ -817,8 +817,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Description: d.Description,
 		Timeout:     d.Timeout,
 		ExecuteRules: api.UpdateExecuteRulesRequest{
-			RequireRequests:     &d.RequireRequests,
-			DisallowSelfApprove: pointers.Bool(false),
+			RequireRequests: &d.RequireRequests,
 		},
 	}
 
@@ -833,6 +832,8 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 	if d.AllowSelfApprovals != nil {
 		disallow := !*d.AllowSelfApprovals
 		req.ExecuteRules.DisallowSelfApprove = &disallow
+	} else {
+		req.ExecuteRules.DisallowSelfApprove = pointers.Bool(false)
 	}
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
