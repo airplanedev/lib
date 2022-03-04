@@ -20,6 +20,7 @@ type DefinitionInterface interface {
 	GetKindAndOptions() (build.TaskKind, build.KindOptions, error)
 	GetEnv() (api.TaskEnv, error)
 	GetSlug() string
+	GetName() string
 	UpgradeJST() error
-	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error)
+	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
 }

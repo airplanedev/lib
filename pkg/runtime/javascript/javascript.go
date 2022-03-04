@@ -141,6 +141,10 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, err
 	}
+	workdir, err := r.Workdir(opts.Path)
+	if err != nil {
+		return nil, nil, err
+	}
 
 	tmpdir := filepath.Join(root, ".airplane")
 	if err := os.Mkdir(tmpdir, os.ModeDir|0777); err != nil && !os.IsExist(err) {
@@ -193,7 +197,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 
 	// Confirm we have a `package.json`, otherwise we might install shim dependencies
 	// in the wrong folder.
-	pathPkgJSON := filepath.Join(root, "package.json")
+	pathPkgJSON := filepath.Join(workdir, "package.json")
 	hasPkgJSON := fsx.AssertExistsAll(pathPkgJSON) == nil
 	if !hasPkgJSON {
 		return nil, nil, errors.New("a package.json is missing")

@@ -27,18 +27,22 @@ const (
 )
 
 type TaskConfig struct {
+	TaskID         string
 	TaskRoot       string
 	TaskEntrypoint string
-	Task           api.Task
 	Def            definitions.DefinitionInterface
-	From           TaskConfigSource
+	Source         TaskConfigSource
 }
 
 type TaskDiscoverer interface {
-	IsAirplaneTask(ctx context.Context, file string) (slug string, err error)
-	GetTaskConfig(ctx context.Context, task api.Task, file string) (TaskConfig, error)
+	// IsAirplaneTask inspects a file and if that file represents an Airplane task, it returns
+	// that task's slug. If that file is not a task, it will return an empty string.
+	IsAirplaneTask(ctx context.Context, file string) (string, error)
+	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
+	// If the task should not be discovered as an Airplane task, a nil task config is returned.
+	GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error)
+	// TaskConfigSource returns a unique identifier of this TaskDiscoverer.
 	TaskConfigSource() TaskConfigSource
-	HandleMissingTask(ctx context.Context, file string) (*api.Task, error)
 }
 
 type Discoverer struct {
@@ -83,52 +87,29 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				return nil, err
 			}
 			for _, tc := range nestedTaskConfigs {
-				slug := tc.Task.Slug
+				slug := tc.Def.GetSlug()
 				if _, ok := taskConfigsBySlug[slug]; !ok {
 					taskConfigsBySlug[slug] = []TaskConfig{}
 				}
 				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], tc)
 			}
-			continue
-		}
-		// We found a file.
-		for _, td := range d.TaskDiscoverers {
-			slug, err := td.IsAirplaneTask(ctx, p)
-			if err != nil {
-				return nil, err
-			}
-			if slug == "" {
-				// The file is not an Airplane task.
-				continue
-			}
-			task, err := d.Client.GetTask(ctx, api.GetTaskRequest{
-				Slug:    slug,
-				EnvSlug: d.EnvSlug,
-			})
-			if err != nil {
-				var missingErr *api.TaskMissingError
-				if errors.As(err, &missingErr) {
-					taskPtr, err := td.HandleMissingTask(ctx, p)
-					if err != nil {
-						return nil, err
-					} else if taskPtr == nil {
-						d.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, slug)
-						continue
-					}
-					task = *taskPtr
-				} else {
+		} else {
+			// We found a file.
+			for _, td := range d.TaskDiscoverers {
+				taskConfig, err := td.GetTaskConfig(ctx, p)
+				if err != nil {
 					return nil, err
 				}
+				if taskConfig == nil {
+					// This file is not an Airplane task.
+					continue
+				}
+				slug := taskConfig.Def.GetSlug()
+				if _, ok := taskConfigsBySlug[slug]; !ok {
+					taskConfigsBySlug[slug] = []TaskConfig{}
+				}
+				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], *taskConfig)
 			}
-			taskConfig, err := td.GetTaskConfig(ctx, task, p)
-			if err != nil {
-				return nil, err
-			}
-			taskConfig.From = td.TaskConfigSource()
-			if _, ok := taskConfigsBySlug[slug]; !ok {
-				taskConfigsBySlug[slug] = []TaskConfig{}
-			}
-			taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], taskConfig)
 		}
 	}
 
@@ -165,7 +146,7 @@ func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskCo
 		found := false
 		for _, td := range d.TaskDiscoverers {
 			for _, tc := range tcs {
-				if td.TaskConfigSource() == tc.From {
+				if td.TaskConfigSource() == tc.Source {
 					taskConfigs[i] = tc
 					found = true
 					break

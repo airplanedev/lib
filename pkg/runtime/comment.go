@@ -27,39 +27,36 @@ func Comment(r Interface, taskURL string) string {
 	return r.FormatComment("Linked to " + taskURL + " [do not edit this line]")
 }
 
-// Slug returns the slug from the given file.
-//
-// Ok is true if the slug was found and isn't empty.
-func Slug(filePath string) (slug string, ok bool) {
+// Slug returns the slug from the given file. An empty string is returned if a slug was not found.
+func Slug(filePath string) string {
 	file, err := os.Open(filePath)
 	if err != nil {
-		return
+		return ""
 	}
 	defer file.Close()
 
 	return slugFromReader(file)
 }
 
-func slugFromReader(reader io.Reader) (slug string, ok bool) {
+func slugFromReader(reader io.Reader) string {
 	code := make([]byte, maxBytesToReadForSlug)
 	_, err := io.ReadFull(reader, code)
 	if err != nil && !errors.Is(err, io.ErrUnexpectedEOF) {
-		return
+		return ""
 	}
 
 	result := commentRegex.FindSubmatch(code)
 	if len(result) == 0 {
-		return
+		return ""
 	}
 
 	u, err := url.Parse(string(result[1]))
 	if err != nil {
-		return
+		return ""
 	}
 
-	_, slug = path.Split(u.Path)
-	ok = slug != ""
-	return
+	_, slug := path.Split(u.Path)
+	return slug
 }
 
 // ErrNotLinked is an error that is raised when a path unexpectedly

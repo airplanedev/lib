@@ -11,11 +11,11 @@ require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/aymerick/raymond v2.0.2+incompatible
 	github.com/blang/semver/v4 v4.0.0
-	github.com/evanw/esbuild v0.14.2
+	github.com/evanw/esbuild v0.14.25
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/go-git/go-git/v5 v5.4.2
-	github.com/goccy/go-yaml v1.9.4
-	github.com/mitchellh/mapstructure v1.1.2
+	github.com/goccy/go-yaml v1.9.5
+	github.com/mitchellh/mapstructure v1.4.3
 	github.com/otiai10/copy v1.7.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
