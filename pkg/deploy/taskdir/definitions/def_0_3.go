@@ -772,7 +772,7 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 	case build.TaskKindNode:
 		def.Node = &NodeDefinition_0_3{
 			Entrypoint:  entrypoint,
-			NodeVersion: "14",
+			NodeVersion: "16",
 		}
 	case build.TaskKindPython:
 		def.Python = &PythonDefinition_0_3{
