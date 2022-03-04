@@ -73,11 +73,11 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 	// Entrypoint needs to be relative to the taskroot.
 	absEntrypoint, err := pathcase.ActualFilename(absFile)
 	if err != nil {
-		return &TaskConfig{}, err
+		return nil, err
 	}
 	ep, err := filepath.Rel(taskroot, absEntrypoint)
 	if err != nil {
-		return &TaskConfig{}, err
+		return nil, err
 	}
 	def.SetBuildConfig("entrypoint", ep)
 
@@ -86,7 +86,7 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		return nil, err
 	}
 	if err := def.SetWorkdir(taskroot, wd); err != nil {
-		return &TaskConfig{}, err
+		return nil, err
 	}
 
 	return &TaskConfig{
