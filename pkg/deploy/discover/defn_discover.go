@@ -100,25 +100,20 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	} else if err != nil {
 		return nil, err
 	} else {
-		defnDir := filepath.Dir(dir.DefinitionPath())
-		absEntrypoint, err := filepath.Abs(filepath.Join(defnDir, entrypoint))
-		if err != nil {
-			return nil, err
-		}
-		tc.TaskEntrypoint = absEntrypoint
+		tc.TaskEntrypoint = entrypoint
 
 		r, err := runtime.Lookup(entrypoint, kind)
 		if err != nil {
 			return nil, err
 		}
 
-		taskroot, err := r.Root(absEntrypoint)
+		taskroot, err := r.Root(entrypoint)
 		if err != nil {
 			return nil, err
 		}
 		tc.TaskRoot = taskroot
 
-		wd, err := r.Workdir(absEntrypoint)
+		wd, err := r.Workdir(entrypoint)
 		if err != nil {
 			return nil, err
 		}
@@ -127,8 +122,9 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		}
 
 		// Entrypoint for builder needs to be relative to taskroot, not definition directory.
+		defnDir := filepath.Dir(dir.DefinitionPath())
 		if defnDir != taskroot {
-			ep, err := filepath.Rel(taskroot, absEntrypoint)
+			ep, err := filepath.Rel(taskroot, entrypoint)
 			if err != nil {
 				return nil, err
 			}
