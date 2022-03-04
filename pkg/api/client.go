@@ -88,7 +88,7 @@ type UpdateTaskRequest struct {
 	ExecuteRules               UpdateExecuteRulesRequest `json:"executeRules"`
 	Timeout                    int                       `json:"timeout"`
 	BuildID                    *string                   `json:"buildID"`
-	InterpolationMode          string                    `json:"interpolationMode"`
+	InterpolationMode          *string                   `json:"interpolationMode"`
 	EnvSlug                    string                    `json:"envSlug"`
 }
 
