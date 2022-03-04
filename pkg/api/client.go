@@ -10,7 +10,10 @@ import (
 )
 
 type IAPIClient interface {
+	// GetTask fetches a task by slug. If the slug does not match a task, a *TaskMissingError is returned.
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
+	// GetTaskMetadata fetches a task's metadata by slug. If the slug does not match a task, a *TaskMissingError is returned.
+	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 }
@@ -45,6 +48,11 @@ type GetTaskRequest struct {
 	EnvSlug string
 }
 
+type TaskMetadata struct {
+	ID   string `json:"id"`
+	Slug string `json:"slug"`
+}
+
 type CreateBuildUploadRequest struct {
 	SizeBytes int `json:"sizeBytes"`
 }
@@ -61,27 +69,32 @@ type Upload struct {
 
 // UpdateTaskRequest updates a task.
 type UpdateTaskRequest struct {
-	Slug                       string            `json:"slug"`
-	Name                       string            `json:"name"`
-	Description                string            `json:"description"`
-	Image                      *string           `json:"image"`
-	Command                    []string          `json:"command"`
-	Arguments                  []string          `json:"arguments"`
-	Parameters                 Parameters        `json:"parameters"`
-	Constraints                RunConstraints    `json:"constraints"`
-	Env                        TaskEnv           `json:"env"`
-	ResourceRequests           map[string]string `json:"resourceRequests"`
-	Resources                  map[string]string `json:"resources"`
-	Kind                       build.TaskKind    `json:"kind"`
-	KindOptions                build.KindOptions `json:"kindOptions"`
-	Repo                       string            `json:"repo"`
-	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
-	Permissions                Permissions       `json:"permissions"`
-	ExecuteRules               ExecuteRules      `json:"executeRules"`
-	Timeout                    int               `json:"timeout"`
-	BuildID                    *string           `json:"buildID"`
-	InterpolationMode          string            `json:"interpolationMode"`
-	EnvSlug                    string            `json:"envSlug"`
+	Slug                       string                    `json:"slug"`
+	Name                       string                    `json:"name"`
+	Description                string                    `json:"description"`
+	Image                      *string                   `json:"image"`
+	Command                    []string                  `json:"command"`
+	Arguments                  []string                  `json:"arguments"`
+	Parameters                 Parameters                `json:"parameters"`
+	Constraints                RunConstraints            `json:"constraints"`
+	Env                        TaskEnv                   `json:"env"`
+	ResourceRequests           map[string]string         `json:"resourceRequests"`
+	Resources                  map[string]string         `json:"resources"`
+	Kind                       build.TaskKind            `json:"kind"`
+	KindOptions                build.KindOptions         `json:"kindOptions"`
+	Repo                       string                    `json:"repo"`
+	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
+	Permissions                *Permissions              `json:"permissions"`
+	ExecuteRules               UpdateExecuteRulesRequest `json:"executeRules"`
+	Timeout                    int                       `json:"timeout"`
+	BuildID                    *string                   `json:"buildID"`
+	InterpolationMode          *string                   `json:"interpolationMode"`
+	EnvSlug                    string                    `json:"envSlug"`
+}
+
+type UpdateExecuteRulesRequest struct {
+	DisallowSelfApprove *bool `json:"disallowSelfApprove"`
+	RequireRequests     *bool `json:"requireRequests"`
 }
 
 type ListResourcesResponse struct {

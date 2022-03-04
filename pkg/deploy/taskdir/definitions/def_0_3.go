@@ -9,6 +9,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils/pointers"
 	"github.com/alessio/shellescape"
 	"github.com/flynn/go-shlex"
 	"github.com/goccy/go-yaml"
@@ -919,12 +920,15 @@ func (d Definition_0_3) taskKind() (taskKind_0_3, error) {
 	}
 }
 
-func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error) {
 	req := api.UpdateTaskRequest{
 		Slug:        d.Slug,
 		Name:        d.Name,
 		Description: d.Description,
 		Timeout:     d.Timeout,
+		ExecuteRules: api.UpdateExecuteRulesRequest{
+			RequireRequests: &d.RequireRequests,
+		},
 	}
 
 	if err := d.addParametersToUpdateTaskRequest(ctx, &req); err != nil {
@@ -944,20 +948,15 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		}
 	}
 
-	if d.RequireRequests {
-		req.ExecuteRules.RequireRequests = true
-	}
-	if d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals {
-		req.ExecuteRules.DisallowSelfApprove = true
+	if d.AllowSelfApprovals != nil {
+		disallow := !*d.AllowSelfApprovals
+		req.ExecuteRules.DisallowSelfApprove = &disallow
+	} else {
+		req.ExecuteRules.DisallowSelfApprove = pointers.Bool(false)
 	}
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
-	}
-
-	if currentTask != nil {
-		req.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
-		req.Permissions = currentTask.Permissions
 	}
 
 	return req, nil
@@ -1084,6 +1083,10 @@ func (d *Definition_0_3) GetEnv() (api.TaskEnv, error) {
 
 func (d *Definition_0_3) GetSlug() string {
 	return d.Slug
+}
+
+func (d *Definition_0_3) GetName() string {
+	return d.Name
 }
 
 func (d *Definition_0_3) SetEntrypoint(entrypoint string) error {

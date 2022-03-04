@@ -7,16 +7,9 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/api/mock"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils/pointers"
 	"github.com/stretchr/testify/require"
 )
-
-func newBoolPtr(v bool) *bool {
-	return &v
-}
-
-func newStringPtr(v string) *string {
-	return &v
-}
 
 var fullYAML = []byte(
 	`name: Hello World
@@ -101,7 +94,7 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    newBoolPtr(true),
+			Required:    pointers.Bool(true),
 		},
 	},
 	Python: &PythonDefinition_0_3{
@@ -220,10 +213,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 				Env: api.TaskEnv{
 					"value": api.EnvVarValue{
-						Value: newStringPtr("value"),
+						Value: pointers.String("value"),
 					},
 					"config": api.EnvVarValue{
-						Config: newStringPtr("config"),
+						Config: pointers.String("config"),
 					},
 				},
 			},
@@ -235,10 +228,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 					EnvVars: api.TaskEnv{
 						"value": api.EnvVarValue{
-							Value: newStringPtr("value"),
+							Value: pointers.String("value"),
 						},
 						"config": api.EnvVarValue{
-							Config: newStringPtr("config"),
+							Config: pointers.String("config"),
 						},
 					},
 				},
@@ -257,10 +250,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 				Env: api.TaskEnv{
 					"value": api.EnvVarValue{
-						Value: newStringPtr("value"),
+						Value: pointers.String("value"),
 					},
 					"config": api.EnvVarValue{
-						Config: newStringPtr("config"),
+						Config: pointers.String("config"),
 					},
 				},
 			},
@@ -272,10 +265,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					NodeVersion: "14",
 					EnvVars: api.TaskEnv{
 						"value": api.EnvVarValue{
-							Value: newStringPtr("value"),
+							Value: pointers.String("value"),
 						},
 						"config": api.EnvVarValue{
-							Config: newStringPtr("config"),
+							Config: pointers.String("config"),
 						},
 					},
 				},
@@ -293,10 +286,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 				Env: api.TaskEnv{
 					"value": api.EnvVarValue{
-						Value: newStringPtr("value"),
+						Value: pointers.String("value"),
 					},
 					"config": api.EnvVarValue{
-						Config: newStringPtr("config"),
+						Config: pointers.String("config"),
 					},
 				},
 			},
@@ -307,10 +300,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.sh",
 					EnvVars: api.TaskEnv{
 						"value": api.EnvVarValue{
-							Value: newStringPtr("value"),
+							Value: pointers.String("value"),
 						},
 						"config": api.EnvVarValue{
-							Config: newStringPtr("config"),
+							Config: pointers.String("config"),
 						},
 					},
 				},
@@ -325,13 +318,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Arguments:   []string{"-c", `echo "foobar"`},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
-				Image:       newStringPtr("ubuntu:latest"),
+				Image:       pointers.String("ubuntu:latest"),
 				Env: api.TaskEnv{
 					"value": api.EnvVarValue{
-						Value: newStringPtr("value"),
+						Value: pointers.String("value"),
 					},
 					"config": api.EnvVarValue{
-						Config: newStringPtr("config"),
+						Config: pointers.String("config"),
 					},
 				},
 			},
@@ -344,10 +337,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Command:    `-c 'echo "foobar"'`,
 					EnvVars: api.TaskEnv{
 						"value": api.EnvVarValue{
-							Value: newStringPtr("value"),
+							Value: pointers.String("value"),
 						},
 						"config": api.EnvVarValue{
-							Config: newStringPtr("config"),
+							Config: pointers.String("config"),
 						},
 					},
 				},
@@ -496,7 +489,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: newBoolPtr(false),
+						Required: pointers.Bool(false),
 					},
 					{
 						Name: "Options",
@@ -551,7 +544,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: newBoolPtr(false),
+				AllowSelfApprovals: pointers.Bool(false),
 			},
 		},
 		{
@@ -619,6 +612,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -640,6 +637,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -658,6 +659,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
 				},
 			},
 		},
@@ -679,7 +684,11 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Command:    []string{"bash"},
 				Arguments:  []string{"-c", `echo "foobar"`},
 				Kind:       build.TaskKindImage,
-				Image:      newStringPtr("ubuntu:latest"),
+				Image:      pointers.String("ubuntu:latest"),
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -712,6 +721,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Resources: map[string]string{
 					"rest": "rest_id",
 				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 			resources: []api.Resource{
 				{
@@ -730,7 +743,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: newBoolPtr(false),
+				AllowSelfApprovals: pointers.Bool(false),
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -741,9 +754,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: api.ExecuteRules{
-					DisallowSelfApprove: true,
-					RequireRequests:     true,
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(true),
+					RequireRequests:     pointers.Bool(true),
 				},
 			},
 		},
@@ -768,9 +781,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				ExecuteRules: api.ExecuteRules{
-					DisallowSelfApprove: false,
-					RequireRequests:     false,
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
 				},
 			},
 		},
@@ -781,7 +794,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			client := &mock.MockClient{
 				Resources: test.resources,
 			}
-			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
+			req, err := test.definition.GetUpdateTaskRequest(ctx, client)
 			assert.NoError(err)
 			assert.Equal(test.request, req)
 		})
