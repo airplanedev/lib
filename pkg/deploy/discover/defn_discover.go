@@ -89,11 +89,6 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	}
 	tc.TaskID = metadata.ID
 
-	kind, _, err := def.GetKindAndOptions()
-	if err != nil {
-		return nil, err
-	}
-
 	entrypoint, err := def.GetAbsoluteEntrypoint()
 	if err == definitions.ErrNoEntrypoint {
 		return &tc, nil
@@ -101,6 +96,11 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		return nil, err
 	} else {
 		tc.TaskEntrypoint = entrypoint
+
+		kind, _, err := def.GetKindAndOptions()
+		if err != nil {
+			return nil, err
+		}
 
 		r, err := runtime.Lookup(entrypoint, kind)
 		if err != nil {
