@@ -98,27 +98,27 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	if err == definitions.ErrNoEntrypoint {
 		return &tc, nil
 	} else if err != nil {
-		return &TaskConfig{}, err
+		return nil, err
 	} else {
 		tc.TaskEntrypoint = entrypoint
 
 		r, err := runtime.Lookup(entrypoint, kind)
 		if err != nil {
-			return &TaskConfig{}, err
+			return nil, err
 		}
 
 		taskroot, err := r.Root(entrypoint)
 		if err != nil {
-			return &TaskConfig{}, err
+			return nil, err
 		}
 		tc.TaskRoot = taskroot
 
 		wd, err := r.Workdir(entrypoint)
 		if err != nil {
-			return &TaskConfig{}, err
+			return nil, err
 		}
 		if err := def.SetWorkdir(taskroot, wd); err != nil {
-			return &TaskConfig{}, err
+			return nil, err
 		}
 
 		// Entrypoint for builder needs to be relative to taskroot, not definition directory.
@@ -126,7 +126,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		if defnDir != taskroot {
 			ep, err := filepath.Rel(taskroot, entrypoint)
 			if err != nil {
-				return &TaskConfig{}, err
+				return nil, err
 			}
 			def.SetBuildConfig("entrypoint", ep)
 		}
