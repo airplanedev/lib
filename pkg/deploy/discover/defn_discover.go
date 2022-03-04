@@ -13,10 +13,8 @@ import (
 )
 
 type DefnDiscoverer struct {
-	Client    api.IAPIClient
-	AssumeYes bool
-	AssumeNo  bool
-	Logger    logger.Logger
+	Client api.IAPIClient
+	Logger logger.Logger
 
 	// MissingTaskHandler is called from `GetTaskConfig` if a task ID cannot be found for a definition
 	// file. The handler should either create the task and return the created task's TaskMetadata, or
@@ -82,7 +80,9 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		if err != nil {
 			return nil, err
 		} else if mptr == nil {
-			dd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, def.GetSlug())
+			if dd.Logger != nil {
+				dd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, def.GetSlug())
+			}
 			return nil, nil
 		}
 		metadata = *mptr
