@@ -38,7 +38,7 @@ node:
   entrypoint: my_task.ts
 
   # The version of Node to use. Valid values: 12, 14, 15, 16.
-  nodeVersion: "14"
+  nodeVersion: "16"
 
   # A map of environment variables to use when running the task. The value
   # should be an object; if specifying raw values, the value must be an object
