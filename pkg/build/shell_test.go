@@ -42,6 +42,7 @@ func TestShellBuilder(t *testing.T) {
 				"shim":       "true",
 				"entrypoint": "main.sh",
 			},
+			SearchString: "bar",
 		},
 	}
 

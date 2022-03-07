@@ -1,2 +1,4 @@
 FROM ubuntu:21.04
-WORKDIR /app/airplane
+WORKDIR /myScripts
+RUN echo "echo "bar"" > test.sh
+RUN chmod +x test.sh
