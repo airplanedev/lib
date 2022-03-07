@@ -2,5 +2,7 @@
   "extends": ["config:base", "group:allNonMajor"],
   "labels": ["merge"],
   "postUpdateOptions": ["gomodTidy"],
-  "reviewers": ["team:deps"]
+  "reviewers": ["team:deps"],
+  "schedule": ["before 5am on Thursday"],
+  "timezone": "America/New_York"
 }
