@@ -7,16 +7,9 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/api/mock"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/airplanedev/lib/pkg/utils/pointers"
 	"github.com/stretchr/testify/require"
 )
-
-func newBoolPtr(v bool) *bool {
-	return &v
-}
-
-func newStringPtr(v string) *string {
-	return &v
-}
 
 var fullYAML = []byte(
 	`name: Hello World
@@ -31,8 +24,6 @@ parameters:
   required: true
 python:
   entrypoint: hello_world.py
-  arguments:
-  - "{{JSON.stringify(params)}}"
 timeout: 3600
 `)
 
@@ -52,10 +43,7 @@ var fullJSON = []byte(
 		}
 	],
 	"python": {
-		"entrypoint": "hello_world.py",
-		"arguments": [
-			"{{JSON.stringify(params)}}"
-		]
+		"entrypoint": "hello_world.py"
 	},
 	"timeout": 3600
 }`)
@@ -72,8 +60,6 @@ parameters:
   default: World
 python:
   entrypoint: hello_world.py
-  arguments:
-  - "{{JSON.stringify(params)}}"
 timeout: 3600
 `)
 
@@ -92,10 +78,7 @@ var jsonWithDefault = []byte(
 		}
 	],
 	"python": {
-		"entrypoint": "hello_world.py",
-		"arguments": [
-			"{{JSON.stringify(params)}}"
-		]
+		"entrypoint": "hello_world.py"
 	},
 	"timeout": 3600
 }`)
@@ -111,12 +94,11 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    newBoolPtr(true),
+			Required:    pointers.Bool(true),
 		},
 	},
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
-		Arguments:  []string{"{{JSON.stringify(params)}}"},
 	},
 	Timeout: 3600,
 }
@@ -136,7 +118,6 @@ var defWithDefault = Definition_0_3{
 	},
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
-		Arguments:  []string{"{{JSON.stringify(params)}}"},
 	},
 	Timeout: 3600,
 }
@@ -215,9 +196,9 @@ func TestDefinitionSerialization_0_3(t *testing.T) {
 func TestTaskToDefinition_0_3(t *testing.T) {
 	for _, test := range []struct {
 		name       string
-		resources  []api.Resource
 		task       api.Task
 		definition Definition_0_3
+		resources  []api.Resource
 	}{
 		{
 			name: "python task",
@@ -230,17 +211,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				Constraints: api.RunConstraints{},
 			},
 			definition: Definition_0_3{
 				Name:        "Python Task",
 				Slug:        "python_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 		},
 		{
@@ -254,17 +232,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
-				Constraints: api.RunConstraints{},
 			},
 			definition: Definition_0_3{
 				Name: "Node Task",
 				Slug: "node_task",
 				Node: &NodeDefinition_0_3{
-					Arguments:   []string{"{{JSON.stringify(params)}}"},
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 		},
 		{
@@ -277,16 +252,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
 				},
-				Constraints: api.RunConstraints{},
 			},
 			definition: Definition_0_3{
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
-					Arguments:  []string{},
 					Entrypoint: "main.sh",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 		},
 		{
@@ -298,8 +270,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Arguments:   []string{"-c", "echo 'foobar'"},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
-				Image:       newStringPtr("ubuntu:latest"),
-				Constraints: api.RunConstraints{},
+				Image:       pointers.String("ubuntu:latest"),
 			},
 			definition: Definition_0_3{
 				Name: "Image Task",
@@ -309,7 +280,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "bash",
 					Command:    []string{"-c", "echo 'foobar'"},
 				},
-				Constraints: &api.RunConstraints{},
 			},
 		},
 		{
@@ -328,10 +298,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"method": "GET",
 					"path":   "/get",
-					"urlParams": map[string]string{
+					"urlParams": map[string]interface{}{
 						"foo": "bar",
 					},
-					"headers": map[string]string{
+					"headers": map[string]interface{}{
 						"bar": "foo",
 					},
 					"bodyType": "json",
@@ -341,7 +311,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Resources: map[string]string{
 					"rest": "res20220111foobarx",
 				},
-				Constraints: api.RunConstraints{},
 			},
 			definition: Definition_0_3{
 				Name: "REST Task",
@@ -350,17 +319,16 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Resource: "httpbin",
 					Method:   "GET",
 					Path:     "/get",
-					URLParams: map[string]string{
+					URLParams: map[string]interface{}{
 						"foo": "bar",
 					},
-					Headers: map[string]string{
+					Headers: map[string]interface{}{
 						"bar": "foo",
 					},
 					BodyType: "json",
 					Body:     "",
 					FormData: map[string]interface{}{},
 				},
-				Constraints: &api.RunConstraints{},
 			},
 		},
 		{
@@ -431,7 +399,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				Constraints: api.RunConstraints{},
 			},
 			definition: Definition_0_3{
 				Name: "Test Task",
@@ -458,7 +425,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: newBoolPtr(false),
+						Required: pointers.Bool(false),
 					},
 					{
 						Name: "Options",
@@ -487,10 +454,58 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					},
 				},
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
-				Constraints: &api.RunConstraints{},
+			},
+		},
+		{
+			name: "check execute rules",
+			task: api.Task{
+				Name:      "Test Task",
+				Slug:      "test_task",
+				Arguments: []string{"{{JSON.stringify(params)}}"},
+				Kind:      build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: true,
+					RequireRequests:     true,
+				},
+			},
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+				},
+				RequireRequests:    true,
+				AllowSelfApprovals: pointers.Bool(false),
+			},
+		},
+		{
+			name: "check default execute rules",
+			task: api.Task{
+				Name:      "Test Task",
+				Slug:      "test_task",
+				Arguments: []string{"{{JSON.stringify(params)}}"},
+				Kind:      build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				ExecuteRules: api.ExecuteRules{
+					DisallowSelfApprove: false,
+					RequireRequests:     false,
+				},
+			},
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+				},
+				RequireRequests:    false,
+				AllowSelfApprovals: nil,
 			},
 		},
 	} {
@@ -512,6 +527,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 		name       string
 		definition Definition_0_3
 		request    api.UpdateTaskRequest
+		resources  []api.Resource
 	}{
 		{
 			name: "python task",
@@ -520,22 +536,22 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Description: "A task for testing",
 				Parameters:  []api.Parameter{},
-				Arguments:   []string{"{{JSON.stringify(params)}}"},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				Constraints: api.RunConstraints{},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -544,23 +560,23 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name: "Node Task",
 				Slug: "node_task",
 				Node: &NodeDefinition_0_3{
-					Arguments:   []string{"{{JSON.stringify(params)}}"},
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 			request: api.UpdateTaskRequest{
 				Name:       "Node Task",
 				Slug:       "node_task",
 				Parameters: []api.Parameter{},
-				Arguments:  []string{"{{JSON.stringify(params)}}"},
 				Kind:       build.TaskKindNode,
 				KindOptions: build.KindOptions{
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
-				Constraints: api.RunConstraints{},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -569,21 +585,21 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
-					Arguments:  []string{},
 					Entrypoint: "main.sh",
 				},
-				Constraints: &api.RunConstraints{},
 			},
 			request: api.UpdateTaskRequest{
 				Name:       "Shell Task",
 				Slug:       "shell_task",
 				Parameters: []api.Parameter{},
-				Arguments:  []string{},
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
 				},
-				Constraints: api.RunConstraints{},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
@@ -596,157 +612,125 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "bash",
 					Command:    []string{"-c", "echo 'foobar'"},
 				},
-				Constraints: &api.RunConstraints{},
 			},
 			request: api.UpdateTaskRequest{
-				Name:        "Image Task",
-				Slug:        "image_task",
-				Parameters:  []api.Parameter{},
-				Command:     []string{"bash"},
-				Arguments:   []string{"-c", "echo 'foobar'"},
-				Kind:        build.TaskKindImage,
-				Image:       newStringPtr("ubuntu:latest"),
-				Constraints: api.RunConstraints{},
+				Name:       "Image Task",
+				Slug:       "image_task",
+				Parameters: []api.Parameter{},
+				Command:    []string{"bash"},
+				Arguments:  []string{"-c", "echo 'foobar'"},
+				Kind:       build.TaskKindImage,
+				Image:      pointers.String("ubuntu:latest"),
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 		{
-			name: "test update parameters",
+			name: "rest task",
+			definition: Definition_0_3{
+				Name: "REST Task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "rest",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     `{"foo": "bar"}`,
+				},
+			},
+			request: api.UpdateTaskRequest{
+				Name:       "REST Task",
+				Slug:       "rest_task",
+				Parameters: []api.Parameter{},
+				Kind:       build.TaskKindREST,
+				KindOptions: build.KindOptions{
+					"method":    "POST",
+					"path":      "/post",
+					"urlParams": map[string]interface{}{},
+					"headers":   map[string]interface{}{},
+					"bodyType":  "json",
+					"body":      `{"foo": "bar"}`,
+					"formData":  map[string]interface{}{},
+				},
+				Resources: map[string]string{
+					"rest": "rest_id",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
+			},
+			resources: []api.Resource{
+				{
+					ID:   "rest_id",
+					Name: "rest",
+				},
+			},
+		},
+		{
+			name: "test update execute rules",
 			definition: Definition_0_3{
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Description: "A task for testing",
-				Parameters: []ParameterDefinition_0_3{
-					{
-						Name:        "Required boolean",
-						Slug:        "required_boolean",
-						Type:        "boolean",
-						Description: "A required boolean.",
-					},
-					{
-						Name:    "Short text",
-						Slug:    "short_text",
-						Type:    "shorttext",
-						Default: "foobar",
-					},
-					{
-						Name: "SQL",
-						Slug: "sql",
-						Type: "sql",
-					},
-					{
-						Name:     "Optional long text",
-						Slug:     "optional_long_text",
-						Type:     "longtext",
-						Required: newBoolPtr(false),
-					},
-					{
-						Name: "Options",
-						Slug: "options",
-						Type: "shorttext",
-						Options: []OptionDefinition_0_3{
-							{
-								Label: "one",
-								Value: 1,
-							},
-							{
-								Label: "two",
-								Value: 2,
-							},
-							{
-								Label: "three",
-								Value: 3,
-							},
-						},
-					},
-					{
-						Name:  "Regex",
-						Slug:  "regex",
-						Type:  "shorttext",
-						Regex: "foo.*",
-					},
-				},
 				Python: &PythonDefinition_0_3{
-					Arguments:  []string{"{{JSON.stringify(params)}}"},
 					Entrypoint: "main.py",
 				},
-				Constraints: &api.RunConstraints{},
+				RequireRequests:    true,
+				AllowSelfApprovals: pointers.Bool(false),
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
 				Slug:        "test_task",
+				Parameters:  []api.Parameter{},
 				Description: "A task for testing",
-				Parameters: []api.Parameter{
-					{
-						Name: "Required boolean",
-						Slug: "required_boolean",
-						Type: api.TypeBoolean,
-						Desc: "A required boolean.",
-					},
-					{
-						Name:    "Short text",
-						Slug:    "short_text",
-						Type:    api.TypeString,
-						Default: "foobar",
-					},
-					{
-						Name:      "SQL",
-						Slug:      "sql",
-						Type:      api.TypeString,
-						Component: api.ComponentEditorSQL,
-					},
-					{
-						Name:      "Optional long text",
-						Slug:      "optional_long_text",
-						Type:      api.TypeString,
-						Component: api.ComponentTextarea,
-						Constraints: api.Constraints{
-							Optional: true,
-						},
-					},
-					{
-						Name: "Options",
-						Slug: "options",
-						Type: api.TypeString,
-						Constraints: api.Constraints{
-							Options: []api.ConstraintOption{
-								{
-									Label: "one",
-									Value: 1,
-								},
-								{
-									Label: "two",
-									Value: 2,
-								},
-								{
-									Label: "three",
-									Value: 3,
-								},
-							},
-						},
-					},
-					{
-						Name: "Regex",
-						Slug: "regex",
-						Type: api.TypeString,
-						Constraints: api.Constraints{
-							Regex: "foo.*",
-						},
-					},
-				},
-				Arguments: []string{"{{JSON.stringify(params)}}"},
-				Kind:      build.TaskKindPython,
+				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
-				Constraints: api.RunConstraints{},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(true),
+					RequireRequests:     pointers.Bool(true),
+				},
+			},
+		},
+		{
+			name: "test update default execute rules",
+			definition: Definition_0_3{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Description: "A task for testing",
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+				},
+				RequireRequests:    false,
+				AllowSelfApprovals: nil,
+			},
+			request: api.UpdateTaskRequest{
+				Name:        "Test Task",
+				Slug:        "test_task",
+				Parameters:  []api.Parameter{},
+				Description: "A task for testing",
+				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
 			},
 		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
 			ctx := context.Background()
-			client := &mock.MockClient{}
-			req, err := test.definition.GetUpdateTaskRequest(ctx, client, &api.Task{})
+			client := &mock.MockClient{
+				Resources: test.resources,
+			}
+			req, err := test.definition.GetUpdateTaskRequest(ctx, client)
 			assert.NoError(err)
 			assert.Equal(test.request, req)
 		})

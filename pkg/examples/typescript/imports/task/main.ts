@@ -8,6 +8,6 @@ type Params = {
 }
 
 export default async function(params: Params) {
-  airplane.output(uppercase("your id:"))
-  airplane.output(params.id)
+  airplane.appendOutput(uppercase("your id:"))
+  airplane.appendOutput(params.id)
 }

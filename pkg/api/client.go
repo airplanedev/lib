@@ -10,7 +10,10 @@ import (
 )
 
 type IAPIClient interface {
-	GetTask(ctx context.Context, slug string) (res Task, err error)
+	// GetTask fetches a task by slug. If the slug does not match a task, a *TaskMissingError is returned.
+	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
+	// GetTaskMetadata fetches a task's metadata by slug. If the slug does not match a task, a *TaskMissingError is returned.
+	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 }
@@ -35,8 +38,19 @@ type Task struct {
 	Repo                       string            `json:"repo" yaml:"repo"`
 	RequireExplicitPermissions bool              `json:"requireExplicitPermissions" yaml:"-"`
 	Permissions                Permissions       `json:"permissions" yaml:"-"`
+	ExecuteRules               ExecuteRules      `json:"executeRules" yaml:"-"`
 	Timeout                    int               `json:"timeout" yaml:"timeout"`
 	InterpolationMode          string            `json:"interpolationMode" yaml:"-"`
+}
+
+type GetTaskRequest struct {
+	Slug    string
+	EnvSlug string
+}
+
+type TaskMetadata struct {
+	ID   string `json:"id"`
+	Slug string `json:"slug"`
 }
 
 type CreateBuildUploadRequest struct {
@@ -55,27 +69,32 @@ type Upload struct {
 
 // UpdateTaskRequest updates a task.
 type UpdateTaskRequest struct {
-	Slug                       string            `json:"slug"`
-	Name                       string            `json:"name"`
-	Description                string            `json:"description"`
-	Image                      *string           `json:"image"`
-	Command                    []string          `json:"command"`
-	Arguments                  []string          `json:"arguments"`
-	Parameters                 Parameters        `json:"parameters"`
-	Constraints                RunConstraints    `json:"constraints"`
-	Env                        TaskEnv           `json:"env"`
-	ResourceRequests           map[string]string `json:"resourceRequests"`
-	Resources                  map[string]string `json:"resources"`
-	Kind                       build.TaskKind    `json:"kind"`
-	KindOptions                build.KindOptions `json:"kindOptions"`
-	Repo                       string            `json:"repo"`
-	RequireExplicitPermissions bool              `json:"requireExplicitPermissions"`
-	Permissions                Permissions       `json:"permissions"`
-	// TODO(amir): friendly type here (120s, 5m ...)
-	Timeout int     `json:"timeout"`
-	BuildID *string `json:"buildID"`
+	Slug                       string                    `json:"slug"`
+	Name                       string                    `json:"name"`
+	Description                string                    `json:"description"`
+	Image                      *string                   `json:"image"`
+	Command                    []string                  `json:"command"`
+	Arguments                  []string                  `json:"arguments"`
+	Parameters                 Parameters                `json:"parameters"`
+	Constraints                RunConstraints            `json:"constraints"`
+	Env                        TaskEnv                   `json:"env"`
+	ResourceRequests           map[string]string         `json:"resourceRequests"`
+	Resources                  map[string]string         `json:"resources"`
+	Kind                       build.TaskKind            `json:"kind"`
+	KindOptions                build.KindOptions         `json:"kindOptions"`
+	Repo                       string                    `json:"repo"`
+	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
+	Permissions                *Permissions              `json:"permissions"`
+	ExecuteRules               UpdateExecuteRulesRequest `json:"executeRules"`
+	Timeout                    int                       `json:"timeout"`
+	BuildID                    *string                   `json:"buildID"`
+	InterpolationMode          *string                   `json:"interpolationMode"`
+	EnvSlug                    string                    `json:"envSlug"`
+}
 
-	InterpolationMode string `json:"interpolationMode" yaml:"-"`
+type UpdateExecuteRulesRequest struct {
+	DisallowSelfApprove *bool `json:"disallowSelfApprove"`
+	RequireRequests     *bool `json:"requireRequests"`
 }
 
 type ListResourcesResponse struct {
@@ -109,15 +128,33 @@ const (
 type Permissions []Permission
 
 type Permission struct {
-	Action     Action  `json:"action"`
+	Action     Action  `json:"action,omitempty"`
+	RoleID     RoleID  `json:"roleID,omitempty"`
 	SubUserID  *string `json:"subUserID"`
 	SubGroupID *string `json:"subGroupID"`
-	RoleID     RoleID  `json:"roleID"`
 }
+
+type Action string
 
 type RoleID string
 
-type Action string
+const (
+	RoleTeamAdmin        RoleID = "team_admin"
+	RoleTeamDeveloper    RoleID = "team_developer"
+	RoleTaskViewer       RoleID = "task_viewer"
+	RoleTaskRequester    RoleID = "task_requester"
+	RoleTaskExecuter     RoleID = "task_executer"
+	RoleTaskAdmin        RoleID = "task_admin"
+	RoleRunViewer        RoleID = "run_viewer"
+	RoleRunbookViewer    RoleID = "runbook_viewer"
+	RoleRunbookRequester RoleID = "runbook_requester"
+	RoleRunbookExecuter  RoleID = "runbook_executer"
+	RoleRunbookAdmin     RoleID = "runbook_admin"
+	RoleSessionViewer    RoleID = "session_viewer"
+	RoleSessionExecuter  RoleID = "session_executer"
+	RoleSessionAdmin     RoleID = "session_admin"
+	RoleResourceUser     RoleID = "resource_user"
+)
 
 type ResourceRequests map[string]string
 
@@ -274,8 +311,17 @@ type RunConstraints struct {
 	Labels []AgentLabel `json:"labels" yaml:"labels"`
 }
 
+func (rc RunConstraints) IsEmpty() bool {
+	return len(rc.Labels) == 0
+}
+
 // AgentLabel represents an agent label.
 type AgentLabel struct {
 	Key   string `json:"key" yaml:"key"`
 	Value string `json:"value" yaml:"value"`
+}
+
+type ExecuteRules struct {
+	DisallowSelfApprove bool `json:"disallowSelfApprove"`
+	RequireRequests     bool `json:"requireRequests"`
 }

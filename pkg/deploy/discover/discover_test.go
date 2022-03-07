@@ -15,30 +15,37 @@ import (
 
 func TestDiscoverTasks(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
-	discoverPath, _ := filepath.Abs("./")
 	tests := []struct {
 		name          string
 		paths         []string
 		existingTasks map[string]api.Task
 		expectedErr   bool
 		want          []TaskConfig
+		buildConfigs  []build.BuildConfig
 	}{
 		{
 			name:  "single script",
 			paths: []string{"./fixtures/single_task.js"},
 			existingTasks: map[string]api.Task{
-				"my_task": {Kind: build.TaskKindNode},
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "handlebars"},
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task.js",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
-						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
+						Slug: "my_task",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "single_task.js",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -46,29 +53,41 @@ func TestDiscoverTasks(t *testing.T) {
 			name:  "multiple scripts",
 			paths: []string{"./fixtures/single_task.js", "./fixtures/single_task2.js"},
 			existingTasks: map[string]api.Task{
-				"my_task":  {Kind: build.TaskKindNode},
-				"my_task2": {Kind: build.TaskKindNode},
+				"my_task":  {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+				"my_task2": {ID: "tsk456", Slug: "my_task2", Kind: build.TaskKindNode, InterpolationMode: "handlebars"},
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task.js",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition{
-						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
+						Slug: "my_task",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "single_task.js",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 				{
-					TaskRoot:         fixturesPath,
-					WorkingDirectory: fixturesPath,
-					TaskEntrypoint:   fixturesPath + "/single_task2.js",
+					TaskID:         "tsk456",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task2.js",
 					Def: &definitions.Definition{
-						Node: &definitions.NodeDefinition{Entrypoint: "single_task2.js"},
+						Slug: "my_task2",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "single_task2.js",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -76,29 +95,41 @@ func TestDiscoverTasks(t *testing.T) {
 			name:  "nested scripts",
 			paths: []string{"./fixtures/nestedScripts"},
 			existingTasks: map[string]api.Task{
-				"my_task":  {Kind: build.TaskKindNode},
-				"my_task2": {Kind: build.TaskKindNode},
+				"my_task":  {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+				"my_task2": {ID: "tsk456", Slug: "my_task2", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot:         fixturesPath + "/nestedScripts",
-					WorkingDirectory: fixturesPath + "/nestedScripts",
-					TaskEntrypoint:   fixturesPath + "/nestedScripts/single_task.js",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task.js",
 					Def: &definitions.Definition{
-						Node: &definitions.NodeDefinition{Entrypoint: "single_task.js"},
+						Slug: "my_task",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "single_task.js",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
 				},
 				{
-					TaskRoot:         fixturesPath + "/nestedScripts",
-					WorkingDirectory: fixturesPath + "/nestedScripts",
-					TaskEntrypoint:   fixturesPath + "/nestedScripts/single_task2.js",
+					TaskID:         "tsk456",
+					TaskRoot:       fixturesPath + "/nestedScripts",
+					TaskEntrypoint: fixturesPath + "/nestedScripts/single_task2.js",
 					Def: &definitions.Definition{
-						Node: &definitions.NodeDefinition{Entrypoint: "single_task2.js"},
+						Slug: "my_task2",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "single_task2.js",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceScript,
+					Source: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -106,22 +137,28 @@ func TestDiscoverTasks(t *testing.T) {
 			name:  "single defn",
 			paths: []string{"./fixtures/defn.task.yaml"},
 			existingTasks: map[string]api.Task{
-				"my_task": {Kind: build.TaskKindNode},
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
 			want: []TaskConfig{
 				{
-					TaskRoot: fixturesPath,
-					// TODO adjust to be fixturesPath when entrypoint is relative to task defn
-					TaskEntrypoint: discoverPath + "/single_task.js",
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
 					Def: &definitions.Definition_0_3{
 						Name:        "sunt in tempor eu",
 						Slug:        "my_task",
 						Description: "ut dolor sit officia ea",
-						// TODO adjust to be absolute path
-						Node: &definitions.NodeDefinition_0_3{Entrypoint: "./single_task.js", NodeVersion: "14"},
+						Node: &definitions.NodeDefinition_0_3{
+							Entrypoint:  "./single_task.js",
+							NodeVersion: "14",
+						},
 					},
-					Task: api.Task{Kind: build.TaskKindNode},
-					From: TaskConfigSourceDefn,
+					Source: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
 				},
 			},
 		},
@@ -131,6 +168,91 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{},
 			expectedErr:   false,
 		},
+		{
+			name:  "same task, multiple discoverers",
+			paths: []string{"./fixtures/defn.task.yaml", "./fixtures/single_task.js"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+			},
+			want: []TaskConfig{
+				{
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/single_task.js",
+					Def: &definitions.Definition_0_3{
+						Name:        "sunt in tempor eu",
+						Slug:        "my_task",
+						Description: "ut dolor sit officia ea",
+						Node: &definitions.NodeDefinition_0_3{
+							Entrypoint:  "./single_task.js",
+							NodeVersion: "14",
+						},
+					},
+					Source: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "",
+				},
+			},
+		},
+		{
+			name:  "different working directory",
+			paths: []string{"./fixtures/subdir/single_task.js"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+			},
+			want: []TaskConfig{
+				{
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
+					Def: &definitions.Definition{
+						Slug: "my_task",
+						Node: &definitions.NodeDefinition{
+							Entrypoint: "subdir/single_task.js",
+						},
+					},
+					Source: TaskConfigSourceScript,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir": "/subdir",
+				},
+			},
+		},
+		{
+			name:  "different working directory, with definition",
+			paths: []string{"./fixtures/subdir/defn.task.yaml"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+			},
+			want: []TaskConfig{
+				{
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/subdir/single_task.js",
+					Def: &definitions.Definition_0_3{
+						Name:        "sunt in tempor eu",
+						Slug:        "my_task",
+						Description: "ut dolor sit officia ea",
+						Node: &definitions.NodeDefinition_0_3{
+							Entrypoint:  "./single_task.js",
+							NodeVersion: "14",
+						},
+					},
+					Source: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir":    "/subdir",
+					"entrypoint": "subdir/single_task.js",
+				},
+			},
+		},
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
@@ -138,12 +260,16 @@ func TestDiscoverTasks(t *testing.T) {
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
 			}
-			scriptDiscoverer := &ScriptDiscoverer{}
+			scriptDiscoverer := &ScriptDiscoverer{
+				Client: apiClient,
+				Logger: &logger.MockLogger{},
+			}
 			defnDiscoverer := &DefnDiscoverer{
 				Client: apiClient,
+				Logger: &logger.MockLogger{},
 			}
 			d := &Discoverer{
-				TaskDiscoverers: []TaskDiscoverer{scriptDiscoverer, defnDiscoverer},
+				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
 				Client: &mock.MockClient{
 					Tasks: tC.existingTasks,
 				},
@@ -156,7 +282,13 @@ func TestDiscoverTasks(t *testing.T) {
 			}
 			require.NoError(err)
 
-			require.Equal(tC.want, got)
+			require.Equal(len(tC.want), len(got))
+			for i := range tC.want {
+				for k, v := range tC.buildConfigs[i] {
+					tC.want[i].Def.SetBuildConfig(k, v)
+				}
+				require.Equal(tC.want[i], got[i])
+			}
 		})
 	}
 }

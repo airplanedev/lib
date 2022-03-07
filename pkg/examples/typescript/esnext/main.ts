@@ -14,13 +14,13 @@ export default async function(params: Params) {
   // Test a few syntax changes and a few polyfills to make sure
   // they are compiled/polyfilled correctly under order versions of Node.
 
-  airplane.output("exp", 2 ** 5) // exponent operator (es2016)
+  airplane.setOutput(2 ** 5, "exp") // exponent operator (es2016)
 
   try {
-    airplane.output("try", "throw")
+    airplane.setOutput("throw", "try")
     throw new Error("yikes!")
   } catch { // optional catch binding (es2019)
-    airplane.output("try", "catch")
+    airplane.setOutput("catch", "try")
   }
 
   const sayings = {
@@ -29,7 +29,7 @@ export default async function(params: Params) {
     }
   }
   for (const lang of ["english", "spanish"]) {
-    airplane.output("saying", sayings[lang]?.hello) // optional chaining (es2020)
+    airplane.appendOutput(sayings[lang]?.hello, "saying") // optional chaining (es2020)
   }
 
   // TODO: polyfill JS functionality so older versions of Node can access
@@ -38,5 +38,5 @@ export default async function(params: Params) {
   // foo.replaceAll("<id>", params.id) // replaceAll (es2021)
   // airplane.output(foo)
   
-  airplane.output(params.id)
+  airplane.setOutput(params.id, "output")
 }

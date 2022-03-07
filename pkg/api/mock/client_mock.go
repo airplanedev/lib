@@ -13,12 +13,23 @@ type MockClient struct {
 
 var _ api.IAPIClient = &MockClient{}
 
-func (mc *MockClient) GetTask(ctx context.Context, slug string) (res api.Task, err error) {
-	task, ok := mc.Tasks[slug]
+func (mc *MockClient) GetTask(ctx context.Context, req api.GetTaskRequest) (res api.Task, err error) {
+	task, ok := mc.Tasks[req.Slug]
 	if !ok {
-		return api.Task{}, &api.TaskMissingError{AppURL: "api/", Slug: slug}
+		return api.Task{}, &api.TaskMissingError{AppURL: "api/", Slug: req.Slug}
 	}
 	return task, nil
+}
+
+func (mc *MockClient) GetTaskMetadata(ctx context.Context, slug string) (res api.TaskMetadata, err error) {
+	task, ok := mc.Tasks[slug]
+	if !ok {
+		return api.TaskMetadata{}, &api.TaskMissingError{AppURL: "api/", Slug: slug}
+	}
+	return api.TaskMetadata{
+		ID:   task.ID,
+		Slug: task.Slug,
+	}, nil
 }
 
 func (mc *MockClient) ListResources(ctx context.Context) (res api.ListResourcesResponse, err error) {

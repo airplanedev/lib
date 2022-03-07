@@ -201,9 +201,11 @@ func (def *Definition) SetEntrypoint(taskroot, absEntrypoint string) error {
 
 func (def *Definition) SetWorkdir(taskroot, workdir string) {
 	// TODO: currently only a concept on Node - should be generalized to all builders.
-	if def.Node != nil {
-		def.Node.Workdir = strings.TrimPrefix(workdir, taskroot)
+	if def.Node == nil {
+		return
 	}
+
+	def.SetBuildConfig("workdir", strings.TrimPrefix(workdir, taskroot))
 }
 
 func (def Definition) Validate() (Definition, error) {
@@ -275,13 +277,17 @@ func (def *Definition) GetSlug() string {
 	return def.Slug
 }
 
-func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient, currentTask *api.Task) (api.UpdateTaskRequest, error) {
+func (def *Definition) GetName() string {
+	return def.Name
+}
+
+func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error) {
 	kind, options, err := def.GetKindAndOptions()
 	if err != nil {
 		return api.UpdateTaskRequest{}, err
 	}
 
-	utr := api.UpdateTaskRequest{
+	return api.UpdateTaskRequest{
 		Slug:             def.Slug,
 		Name:             def.Name,
 		Description:      def.Description,
@@ -296,12 +302,36 @@ func (def *Definition) GetUpdateTaskRequest(ctx context.Context, client api.IAPI
 		KindOptions:      options,
 		Repo:             def.Repo,
 		Timeout:          def.Timeout,
+	}, nil
+}
+
+func (def *Definition) GetBuildConfig() (build.BuildConfig, error) {
+	config := build.BuildConfig{}
+
+	_, options, err := def.GetKindAndOptions()
+	if err != nil {
+		return nil, err
 	}
-	if currentTask != nil {
-		utr.Permissions = currentTask.Permissions
-		utr.RequireExplicitPermissions = currentTask.RequireExplicitPermissions
+	for key, val := range options {
+		config[key] = val
 	}
-	return utr, nil
+
+	for key, val := range def.buildConfig {
+		if val == nil { // Nil masks out the value.
+			delete(config, key)
+		} else {
+			config[key] = val
+		}
+	}
+
+	return config, nil
+}
+
+func (def *Definition) SetBuildConfig(key string, value interface{}) {
+	if def.buildConfig == nil {
+		def.buildConfig = map[string]interface{}{}
+	}
+	def.buildConfig[key] = value
 }
 
 func UnmarshalDefinition(buf []byte, defPath string) (Definition, error) {
