@@ -584,7 +584,7 @@ type RESTDefinition_0_3 struct {
 	URLParams map[string]interface{} `json:"urlParams,omitempty"`
 	Headers   map[string]interface{} `json:"headers,omitempty"`
 	BodyType  string                 `json:"bodyType"`
-	Body      string                 `json:"body,omitempty"`
+	Body      interface{}            `json:"body,omitempty"`
 	FormData  map[string]interface{} `json:"formData,omitempty"`
 }
 
@@ -649,11 +649,7 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 		}
 	}
 	if v, ok := t.KindOptions["body"]; ok {
-		if sv, ok := v.(string); ok {
-			d.Body = sv
-		} else {
-			return errors.Errorf("expected string body, got %T instead", v)
-		}
+		d.Body = v
 	}
 	if v, ok := t.KindOptions["formData"]; ok {
 		if mv, ok := v.(map[string]interface{}); ok {
