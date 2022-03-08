@@ -1,6 +1,6 @@
 // Linked to https://app.airplane.dev/t/update_registry_cache [do not edit this line]
 
-import execa from 'execa'
+import { execa } from 'execa'
 import * as fs from 'fs'
 import airplane from 'airplane'
 
