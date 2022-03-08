@@ -1,0 +1,22 @@
+# https://golangci-lint.run/usage/configuration/#config-file
+
+linters:
+  # The following linters require at least version 1.44 of golangci-lint.
+  # https://golangci-lint.run/usage/linters/
+  enable:
+    - bodyclose
+    - durationcheck
+    - exportloopref
+    - gci
+    - gofmt
+    - makezero
+    - nakedret
+    - noctx
+    - predeclared
+    - rowserrcheck
+    - sqlclosecheck
+    - promlinter
+    - tenv
+    - bidichk
+    - contextcheck
+    - errchkjson

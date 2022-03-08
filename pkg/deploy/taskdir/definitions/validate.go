@@ -3,7 +3,7 @@ package definitions
 import (
 	"fmt"
 
-	"github.com/alecthomas/jsonschema"
+	"github.com/invopop/jsonschema"
 	"github.com/pkg/errors"
 	"github.com/xeipuuv/gojsonschema"
 	"gopkg.in/yaml.v3"

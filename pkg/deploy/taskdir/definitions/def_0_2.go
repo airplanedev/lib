@@ -38,6 +38,8 @@ type Definition_0_2 struct {
 	// This field is ignored when using the "image" builder.
 	Root string `yaml:"root,omitempty"`
 
+	// This field is reported as unused because the usage is on an alias type of this struct (Definition).
+	//nolint:structcheck
 	buildConfig build.BuildConfig
 }
 
