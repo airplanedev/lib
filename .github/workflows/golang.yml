@@ -1,0 +1,53 @@
+name: golang
+on: push
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.17"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+      # https://github.com/golangci/golangci-lint-action
+      - uses: golangci/golangci-lint-action@v2
+        with:
+          version: v1.44.0
+          args: --timeout=5m
+          skip-go-installation: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+      - name: Run check_gotidy.sh
+        run: |
+          scripts/check_gotidy.sh
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: "1.17"
+      - uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: go test
+        run: |
+          go test -race -timeout=10m -coverpkg=./... -covermode atomic -coverprofile=coverage.out ./...
+
+      - name: Upload coverage to Codecov
+        # this line will prevent forks of this repo from attempting to upload coverage
+        if: github.repository == 'airplanedev/lib'
+        run: bash <(curl -s https://codecov.io/bash)
