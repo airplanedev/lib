@@ -91,7 +91,7 @@ func node(root string, options KindOptions) (string, error) {
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON()
+	pjson, err := GenShimPackageJSON(cfg.ESMModules)
 	if err != nil {
 		return "", err
 	}
@@ -172,18 +172,22 @@ func node(root string, options KindOptions) (string, error) {
 	`), cfg)
 }
 
-func GenShimPackageJSON() ([]byte, error) {
+func GenShimPackageJSON(usesESMModules bool) ([]byte, error) {
+	packageJSONType := "commonjs"
+	if usesESMModules {
+		packageJSONType = "module"
+	}
 	b, err := json.Marshal(struct {
 		Dependencies map[string]string `json:"dependencies"`
 		Type         string            `json:"type"`
 	}{
 		Dependencies: map[string]string{
 			"airplane":         "~0.1.2",
-			"esbuild":          "0.14",
+			"esbuild":          "0.11",
 			"fast-glob":        "3.2.11",
 			"esbuild-ts-paths": "^1.1.1",
 		},
-		Type: "module",
+		Type: packageJSONType,
 	})
 	return b, errors.Wrap(err, "generating shim dependencies")
 }

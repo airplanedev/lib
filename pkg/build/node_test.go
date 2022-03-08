@@ -85,22 +85,22 @@ func TestNodeBuilder(t *testing.T) {
 		// 		"nodeVersion": "14",
 		// 	},
 		// },
-		{
-			Root: "typescript/esm",
-			Kind: TaskKindNode,
-			Options: KindOptions{
-				"shim":       "true",
-				"entrypoint": "main.ts",
-			},
-		},
 		// {
-		// 	Root: "typescript/aliases",
+		// 	Root: "typescript/esm",
 		// 	Kind: TaskKindNode,
 		// 	Options: KindOptions{
 		// 		"shim":       "true",
 		// 		"entrypoint": "main.ts",
 		// 	},
 		// },
+		{
+			Root: "typescript/aliases",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
 		// {
 		// 	Root: "typescript/externals",
 		// 	Kind: TaskKindNode,
