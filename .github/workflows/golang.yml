@@ -45,7 +45,7 @@ jobs:
 
       - name: go test
         run: |
-          go test -race -timeout=1m -coverpkg=./... -covermode atomic -coverprofile=coverage.out ./...
+          go test -race -timeout=10m -coverpkg=./... -covermode atomic -coverprofile=coverage.out ./...
 
       - name: Upload coverage to Codecov
         # this line will prevent forks of this repo from attempting to upload coverage
