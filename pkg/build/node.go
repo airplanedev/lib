@@ -165,9 +165,6 @@ func node(root string, options KindOptions) (string, error) {
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js
 		RUN	{{.InlineBuild}} > /airplane/.airplane/build.mjs
 		RUN	node /airplane/.airplane/build.mjs {{.NodeVersion}} {{.ESMModules}}
-		RUN echo hief
-		RUN cat /airplane/main.js
-		RUN cat /airplane/.airplane/shim.js
 		ENTRYPOINT ["node", "/airplane/.airplane/shim.js"]
 	`), cfg)
 }
@@ -182,10 +179,9 @@ func GenShimPackageJSON(usesESMModules bool) ([]byte, error) {
 		Type         string            `json:"type"`
 	}{
 		Dependencies: map[string]string{
-			"airplane":         "~0.1.2",
-			"esbuild":          "0.11",
-			"fast-glob":        "3.2.11",
-			"esbuild-ts-paths": "^1.1.1",
+			"airplane":  "~0.1.2",
+			"esbuild":   "0.11",
+			"fast-glob": "3.2.11",
 		},
 		Type: packageJSONType,
 	})
@@ -215,6 +211,9 @@ func NodeShim(entrypoint string) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept
 	// import paths with `.ts` endings. `.js` endings are fine.
 	entrypoint = strings.TrimSuffix(entrypoint, ".ts")
+	if !strings.HasSuffix(entrypoint, ".js") {
+		entrypoint = fmt.Sprintf("%s.js", entrypoint)
+	}
 	// The shim is stored under the .airplane directory.
 	entrypoint = filepath.Join("../", entrypoint)
 	// Escape for embedding into a string

@@ -1,4 +1,3 @@
-// import {NodeResolvePlugin} from "@esbuild-plugins/node-resolve";
 import { build } from "esbuild";
 import fg from 'fast-glob';
 
