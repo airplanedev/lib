@@ -50,4 +50,4 @@ jobs:
       - name: Upload coverage to Codecov
         # this line will prevent forks of this repo from attempting to upload coverage
         if: github.repository == 'airplanedev/lib'
-        run: bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+        run: bash <(curl -s https://codecov.io/bash)
