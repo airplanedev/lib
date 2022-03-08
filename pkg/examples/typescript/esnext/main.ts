@@ -14,13 +14,13 @@ export default async function(params: Params) {
   // Test a few syntax changes and a few polyfills to make sure
   // they are compiled/polyfilled correctly under order versions of Node.
 
-  airplane.setOutput(2 ** 5, "exp") // exponent operator (es2016)
+  airplane.appendOutput(2 ** 5, "exp") // exponent operator (es2016)
 
   try {
-    airplane.setOutput("throw", "try")
+    airplane.appendOutput("throw", "try")
     throw new Error("yikes!")
   } catch { // optional catch binding (es2019)
-    airplane.setOutput("catch", "try")
+    airplane.appendOutput("catch", "try")
   }
 
   const sayings = {
@@ -38,5 +38,5 @@ export default async function(params: Params) {
   // foo.replaceAll("<id>", params.id) // replaceAll (es2021)
   // airplane.output(foo)
   
-  airplane.setOutput(params.id, "output")
+  airplane.appendOutput(params.id, "output")
 }

@@ -67,6 +67,7 @@ func node(root string, options KindOptions) (string, error) {
 		InlineShimPackageJSON string
 		InlineBuild           string
 		NodeVersion           string
+		ESMModules            bool
 		InstallCommand        string
 		PostInstallCommand    string
 	}{
@@ -78,6 +79,7 @@ func node(root string, options KindOptions) (string, error) {
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
 		InlineBuild:        inlineString(nodeBuild),
+		ESMModules:         pkg.Type == "module",
 	}
 
 	if !strings.HasPrefix(cfg.Workdir, "/") {
@@ -160,23 +162,28 @@ func node(root string, options KindOptions) (string, error) {
 		RUN {{.PostInstallCommand}}
 		{{end}}
 		
-		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
-			{{.InlineBuild}} > /airplane/.airplane/build.mjs && \
-			node /airplane/.airplane/build.mjs {{.NodeVersion}}
-		ENTRYPOINT ["node", "/airplane/.airplane/dist/shim.js"]
+		RUN {{.InlineShim}} > /airplane/.airplane/shim.js
+		RUN	{{.InlineBuild}} > /airplane/.airplane/build.mjs
+		RUN	node /airplane/.airplane/build.mjs {{.NodeVersion}} {{.ESMModules}}
+		RUN echo hief
+		RUN cat /airplane/main.js
+		RUN cat /airplane/.airplane/shim.js
+		ENTRYPOINT ["node", "/airplane/.airplane/shim.js"]
 	`), cfg)
 }
 
 func GenShimPackageJSON() ([]byte, error) {
 	b, err := json.Marshal(struct {
 		Dependencies map[string]string `json:"dependencies"`
+		Type         string            `json:"type"`
 	}{
 		Dependencies: map[string]string{
-			"airplane":                      "~0.1.2",
-			"@types/node":                   "^16",
-			"@esbuild-plugins/node-resolve": "0.1.4",
-			"esbuild":                       "0.12",
+			"airplane":         "~0.1.2",
+			"esbuild":          "0.14",
+			"fast-glob":        "3.2.11",
+			"esbuild-ts-paths": "^1.1.1",
 		},
+		Type: "module",
 	})
 	return b, errors.Wrap(err, "generating shim dependencies")
 }
@@ -341,6 +348,7 @@ type Settings struct {
 type pkgJSON struct {
 	Settings   Settings          `json:"airplane"`
 	Workspaces pkgJSONWorkspaces `json:"workspaces"`
+	Type       string            `json:"type"`
 }
 
 type pkgJSONWorkspaces struct {

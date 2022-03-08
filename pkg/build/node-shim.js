@@ -1,6 +1,6 @@
 // This file includes a shim that will execute your task code.
 import airplane from "airplane";
-import task from "{{.Entrypoint}}";
+import task from "{{.Entrypoint}}.js";
 
 async function main() {
   if (process.argv.length !== 3) {

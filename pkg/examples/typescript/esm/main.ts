@@ -12,10 +12,10 @@ type Params = {
 export default async function(params: Params) {
   const res = await fetch("https://google.com");
   const html = await res.text();
-  console.log(html)
 
+  console.log(airplane)
   // I'm feeling lucky!
   if (html.toLowerCase().indexOf("lucky")) {
-    airplane.setOutput(params.id)
+    airplane.appendOutput(params.id)
   }
 }
