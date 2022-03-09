@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/utils/logger"
@@ -137,14 +138,17 @@ func Lookup(path string, kind build.TaskKind) (Interface, error) {
 	return possible[0], nil
 }
 
-// SuggestExt returns the default extension for a given TaskKind, if any.
-func SuggestExt(kind build.TaskKind) string {
+// SuggestExts returns a list of extensions for a given TaskKind. May be empty.
+func SuggestExts(kind build.TaskKind) []string {
+	exts := []string{}
 	for ext, runtime := range runtimes {
 		if runtime.Kind() == kind {
-			return ext
+			exts = append(exts, ext)
 		}
 	}
-	return ""
+	// Sort, so the return value is deterministic.
+	sort.Strings(exts)
+	return exts
 }
 
 func SuggestKind(ext string) (build.TaskKind, error) {
