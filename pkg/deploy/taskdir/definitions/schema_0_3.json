@@ -253,7 +253,7 @@
                 },
                 "body": {
                   "description": "The body of the request. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
-                  "type": "string"
+                  "type": ["string", "object"]
                 },
                 "formData": {
                   "description": "A map of form values. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
