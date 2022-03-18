@@ -39,7 +39,7 @@
     "3": {
       "image": "registry.hub.docker.com/library/python",
       "tag": "3.9.6-bullseye",
-      "digest": "sha256-ddd039d4d5462c862ec1c715f78102f5a2db7ae1fda672a90941b92e766c7746"
+      "digest": "sha256:736b76eb3f64778646ce0051fb5fed4dfbf67016e51563946230ca8bb40ac687"
     }
   }
 }
