@@ -800,24 +800,24 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 }
 
 func (d Definition_0_3) Marshal(format TaskDefFormat) ([]byte, error) {
-	buf, err := json.MarshalIndent(d, "", "\t")
-	if err != nil {
-		return nil, err
-	}
-
 	switch format {
 	case TaskDefFormatYAML:
-		buf, err = yaml.JSONToYAML(buf)
+		buf, err := yaml.MarshalWithOptions(d, yaml.UseLiteralStyleIfMultiline(true))
 		if err != nil {
 			return nil, err
 		}
+		return buf, nil
+
 	case TaskDefFormatJSON:
-		// nothing
+		buf, err := json.MarshalIndent(d, "", "\t")
+		if err != nil {
+			return nil, err
+		}
+		return buf, nil
+
 	default:
 		return nil, errors.Errorf("unknown format: %s", format)
 	}
-
-	return buf, nil
 }
 
 // GenerateCommentedFile generates a commented YAML file under certain circumstances. If the format
