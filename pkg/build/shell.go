@@ -22,12 +22,14 @@ func shell(root string, options KindOptions) (string, error) {
 
 	// Build off of the dockerfile if provided:
 	var dockerfileTemplate string
+	var workDir string
 	if dockerfilePath := FindDockerfile(root); dockerfilePath != "" {
 		contents, err := ioutil.ReadFile(dockerfilePath)
 		if err != nil {
 			return "", errors.Wrap(err, "opening dockerfile")
 		}
 		dockerfileTemplate = string(contents)
+		workDir = "."
 	} else {
 		dockerfileTemplate = heredoc.Doc(`
 			FROM ubuntu:21.04
@@ -59,24 +61,27 @@ func shell(root string, options KindOptions) (string, error) {
 					strace \
 				&& apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 		`)
+		workDir = "/airplane"
 	}
 
 	// Extend template with our own logic - set up a WORKDIR and shim.
 	dockerfileTemplate = dockerfileTemplate + heredoc.Doc(`
-		WORKDIR /airplane
+		WORKDIR {{.Workdir}}
 		RUN mkdir -p .airplane && {{.InlineShim}} > .airplane/shim.sh
 		
 		COPY . .
 		RUN chmod +x {{.Entrypoint}}
 		
-		ENTRYPOINT ["bash", ".airplane/shim.sh", "/airplane/{{.Entrypoint}}"]
+		ENTRYPOINT ["bash", ".airplane/shim.sh", "./{{.Entrypoint}}"]
 	`)
 	return applyTemplate(dockerfileTemplate, struct {
 		InlineShim string
 		Entrypoint string
+		Workdir    string
 	}{
 		InlineShim: inlineString(ShellShim()),
 		Entrypoint: backslashEscape(entrypoint, `"`),
+		Workdir:    workDir,
 	})
 }
 
