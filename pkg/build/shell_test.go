@@ -35,6 +35,15 @@ func TestShellBuilder(t *testing.T) {
 			},
 			SearchString: "bar",
 		},
+		{
+			Root: "shell/diffworkdir",
+			Kind: TaskKindShell,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.sh",
+			},
+			SearchString: "bar",
+		},
 	}
 
 	RunTests(t, ctx, tests)
