@@ -142,6 +142,66 @@ func TestDefinitionSerialization_0_3(t *testing.T) {
 			def:      fullDef,
 			expected: fullJSON,
 		},
+		{
+			name:   "marshal yaml with multiline",
+			format: TaskDefFormatYAML,
+			def: Definition_0_3{
+				Name: "REST task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "httpbin",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
+				},
+				Timeout: 300,
+			},
+			expected: []byte(
+				`name: REST task
+slug: rest_task
+rest:
+  resource: httpbin
+  method: POST
+  path: /post
+  bodyType: json
+  body: |
+    {
+      "name": "foo",
+      "number": 30
+    }
+timeout: 300
+`),
+		},
+		{
+			name:   "marshal json with multiline",
+			format: TaskDefFormatJSON,
+			def: Definition_0_3{
+				Name: "REST task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "httpbin",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
+				},
+				Timeout: 300,
+			},
+			expected: []byte(
+				`{
+	"name": "REST task",
+	"slug": "rest_task",
+	"rest": {
+		"resource": "httpbin",
+		"method": "POST",
+		"path": "/post",
+		"bodyType": "json",
+		"body": "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n"
+	},
+	"timeout": 300
+}`),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
