@@ -341,7 +341,7 @@
           "type": "boolean"
         },
         "options": {
-          "description": "A list of options to constrain the parameter values.",
+          "description": "A list of options to constrain the parameter values. Can be a single value, an object with a label and a value, or an object with a label and a config var.",
           "type": "array",
           "items": {
             "anyOf": [
@@ -360,6 +360,16 @@
                     ]
                   }
                 },
+                "required": ["label", "value"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "config": { "type": "string" }
+                },
+                "required": ["label", "config"],
                 "additionalProperties": false
               }
             ]
