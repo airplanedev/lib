@@ -506,6 +506,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 									Label: "three",
 									Value: 3,
 								},
+								{
+									Label: "config",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "config_name",
+									},
+								},
 							},
 						},
 					},
@@ -567,6 +574,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 							{
 								Label: "three",
 								Value: 3,
+							},
+							{
+								Label:  "config",
+								Config: pointers.String("config_name"),
 							},
 						},
 					},
@@ -838,6 +849,147 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Parameters:  []api.Parameter{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
+			},
+		},
+		{
+			name: "check parameters",
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Parameters: []ParameterDefinition_0_3{
+					{
+						Name:        "Required boolean",
+						Slug:        "required_boolean",
+						Type:        "boolean",
+						Description: "A required boolean.",
+					},
+					{
+						Name:    "Short text",
+						Slug:    "short_text",
+						Type:    "shorttext",
+						Default: "foobar",
+					},
+					{
+						Name: "SQL",
+						Slug: "sql",
+						Type: "sql",
+					},
+					{
+						Name:     "Optional long text",
+						Slug:     "optional_long_text",
+						Type:     "longtext",
+						Required: pointers.Bool(false),
+					},
+					{
+						Name: "Options",
+						Slug: "options",
+						Type: "shorttext",
+						Options: []OptionDefinition_0_3{
+							{
+								Label: "one",
+								Value: 1,
+							},
+							{
+								Label: "two",
+								Value: 2,
+							},
+							{
+								Label: "three",
+								Value: 3,
+							},
+							{
+								Label:  "config",
+								Config: pointers.String("config_name"),
+							},
+						},
+					},
+					{
+						Name:  "Regex",
+						Slug:  "regex",
+						Type:  "shorttext",
+						Regex: "foo.*",
+					},
+				},
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+				},
+			},
+			request: api.UpdateTaskRequest{
+				Name: "Test Task",
+				Slug: "test_task",
+				Parameters: []api.Parameter{
+					{
+						Name: "Required boolean",
+						Slug: "required_boolean",
+						Type: api.TypeBoolean,
+						Desc: "A required boolean.",
+					},
+					{
+						Name:    "Short text",
+						Slug:    "short_text",
+						Type:    api.TypeString,
+						Default: "foobar",
+					},
+					{
+						Name:      "SQL",
+						Slug:      "sql",
+						Type:      api.TypeString,
+						Component: api.ComponentEditorSQL,
+					},
+					{
+						Name:      "Optional long text",
+						Slug:      "optional_long_text",
+						Type:      api.TypeString,
+						Component: api.ComponentTextarea,
+						Constraints: api.Constraints{
+							Optional: true,
+						},
+					},
+					{
+						Name: "Options",
+						Slug: "options",
+						Type: api.TypeString,
+						Constraints: api.Constraints{
+							Options: []api.ConstraintOption{
+								{
+									Label: "one",
+									Value: 1,
+								},
+								{
+									Label: "two",
+									Value: 2,
+								},
+								{
+									Label: "three",
+									Value: 3,
+								},
+								{
+									Label: "config",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "config_name",
+									},
+								},
+							},
+						},
+					},
+					{
+						Name: "Regex",
+						Slug: "regex",
+						Type: api.TypeString,
+						Constraints: api.Constraints{
+							Regex: "foo.*",
+						},
+					},
+				},
+				Kind: build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
