@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
@@ -29,6 +30,11 @@ func shell(root string, options KindOptions) (string, error) {
 			return "", errors.Wrap(err, "opening dockerfile")
 		}
 		dockerfileTemplate = string(contents)
+
+		if !strings.HasSuffix(dockerfileTemplate, "\n") {
+			dockerfileTemplate = dockerfileTemplate + "\n"
+		}
+
 		workDir = "."
 	} else {
 		dockerfileTemplate = heredoc.Doc(`
