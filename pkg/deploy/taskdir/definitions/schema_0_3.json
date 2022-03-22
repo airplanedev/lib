@@ -341,7 +341,11 @@
           "type": "boolean"
         },
         "options": {
-          "description": "A list of options to constrain the parameter values.",
+          "description": "A list of options to constrain the parameter values. For configvar types, each option needs to be an object with a label (value to show to user) and a config (name of the config var). For all other types, each option can be a single value or an object with a label and a value.",
+          "examples": [
+            "Alfred Pennyworth",
+            { "label": "Batman", "value": "Bruce Wayne" }
+          ],
           "type": "array",
           "items": {
             "anyOf": [
@@ -360,6 +364,16 @@
                     ]
                   }
                 },
+                "required": ["label", "value"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "config": { "type": "string" }
+                },
+                "required": ["label", "config"],
                 "additionalProperties": false
               }
             ]

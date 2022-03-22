@@ -6,6 +6,7 @@ import (
 	_ "embed"
 	"encoding/json"
 	"os"
+	"reflect"
 	"strings"
 	"text/template"
 
@@ -714,8 +715,9 @@ type ParameterDefinition_0_3 struct {
 }
 
 type OptionDefinition_0_3 struct {
-	Label string      `json:"label"`
-	Value interface{} `json:"value"`
+	Label  string      `json:"label"`
+	Value  interface{} `json:"value,omitempty"`
+	Config *string     `json:"config,omitempty"`
 }
 
 var _ json.Unmarshaler = &OptionDefinition_0_3{}
@@ -1105,7 +1107,14 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			param.Constraints.Options = make([]api.ConstraintOption, len(pd.Options))
 			for j, od := range pd.Options {
 				param.Constraints.Options[j].Label = od.Label
-				param.Constraints.Options[j].Value = od.Value
+				if od.Config != nil {
+					param.Constraints.Options[j].Value = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           *od.Config,
+					}
+				} else {
+					param.Constraints.Options[j].Value = od.Value
+				}
 			}
 		}
 
@@ -1290,9 +1299,34 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 		if len(param.Constraints.Options) > 0 {
 			p.Options = make([]OptionDefinition_0_3, len(param.Constraints.Options))
 			for j, opt := range param.Constraints.Options {
-				p.Options[j] = OptionDefinition_0_3{
-					Label: opt.Label,
-					Value: opt.Value,
+				switch k := reflect.ValueOf(opt.Value).Kind(); k {
+				case reflect.Map:
+					m, ok := opt.Value.(map[string]interface{})
+					if !ok {
+						return errors.Errorf("unhandled option: %v", opt.Value)
+					}
+					if airplaneType, ok := m["__airplaneType"]; !ok || airplaneType != "configvar" {
+						return errors.Errorf("unhandled option: %v", opt.Value)
+					}
+					if configName, ok := m["name"]; !ok {
+						return errors.Errorf("unhandled option: %v", opt.Value)
+					} else if configNameStr, ok := configName.(string); !ok {
+						return errors.Errorf("unhandled option: %v", opt.Value)
+					} else {
+						p.Options[j] = OptionDefinition_0_3{
+							Label:  opt.Label,
+							Config: &configNameStr,
+						}
+					}
+				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					p.Options[j] = OptionDefinition_0_3{
+						Label: opt.Label,
+						Value: opt.Value,
+					}
+				default:
+					return errors.Errorf("unhandled option type: %s", k)
 				}
 			}
 		}

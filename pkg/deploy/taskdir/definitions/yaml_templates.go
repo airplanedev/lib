@@ -26,10 +26,14 @@ name: {{.name}}
 #   default: Alfred Pennyworth
 #   # Set to false to indicate that this parameter. is optional. Default: true.
 #   required: false
-#   # A list of options to constrain the parameter values.
+#   # A list of options to constrain the parameter values. For configvar types,
+#   # each option needs to be an object with a label (value to show to user) and
+#   # a config (name of the config var). For all other types, each option can be
+#   # a single value or an object with a label and a value.
 #   options:
 #   - Alfred Pennyworth
-#   - Bruce Wayne
+#   - label: Batman
+#     value: Bruce Wayne
 #   # A regular expression with which to validate parameter values.
 #   regex: "^[a-zA-Z ]+$"
 {{ .taskDefinition }}
