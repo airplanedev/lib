@@ -36,13 +36,21 @@ func TestShellBuilder(t *testing.T) {
 			SearchString: "bar",
 		},
 		{
-			Root: "shell/diffworkdir",
+			Root: "shell/diff-workdir",
 			Kind: TaskKindShell,
 			Options: KindOptions{
 				"shim":       "true",
 				"entrypoint": "main.sh",
 			},
 			SearchString: "bar",
+		},
+		{
+			Root: "shell/ubuntu-no-newline",
+			Kind: TaskKindShell,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.sh",
+			},
 		},
 	}
 
