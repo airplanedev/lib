@@ -142,6 +142,66 @@ func TestDefinitionSerialization_0_3(t *testing.T) {
 			def:      fullDef,
 			expected: fullJSON,
 		},
+		{
+			name:   "marshal yaml with multiline",
+			format: TaskDefFormatYAML,
+			def: Definition_0_3{
+				Name: "REST task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "httpbin",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
+				},
+				Timeout: 300,
+			},
+			expected: []byte(
+				`name: REST task
+slug: rest_task
+rest:
+  resource: httpbin
+  method: POST
+  path: /post
+  bodyType: json
+  body: |
+    {
+      "name": "foo",
+      "number": 30
+    }
+timeout: 300
+`),
+		},
+		{
+			name:   "marshal json with multiline",
+			format: TaskDefFormatJSON,
+			def: Definition_0_3{
+				Name: "REST task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "httpbin",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
+				},
+				Timeout: 300,
+			},
+			expected: []byte(
+				`{
+	"name": "REST task",
+	"slug": "rest_task",
+	"rest": {
+		"resource": "httpbin",
+		"method": "POST",
+		"path": "/post",
+		"bodyType": "json",
+		"body": "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n"
+	},
+	"timeout": 300
+}`),
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
@@ -211,6 +271,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name:        "Python Task",
@@ -218,6 +286,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Description: "A task for testing",
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
 				},
 			},
 		},
@@ -232,6 +308,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					"entrypoint":  "main.ts",
 					"nodeVersion": "14",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Node Task",
@@ -239,6 +323,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Node: &NodeDefinition_0_3{
 					Entrypoint:  "main.ts",
 					NodeVersion: "14",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
 				},
 			},
 		},
@@ -252,12 +344,28 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
 				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Shell Task",
 				Slug: "shell_task",
 				Shell: &ShellDefinition_0_3{
 					Entrypoint: "main.sh",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
 				},
 			},
 		},
@@ -267,10 +375,18 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name:        "Image Task",
 				Slug:        "image_task",
 				Command:     []string{"bash"},
-				Arguments:   []string{"-c", "echo 'foobar'"},
+				Arguments:   []string{"-c", `echo "foobar"`},
 				Kind:        build.TaskKindImage,
 				KindOptions: build.KindOptions{},
 				Image:       pointers.String("ubuntu:latest"),
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
 			},
 			definition: Definition_0_3{
 				Name: "Image Task",
@@ -278,7 +394,15 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
 				},
 			},
 		},
@@ -382,6 +506,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 									Label: "three",
 									Value: 3,
 								},
+								{
+									Label: "config",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "config_name",
+									},
+								},
 							},
 						},
 					},
@@ -443,6 +574,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 							{
 								Label: "three",
 								Value: 3,
+							},
+							{
+								Label:  "config",
+								Config: pointers.String("config_name"),
 							},
 						},
 					},
@@ -610,7 +745,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
 					Entrypoint: "bash",
-					Command:    []string{"-c", "echo 'foobar'"},
+					Command:    `-c 'echo "foobar"'`,
 				},
 			},
 			request: api.UpdateTaskRequest{
@@ -618,7 +753,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Slug:       "image_task",
 				Parameters: []api.Parameter{},
 				Command:    []string{"bash"},
-				Arguments:  []string{"-c", "echo 'foobar'"},
+				Arguments:  []string{"-c", `echo "foobar"`},
 				Kind:       build.TaskKindImage,
 				Image:      pointers.String("ubuntu:latest"),
 				ExecuteRules: api.UpdateExecuteRulesRequest{
@@ -714,6 +849,147 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Parameters:  []api.Parameter{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
+			},
+		},
+		{
+			name: "check parameters",
+			definition: Definition_0_3{
+				Name: "Test Task",
+				Slug: "test_task",
+				Parameters: []ParameterDefinition_0_3{
+					{
+						Name:        "Required boolean",
+						Slug:        "required_boolean",
+						Type:        "boolean",
+						Description: "A required boolean.",
+					},
+					{
+						Name:    "Short text",
+						Slug:    "short_text",
+						Type:    "shorttext",
+						Default: "foobar",
+					},
+					{
+						Name: "SQL",
+						Slug: "sql",
+						Type: "sql",
+					},
+					{
+						Name:     "Optional long text",
+						Slug:     "optional_long_text",
+						Type:     "longtext",
+						Required: pointers.Bool(false),
+					},
+					{
+						Name: "Options",
+						Slug: "options",
+						Type: "shorttext",
+						Options: []OptionDefinition_0_3{
+							{
+								Label: "one",
+								Value: 1,
+							},
+							{
+								Label: "two",
+								Value: 2,
+							},
+							{
+								Label: "three",
+								Value: 3,
+							},
+							{
+								Label:  "config",
+								Config: pointers.String("config_name"),
+							},
+						},
+					},
+					{
+						Name:  "Regex",
+						Slug:  "regex",
+						Type:  "shorttext",
+						Regex: "foo.*",
+					},
+				},
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+				},
+			},
+			request: api.UpdateTaskRequest{
+				Name: "Test Task",
+				Slug: "test_task",
+				Parameters: []api.Parameter{
+					{
+						Name: "Required boolean",
+						Slug: "required_boolean",
+						Type: api.TypeBoolean,
+						Desc: "A required boolean.",
+					},
+					{
+						Name:    "Short text",
+						Slug:    "short_text",
+						Type:    api.TypeString,
+						Default: "foobar",
+					},
+					{
+						Name:      "SQL",
+						Slug:      "sql",
+						Type:      api.TypeString,
+						Component: api.ComponentEditorSQL,
+					},
+					{
+						Name:      "Optional long text",
+						Slug:      "optional_long_text",
+						Type:      api.TypeString,
+						Component: api.ComponentTextarea,
+						Constraints: api.Constraints{
+							Optional: true,
+						},
+					},
+					{
+						Name: "Options",
+						Slug: "options",
+						Type: api.TypeString,
+						Constraints: api.Constraints{
+							Options: []api.ConstraintOption{
+								{
+									Label: "one",
+									Value: 1,
+								},
+								{
+									Label: "two",
+									Value: 2,
+								},
+								{
+									Label: "three",
+									Value: 3,
+								},
+								{
+									Label: "config",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "config_name",
+									},
+								},
+							},
+						},
+					},
+					{
+						Name: "Regex",
+						Slug: "regex",
+						Type: api.TypeString,
+						Constraints: api.Constraints{
+							Regex: "foo.*",
+						},
+					},
+				},
+				Kind: build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},

@@ -191,3 +191,8 @@ func (r Runtime) FormatComment(s string) string {
 
 	return strings.Join(lines, "\n")
 }
+
+// SupportsLocalExecution implementation.
+func (r Runtime) SupportsLocalExecution() bool {
+	return true
+}

@@ -14,7 +14,7 @@ type errReadDefinition struct {
 	errorMsgs []string
 }
 
-func newErrReadDefinition(msg string, errorMsgs ...string) error {
+func NewErrReadDefinition(msg string, errorMsgs ...string) error {
 	return errors.WithStack(errReadDefinition{
 		msg:       msg,
 		errorMsgs: errorMsgs,

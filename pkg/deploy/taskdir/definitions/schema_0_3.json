@@ -1,4 +1,5 @@
 {
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Task",
   "oneOf": [
     {
@@ -8,10 +9,17 @@
           "type": "object",
           "properties": {
             "node": {
+              "description": "Configuration for a Node task.",
               "type": "object",
               "properties": {
-                "entrypoint": { "type": "string" },
-                "nodeVersion": { "enum": ["12", "14", "15", "16"] },
+                "entrypoint": {
+                  "description": "The path to the .ts or .js file containing the logic for this task. This can be absolute or relative to the location of the definition file.",
+                  "type": "string"
+                },
+                "nodeVersion": {
+                  "description": "The version of Node to use.",
+                  "enum": ["12", "14", "15", "16"]
+                },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
@@ -29,9 +37,13 @@
           "type": "object",
           "properties": {
             "python": {
+              "description": "Configuration for a Python task.",
               "type": "object",
               "properties": {
-                "entrypoint": { "type": "string" },
+                "entrypoint": {
+                  "description": "The path to the .py file containing the logic for this task. This can be absolute or relative to the location of the definition file.",
+                  "type": "string"
+                },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
@@ -49,9 +61,13 @@
           "type": "object",
           "properties": {
             "shell": {
+              "description": "Configuration for a shell task.",
               "type": "object",
               "properties": {
-                "entrypoint": { "type": "string" },
+                "entrypoint": {
+                  "description": "The path to the .sh file containing the logic for this task. This can be absolute or relative to the location of the definition file.",
+                  "type": "string"
+                },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
@@ -68,19 +84,35 @@
         {
           "type": "object",
           "properties": {
-            "image": {
+            "docker": {
+              "description": "Configuration for a Docker task.",
               "type": "object",
               "properties": {
-                "image": { "type": "string" },
-                "command": { "type": "array", "items": { "type": "string" } },
-                "entrypoint": { "type": "string" },
+                "image": {
+                  "description": "The name of the image to use.",
+                  "examples": ["alpine:3"],
+                  "type": "string"
+                },
+                "command": {
+                  "description": "The Docker command to run. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
+                  "examples": [
+                    "echo \"hello world\"",
+                    "echo \"{{params.input}}\""
+                  ],
+                  "type": "string"
+                },
+                "entrypoint": {
+                  "description": "Specify a Docker entrypoint to override the default image entrypoint.",
+                  "examples": ["bash"],
+                  "type": "string"
+                },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
               "required": ["image"]
             }
           },
-          "required": ["image"]
+          "required": ["docker"]
         }
       ]
     },
@@ -152,11 +184,19 @@
           "type": "object",
           "properties": {
             "sql": {
+              "description": "Configuration for a SQL task.",
               "type": "object",
               "properties": {
-                "resource": { "type": "string" },
-                "entrypoint": { "type": "string" },
+                "resource": {
+                  "description": "The name of a database resource.",
+                  "type": "string"
+                },
+                "entrypoint": {
+                  "description": "The path to the .sql file containing the logic for this task. This can be absolute or relative to the location of the definition file. The contents of the .sql file support JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
+                  "type": "string"
+                },
                 "queryArgs": {
+                  "description": "A map of query arguments that can be used to safely pass parameter inputs to your query. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
@@ -178,28 +218,45 @@
           "type": "object",
           "properties": {
             "rest": {
+              "description": "Configuration for a REST task.",
               "type": "object",
               "properties": {
-                "resource": { "type": "string" },
-                "method": { "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"] },
-                "path": { "type": "string" },
+                "resource": {
+                  "description": "The name of a REST resource.",
+                  "type": "string"
+                },
+                "method": {
+                  "description": "The HTTP method to use.",
+                  "enum": ["GET", "POST", "PATCH", "PUT", "DELETE"]
+                },
+                "path": {
+                  "description": "The path to request. Your REST resource may specify a path prefix as part of its base URL, in which case this path is joined to it. Airplane recommends that this start with a leading slash. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
+                  "type": "string"
+                },
                 "urlParams": {
+                  "description": "A map of URL parameters. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
                   }
                 },
                 "headers": {
+                  "description": "A map of request headers. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
                   }
                 },
                 "bodyType": {
+                  "description": "The type of body that this request should send.",
                   "enum": ["json", "raw", "form-data", "x-www-form-urlencoded"]
                 },
-                "body": { "type": "string" },
+                "body": {
+                  "description": "The body of the request. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
+                  "type": ["string", "object"]
+                },
                 "formData": {
+                  "description": "A map of form values. Supports JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
                   "type": "object",
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
@@ -215,14 +272,44 @@
       ]
     }
   ],
+  "properties": {
+    "name": true,
+    "slug": true,
+    "description": true,
+    "parameters": true,
+    "constraints": true,
+    "requireRequests": true,
+    "allowSelfApprovals": true,
+    "timeout": true,
+
+    "node": true,
+    "python": true,
+    "shell": true,
+    "deno": true,
+    "docker": true,
+    "go": true,
+    "dockerfile": true,
+    "sql": true,
+    "rest": true
+  },
+  "additionalProperties": false,
 
   "$defs": {
     "parameter": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "slug": { "$ref": "#/$defs/slug" },
+        "name": {
+          "description": "A human-readable name for the parameter.",
+          "type": "string"
+        },
+        "slug": {
+          "description": "An identifier for the parameter, which can be used in JavaScript templates (https://docs.airplane.dev/runbooks/javascript-templates).",
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "maxLength": 50
+        },
         "type": {
+          "description": "The type of parameter.",
           "enum": [
             "shorttext",
             "longtext",
@@ -236,16 +323,29 @@
             "configvar"
           ]
         },
-        "description": { "type": "string" },
+        "description": {
+          "description": "A human-readable description of the parameter.",
+          "type": "string"
+        },
         "default": {
+          "description": "The default value of the parameter.",
           "oneOf": [
             { "type": "string" },
             { "type": "number" },
             { "type": "boolean" }
           ]
         },
-        "required": { "type": "boolean" },
+        "required": {
+          "description": "Set to false to indicate that this parameter is optional.",
+          "default": true,
+          "type": "boolean"
+        },
         "options": {
+          "description": "A list of options to constrain the parameter values. For configvar types, each option needs to be an object with a label (value to show to user) and a config (name of the config var). For all other types, each option can be a single value or an object with a label and a value.",
+          "examples": [
+            "Alfred Pennyworth",
+            { "label": "Batman", "value": "Bruce Wayne" }
+          ],
           "type": "array",
           "items": {
             "anyOf": [
@@ -264,12 +364,23 @@
                     ]
                   }
                 },
+                "required": ["label", "value"],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "label": { "type": "string" },
+                  "config": { "type": "string" }
+                },
+                "required": ["label", "config"],
                 "additionalProperties": false
               }
             ]
           }
         },
         "regex": {
+          "description": "A regular expression with which to validate parameter values.",
           "type": "string",
           "format": "regex"
         }
@@ -278,6 +389,8 @@
       "required": ["name", "slug", "type"]
     },
     "envVars": {
+      "description": "A map of environment variables to use when running the task. If specifying raw values, the value may be a string; if using config variables, the value must be an object with config mapped to the name of the config variable.",
+      "examples": ["env_var_value", { "config": "db_from_config" }],
       "type": "object",
       "patternProperties": {
         ".*": {
@@ -289,48 +402,63 @@
                 "config": { "type": "string" }
               },
               "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string" }
+              },
+              "additionalProperties": false
             }
           ]
         }
       }
     },
-    "slug": {
-      "type": "string",
-      "pattern": "^[a-z0-9_]+$",
-      "maxLength": 50
-    },
     "baseDefinition": {
       "type": "object",
       "properties": {
-        "name": { "type": "string" },
-        "slug": { "$ref": "#/$defs/slug" },
-        "description": { "type": "string" },
+        "name": {
+          "description": "A human-readable name for your task.",
+          "type": "string"
+        },
+        "slug": {
+          "description": "Used by Airplane to identify your task. Do not change.",
+          "type": "string",
+          "pattern": "^[a-z0-9_]+$",
+          "maxLength": 50
+        },
+        "description": {
+          "description": "A human-readable description for your task.",
+          "type": "string"
+        },
         "parameters": {
+          "description": "A list of inputs to your task.",
           "type": "array",
           "items": {
             "$ref": "#/$defs/parameter"
           }
         },
         "constraints": {
+          "description": "Set label constraints to restrict this task to run only on agents with matching labels.",
+          "examples": [{ "aws-region": "us-west-2" }],
           "type": "object",
-          "properties": {
-            "labels": {
-              "type": "array",
-              "items": {
-                "type": "object",
-                "properties": {
-                  "key": { "type": "string" },
-                  "value": { "type": "string" }
-                },
-                "additionalProperties": false
-              }
-            }
-          },
-          "additionalProperties": false
+          "patternProperties": {
+            ".*": { "type": "string" }
+          }
         },
-        "requireRequests": { "type": "boolean" },
-        "allowSelfApprovals": { "type": "boolean" },
+        "requireRequests": {
+          "description": "Set to true to disable direct execution of this task.",
+          "default": false,
+          "type": "boolean"
+        },
+        "allowSelfApprovals": {
+          "description": "Set to false to disallow requesters from approving their own requests for this task.",
+          "default": true,
+          "type": "boolean"
+        },
         "timeout": {
+          "description": "The maximum number of seconds the task should take before being timed out.",
+          "default": 3600,
           "type": "number",
           "exclusiveMinimum": 0
         }
