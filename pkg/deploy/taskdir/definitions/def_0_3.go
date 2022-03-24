@@ -797,7 +797,8 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 		}
 	case build.TaskKindSQL:
 		def.SQL = &SQLDefinition_0_3{
-			Entrypoint: entrypoint,
+			Entrypoint:      entrypoint,
+			TransactionMode: "auto",
 		}
 	case build.TaskKindREST:
 		def.REST = &RESTDefinition_0_3{
