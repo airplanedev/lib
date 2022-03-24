@@ -156,6 +156,10 @@ sql:
   # (https://docs.airplane.dev/runbooks/javascript-templates).
   # queryArgs:
   #   name: "{{"{{params.name}}"}}"
+
+  # The transaction mode to use. Valid values: auto, readOnly, readWrite, none.
+  # Default: auto.
+  transactionMode: {{.TransactionMode}}
 `
 
 const restTemplate = `
