@@ -464,9 +464,10 @@ func (d *ShellDefinition_0_3) getEnv() (api.TaskEnv, error) {
 var _ taskKind_0_3 = &SQLDefinition_0_3{}
 
 type SQLDefinition_0_3 struct {
-	Resource   string                 `json:"resource"`
-	Entrypoint string                 `json:"entrypoint"`
-	QueryArgs  map[string]interface{} `json:"queryArgs,omitempty"`
+	Resource        string                 `json:"resource"`
+	Entrypoint      string                 `json:"entrypoint"`
+	QueryArgs       map[string]interface{} `json:"queryArgs,omitempty"`
+	TransactionMode string                 `json:"transactionMode,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
@@ -533,6 +534,13 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			return errors.Errorf("expected map queryArgs, got %T instead", v)
 		}
 	}
+	if v, ok := t.KindOptions["transactionMode"]; ok {
+		if sv, ok := v.(string); ok {
+			d.TransactionMode = sv
+		} else {
+			return errors.Errorf("expected string transactionMode, got %T instead", v)
+		}
+	}
 	return nil
 }
 
@@ -561,11 +569,15 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	if d.QueryArgs == nil {
 		d.QueryArgs = map[string]interface{}{}
 	}
-	return build.KindOptions{
+	options := build.KindOptions{
 		"entrypoint": d.Entrypoint,
 		"query":      query,
 		"queryArgs":  d.QueryArgs,
-	}, nil
+	}
+	if d.TransactionMode != "" {
+		options["transactionMode"] = d.TransactionMode
+	}
+	return options, nil
 }
 
 func (d *SQLDefinition_0_3) getEntrypoint() (string, error) {

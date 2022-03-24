@@ -201,6 +201,11 @@
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
                   }
+                },
+                "transactionMode": {
+                  "description": "The transaction mode to use.",
+                  "default": "auto",
+                  "enum": ["auto", "readOnly", "readWrite", "none"]
                 }
               },
               "additionalProperties": false,
