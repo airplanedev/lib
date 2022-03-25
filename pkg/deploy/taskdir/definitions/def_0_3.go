@@ -467,11 +467,26 @@ type SQLDefinition_0_3 struct {
 	Resource        string                 `json:"resource"`
 	Entrypoint      string                 `json:"entrypoint"`
 	QueryArgs       map[string]interface{} `json:"queryArgs,omitempty"`
-	TransactionMode string                 `json:"transactionMode,omitempty"`
+	TransactionMode SQLTransactionMode     `json:"transactionMode,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
 	absoluteEntrypoint string `json:"-"`
+}
+
+type SQLTransactionMode string
+
+var _ yaml.IsZeroer = SQLTransactionMode("")
+
+func (tm SQLTransactionMode) IsZero() bool {
+	return tm == "auto" || tm == ""
+}
+
+func (tm SQLTransactionMode) Value() string {
+	if tm == "" {
+		return "auto"
+	}
+	return string(tm)
 }
 
 func (d *SQLDefinition_0_3) GetQuery() (string, error) {
@@ -536,7 +551,7 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 	}
 	if v, ok := t.KindOptions["transactionMode"]; ok {
 		if sv, ok := v.(string); ok {
-			d.TransactionMode = sv
+			d.TransactionMode = SQLTransactionMode(sv)
 		} else {
 			return errors.Errorf("expected string transactionMode, got %T instead", v)
 		}
@@ -569,17 +584,12 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	if d.QueryArgs == nil {
 		d.QueryArgs = map[string]interface{}{}
 	}
-	options := build.KindOptions{
-		"entrypoint": d.Entrypoint,
-		"query":      query,
-		"queryArgs":  d.QueryArgs,
-	}
-	if d.TransactionMode != "" {
-		options["transactionMode"] = d.TransactionMode
-	} else {
-		options["transactionMode"] = "auto"
-	}
-	return options, nil
+	return build.KindOptions{
+		"entrypoint":      d.Entrypoint,
+		"query":           query,
+		"queryArgs":       d.QueryArgs,
+		"transactionMode": d.TransactionMode.Value(),
+	}, nil
 }
 
 func (d *SQLDefinition_0_3) getEntrypoint() (string, error) {
@@ -799,8 +809,7 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 		}
 	case build.TaskKindSQL:
 		def.SQL = &SQLDefinition_0_3{
-			Entrypoint:      entrypoint,
-			TransactionMode: "auto",
+			Entrypoint: entrypoint,
 		}
 	case build.TaskKindREST:
 		def.REST = &RESTDefinition_0_3{
