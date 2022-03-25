@@ -576,6 +576,8 @@ func (d *SQLDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	}
 	if d.TransactionMode != "" {
 		options["transactionMode"] = d.TransactionMode
+	} else {
+		options["transactionMode"] = "auto"
 	}
 	return options, nil
 }
