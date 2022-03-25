@@ -54,7 +54,7 @@ sql:
 
   # The transaction mode to use. Valid values: auto, readOnly, readWrite, none.
   # Default: auto.
-  transactionMode: auto
+  # transactionMode: readWrite
 
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.

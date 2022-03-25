@@ -159,7 +159,7 @@ sql:
 
   # The transaction mode to use. Valid values: auto, readOnly, readWrite, none.
   # Default: auto.
-  transactionMode: {{.TransactionMode}}
+  # transactionMode: readWrite
 `
 
 const restTemplate = `
