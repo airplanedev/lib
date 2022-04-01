@@ -7,7 +7,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const taskDefDocURL = "https://docs.airplane.dev/deprecated/task-definition-reference"
+const taskDefDocURL = "https://docs.airplane.dev/tasks/task-definition"
 
 type errReadDefinition struct {
 	msg       string
