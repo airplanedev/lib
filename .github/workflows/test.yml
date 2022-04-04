@@ -38,3 +38,15 @@ jobs:
           COVERALLS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           goveralls -coverprofile=covprofile -service=github -show
+
+  snyk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: snyk/actions/setup@master
+      - name: Run snyk scan
+        run: |
+          snyk test --severity-threshold=high
+          snyk code test --severity-threshold=high
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
