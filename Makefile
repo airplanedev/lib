@@ -1,0 +1,3 @@
+
+test:
+	@go test --cover --timeout 10m ./...

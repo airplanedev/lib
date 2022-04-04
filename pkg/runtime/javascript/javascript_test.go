@@ -33,6 +33,10 @@ func TestDev(tt *testing.T) {
 			Kind: build.TaskKindNode,
 			Opts: runtime.PrepareRunOptions{Path: "javascript/simple/main.js"},
 		},
+		{
+			Kind: build.TaskKindNode,
+			Opts: runtime.PrepareRunOptions{Path: "javascript/customroot/main.js"},
+		},
 	}
 
 	// For the dev workflow, we expect users to run `npm install` themselves before

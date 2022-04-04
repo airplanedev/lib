@@ -3,22 +3,20 @@ module github.com/airplanedev/lib
 go 1.17
 
 require (
-	github.com/AlecAivazis/survey/v2 v2.3.2
+	github.com/AlecAivazis/survey/v2 v2.3.4
 	github.com/airplanedev/archiver v1.1.3-0.20210823174045-ee4b23880021
 	github.com/airplanedev/ojson v0.1.0
 	github.com/airplanedev/path v0.0.1
-	github.com/alecthomas/jsonschema v0.0.0-20220203024042-cc89723c9db0
 	github.com/alessio/shellescape v1.4.1
 	github.com/aymerick/raymond v2.0.2+incompatible
 	github.com/blang/semver/v4 v4.0.0
-	github.com/evanw/esbuild v0.14.2
+	github.com/evanw/esbuild v0.14.29
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/go-git/go-git/v5 v5.4.2
-	github.com/goccy/go-yaml v1.9.4
-	github.com/mitchellh/mapstructure v1.1.2
+	github.com/goccy/go-yaml v1.9.5
 	github.com/otiai10/copy v1.7.0
 	github.com/pkg/errors v0.9.1
-	github.com/stretchr/testify v1.7.0
+	github.com/stretchr/testify v1.7.1
 	github.com/xeipuuv/gojsonschema v0.0.0-20180618132009-1d523034197f
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
@@ -45,7 +43,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/iancoleman/orderedmap v0.0.0-20190318233801-ac98e3ecb4b0 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect

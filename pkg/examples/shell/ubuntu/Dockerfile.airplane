@@ -1,0 +1,2 @@
+FROM ubuntu:21.04
+ENV foo bar
