@@ -452,7 +452,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					BodyType: "json",
 					Body:     "",
 					FormData: map[string]interface{}{},
-					Configs:  []string{},
 				},
 			},
 		},
@@ -656,7 +655,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				Name:      "REST Task",
 				Slug:      "rest_task",
 				Arguments: []string{"{{__stdAPIRequest}}"},
-				Configs: []api.ConfigAttachment{
+				Configs: &[]api.ConfigAttachment{
 					{
 						NameTag: "CONFIG_NAME_1",
 					},
