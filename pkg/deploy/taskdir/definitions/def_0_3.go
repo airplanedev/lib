@@ -516,12 +516,13 @@ func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client 
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
 	}
-	req.Configs = make([]api.ConfigAttachment, len(d.Configs))
+	configs := make([]api.ConfigAttachment, len(d.Configs))
 	for i, configName := range d.Configs {
-		req.Configs[i] = api.ConfigAttachment{
+		configs[i] = api.ConfigAttachment{
 			NameTag: configName,
 		}
 	}
+	req.Configs = &configs
 	return nil
 }
 
@@ -564,8 +565,8 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 		}
 	}
 
-	d.Configs = make([]string, len(t.Configs))
-	for idx, config := range t.Configs {
+	d.Configs = make([]string, len(*t.Configs))
+	for idx, config := range *t.Configs {
 		d.Configs[idx] = config.NameTag
 	}
 
@@ -639,12 +640,13 @@ func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
 	}
-	req.Configs = make([]api.ConfigAttachment, len(d.Configs))
+	configs := make([]api.ConfigAttachment, len(d.Configs))
 	for i, configName := range d.Configs {
-		req.Configs[i] = api.ConfigAttachment{
+		configs[i] = api.ConfigAttachment{
 			NameTag: configName,
 		}
 	}
+	req.Configs = &configs
 	return nil
 }
 
@@ -704,8 +706,8 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 		}
 	}
 
-	d.Configs = make([]string, len(t.Configs))
-	for idx, config := range t.Configs {
+	d.Configs = make([]string, len(*t.Configs))
+	for idx, config := range *t.Configs {
 		d.Configs[idx] = config.NameTag
 	}
 

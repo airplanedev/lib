@@ -422,8 +422,8 @@
       }
     },
     "configs": {
-      "description": "A list of config variables that are attached to this task.",
-      "examples": ["config_variable"],
+      "description": "A list of config variables that this task can access.",
+      "examples": ["API_KEY", "DB_PASSWORD"],
       "type": "array",
       "items": {
         "type": "string"

@@ -161,10 +161,10 @@ sql:
   # Default: auto.
   # transactionMode: readWrite
 
-  # A list of config variables that are attached to this task.
+  # A list of config variables that this task can access.
   # configs:
-  #   - config_variable_1
-  #   - config_variable_2
+  #   - API_KEY
+  #   - DB_PASSWORD
 `
 
 const restTemplate = `
@@ -205,8 +205,8 @@ rest:
   # formData:
   #   name: Alfred Pennyworth
 
-  # A list of config variables that are attached to this task.
+  # A list of config variables that this task can access.
   # configs:
-  #   - config_variable_1
-  #   - config_variable_2
+  #   - API_KEY
+  #   - DB_PASSWORD
 `

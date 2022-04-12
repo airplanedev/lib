@@ -838,7 +838,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "REST Task",
 				Slug:       "rest_task",
 				Parameters: []api.Parameter{},
-				Configs:    []api.ConfigAttachment{},
+				Configs:    &[]api.ConfigAttachment{},
 				Kind:       build.TaskKindREST,
 				KindOptions: build.KindOptions{
 					"method":    "POST",
@@ -1077,7 +1077,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "REST Task",
 				Slug:       "rest_task",
 				Parameters: []api.Parameter{},
-				Configs: []api.ConfigAttachment{
+				Configs: &[]api.ConfigAttachment{
 					{
 						NameTag: "CONFIG_VARIABLE_1",
 					},
