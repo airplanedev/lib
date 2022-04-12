@@ -452,6 +452,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					BodyType: "json",
 					Body:     "",
 					FormData: map[string]interface{}{},
+					Configs:  []string{},
 				},
 			},
 		},
