@@ -565,11 +565,9 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 		}
 	}
 
-	if t.Configs != nil {
-		d.Configs = make([]string, len(*t.Configs))
-		for idx, config := range *t.Configs {
-			d.Configs[idx] = config.NameTag
-		}
+	d.Configs = make([]string, len(t.Configs))
+	for idx, config := range t.Configs {
+		d.Configs[idx] = config.NameTag
 	}
 
 	return nil
@@ -708,11 +706,9 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 		}
 	}
 
-	if t.Configs != nil {
-		d.Configs = make([]string, len(*t.Configs))
-		for idx, config := range *t.Configs {
-			d.Configs[idx] = config.NameTag
-		}
+	d.Configs = make([]string, len(t.Configs))
+	for idx, config := range t.Configs {
+		d.Configs[idx] = config.NameTag
 	}
 
 	return nil
