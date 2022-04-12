@@ -1,0 +1,6 @@
+name: sunt in tempor eu
+slug: incorrect_entrypoint
+node:
+  entrypoint: ./incorrect_entrypoint.js
+  nodeVersion: '14'
+description: ut dolor sit officia ea

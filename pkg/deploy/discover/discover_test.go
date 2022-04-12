@@ -257,6 +257,14 @@ func TestDiscoverTasks(t *testing.T) {
 				fixturesPath + "/subdir/single_task.js",
 			},
 		},
+		{
+			name:  "defn - entrypoint does not exist",
+			paths: []string{"./fixtures/defn_incorrect_entrypoint.task.yaml"},
+			existingTasks: map[string]api.Task{
+				"incorrect_entrypoint": {ID: "tsk123", Slug: "incorrect_entrypoint", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+			},
+			expectedErr: true,
+		},
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
