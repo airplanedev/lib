@@ -22,7 +22,7 @@ var code = template.Must(template.New("ts").Parse(`{{with .Comment -}}
 {{end -}}
 type Params = {
   {{- range .Params }}
-  {{ .NameTag }}: {{ .Type }}
+  {{ .Name }}: {{ .Type }}
   {{- end }}
 }
 

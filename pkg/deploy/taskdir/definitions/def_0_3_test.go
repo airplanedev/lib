@@ -16,7 +16,7 @@ var fullYAML = []byte(
 slug: hello_world
 description: A starter task.
 parameters:
-- name: NameTag
+- name: Name
   slug: name
   type: shorttext
   description: Someone's name.
@@ -34,7 +34,7 @@ var fullJSON = []byte(
 	"description": "A starter task.",
 	"parameters": [
 		{
-			"name": "NameTag",
+			"name": "Name",
 			"slug": "name",
 			"type": "shorttext",
 			"description": "Someone's name.",
@@ -53,7 +53,7 @@ var yamlWithDefault = []byte(
 slug: hello_world
 description: A starter task.
 parameters:
-- name: NameTag
+- name: Name
   slug: name
   type: shorttext
   description: Someone's name.
@@ -70,7 +70,7 @@ var jsonWithDefault = []byte(
 	"description": "A starter task.",
 	"parameters": [
 		{
-			"name": "NameTag",
+			"name": "Name",
 			"slug": "name",
 			"type": "shorttext",
 			"description": "Someone's name.",
@@ -89,7 +89,7 @@ var fullDef = Definition_0_3{
 	Description: "A starter task.",
 	Parameters: []ParameterDefinition_0_3{
 		{
-			Name:        "NameTag",
+			Name:        "Name",
 			Slug:        "name",
 			Type:        "shorttext",
 			Description: "Someone's name.",
@@ -109,7 +109,7 @@ var defWithDefault = Definition_0_3{
 	Description: "A starter task.",
 	Parameters: []ParameterDefinition_0_3{
 		{
-			Name:        "NameTag",
+			Name:        "Name",
 			Slug:        "name",
 			Type:        "shorttext",
 			Description: "Someone's name.",

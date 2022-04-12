@@ -897,7 +897,6 @@ func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, err
 	}
 
 	taskDefinition := new(bytes.Buffer)
-	var configAttachments string
 	switch kind {
 	case build.TaskKindImage:
 		if d.Image.Entrypoint != "" || len(d.Image.EnvVars) > 0 {
@@ -978,10 +977,9 @@ func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, err
 	}
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, map[string]interface{}{
-		"slug":              d.Slug,
-		"name":              d.Name,
-		"taskDefinition":    taskDefinition.String(),
-		"configAttachments": configAttachments,
+		"slug":           d.Slug,
+		"name":           d.Name,
+		"taskDefinition": taskDefinition.String(),
 	}); err != nil {
 		return nil, errors.Wrap(err, "executing definition template")
 	}
