@@ -468,6 +468,7 @@ type SQLDefinition_0_3 struct {
 	Entrypoint      string                 `json:"entrypoint"`
 	QueryArgs       map[string]interface{} `json:"queryArgs,omitempty"`
 	TransactionMode SQLTransactionMode     `json:"transactionMode,omitempty"`
+	Configs         []string               `json:"configs,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
@@ -515,6 +516,12 @@ func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client 
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
 	}
+	req.Configs = make([]api.ConfigAttachment, len(d.Configs))
+	for i, configName := range d.Configs {
+		req.Configs[i] = api.ConfigAttachment{
+			NameTag: configName,
+		}
+	}
 	return nil
 }
 
@@ -556,6 +563,14 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			return errors.Errorf("expected string transactionMode, got %T instead", v)
 		}
 	}
+
+	if len(t.Configs) > 0 {
+		d.Configs = make([]string, len(t.Configs))
+		for idx, config := range t.Configs {
+			d.Configs[idx] = config.NameTag
+		}
+	}
+
 	return nil
 }
 
@@ -611,6 +626,7 @@ type RESTDefinition_0_3 struct {
 	BodyType  string                 `json:"bodyType"`
 	Body      interface{}            `json:"body,omitempty"`
 	FormData  map[string]interface{} `json:"formData,omitempty"`
+	Configs   []string               `json:"configs,omitempty"`
 }
 
 func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -624,6 +640,12 @@ func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 		}
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
+	}
+	req.Configs = make([]api.ConfigAttachment, len(d.Configs))
+	for i, configName := range d.Configs {
+		req.Configs[i] = api.ConfigAttachment{
+			NameTag: configName,
+		}
 	}
 	return nil
 }
@@ -683,6 +705,14 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 			return errors.Errorf("expected map formData, got %T instead", v)
 		}
 	}
+
+	if len(t.Configs) > 0 {
+		d.Configs = make([]string, len(t.Configs))
+		for idx, config := range t.Configs {
+			d.Configs[idx] = config.NameTag
+		}
+	}
+
 	return nil
 }
 
@@ -867,6 +897,7 @@ func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, err
 	}
 
 	taskDefinition := new(bytes.Buffer)
+	var configAttachments string
 	switch kind {
 	case build.TaskKindImage:
 		if d.Image.Entrypoint != "" || len(d.Image.EnvVars) > 0 {
@@ -947,9 +978,10 @@ func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, err
 	}
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, map[string]interface{}{
-		"slug":           d.Slug,
-		"name":           d.Name,
-		"taskDefinition": taskDefinition.String(),
+		"slug":              d.Slug,
+		"name":              d.Name,
+		"taskDefinition":    taskDefinition.String(),
+		"configAttachments": configAttachments,
 	}); err != nil {
 		return nil, errors.Wrap(err, "executing definition template")
 	}

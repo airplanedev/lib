@@ -56,6 +56,11 @@ sql:
   # Default: auto.
   # transactionMode: readWrite
 
+  # A list of config variables that are attached to this task.
+  # configs:
+  #   - config_variable_1
+  #   - config_variable_2
+
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.
 # constraints:

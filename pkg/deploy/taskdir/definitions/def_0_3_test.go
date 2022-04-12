@@ -16,7 +16,7 @@ var fullYAML = []byte(
 slug: hello_world
 description: A starter task.
 parameters:
-- name: Name
+- name: NameTag
   slug: name
   type: shorttext
   description: Someone's name.
@@ -34,7 +34,7 @@ var fullJSON = []byte(
 	"description": "A starter task.",
 	"parameters": [
 		{
-			"name": "Name",
+			"name": "NameTag",
 			"slug": "name",
 			"type": "shorttext",
 			"description": "Someone's name.",
@@ -53,7 +53,7 @@ var yamlWithDefault = []byte(
 slug: hello_world
 description: A starter task.
 parameters:
-- name: Name
+- name: NameTag
   slug: name
   type: shorttext
   description: Someone's name.
@@ -70,7 +70,7 @@ var jsonWithDefault = []byte(
 	"description": "A starter task.",
 	"parameters": [
 		{
-			"name": "Name",
+			"name": "NameTag",
 			"slug": "name",
 			"type": "shorttext",
 			"description": "Someone's name.",
@@ -89,7 +89,7 @@ var fullDef = Definition_0_3{
 	Description: "A starter task.",
 	Parameters: []ParameterDefinition_0_3{
 		{
-			Name:        "Name",
+			Name:        "NameTag",
 			Slug:        "name",
 			Type:        "shorttext",
 			Description: "Someone's name.",
@@ -109,7 +109,7 @@ var defWithDefault = Definition_0_3{
 	Description: "A starter task.",
 	Parameters: []ParameterDefinition_0_3{
 		{
-			Name:        "Name",
+			Name:        "NameTag",
 			Slug:        "name",
 			Type:        "shorttext",
 			Description: "Someone's name.",
@@ -643,6 +643,64 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				AllowSelfApprovals: nil,
 			},
 		},
+		{
+			name: "check configs",
+			resources: []api.Resource{
+				{
+					ID:   "res20220111foobarx",
+					Name: "httpbin",
+				},
+			},
+			task: api.Task{
+				Name:      "REST Task",
+				Slug:      "rest_task",
+				Arguments: []string{"{{__stdAPIRequest}}"},
+				Configs: []api.ConfigAttachment{
+					{
+						NameTag: "CONFIG_NAME_1",
+					},
+					{
+						NameTag: "CONFIG_NAME_2",
+					},
+				},
+				Kind: build.TaskKindREST,
+				KindOptions: build.KindOptions{
+					"method": "GET",
+					"path":   "/get",
+					"urlParams": map[string]interface{}{
+						"foo": "bar",
+					},
+					"headers": map[string]interface{}{
+						"bar": "foo",
+					},
+					"bodyType": "json",
+					"body":     "",
+					"formData": map[string]interface{}{},
+				},
+				Resources: map[string]string{
+					"rest": "res20220111foobarx",
+				},
+			},
+			definition: Definition_0_3{
+				Name: "REST Task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "httpbin",
+					Method:   "GET",
+					Path:     "/get",
+					URLParams: map[string]interface{}{
+						"foo": "bar",
+					},
+					Headers: map[string]interface{}{
+						"bar": "foo",
+					},
+					BodyType: "json",
+					Body:     "",
+					FormData: map[string]interface{}{},
+					Configs:  []string{"CONFIG_NAME_1", "CONFIG_NAME_2"},
+				},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
@@ -779,6 +837,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "REST Task",
 				Slug:       "rest_task",
 				Parameters: []api.Parameter{},
+				Configs:    []api.ConfigAttachment{},
 				Kind:       build.TaskKindREST,
 				KindOptions: build.KindOptions{
 					"method":    "POST",
@@ -996,6 +1055,57 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				ExecuteRules: api.UpdateExecuteRulesRequest{
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
+				},
+			},
+		},
+		{
+			name: "check configs",
+			definition: Definition_0_3{
+				Name: "REST Task",
+				Slug: "rest_task",
+				REST: &RESTDefinition_0_3{
+					Resource: "rest",
+					Method:   "POST",
+					Path:     "/post",
+					BodyType: "json",
+					Body:     `{"foo": "bar"}`,
+					Configs:  []string{"CONFIG_VARIABLE_1", "CONFIG_VARIABLE_2"},
+				},
+			},
+			request: api.UpdateTaskRequest{
+				Name:       "REST Task",
+				Slug:       "rest_task",
+				Parameters: []api.Parameter{},
+				Configs: []api.ConfigAttachment{
+					{
+						NameTag: "CONFIG_VARIABLE_1",
+					},
+					{
+						NameTag: "CONFIG_VARIABLE_2",
+					},
+				},
+				Kind: build.TaskKindREST,
+				KindOptions: build.KindOptions{
+					"method":    "POST",
+					"path":      "/post",
+					"urlParams": map[string]interface{}{},
+					"headers":   map[string]interface{}{},
+					"bodyType":  "json",
+					"body":      `{"foo": "bar"}`,
+					"formData":  map[string]interface{}{},
+				},
+				Resources: map[string]string{
+					"rest": "rest_id",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
+			},
+			resources: []api.Resource{
+				{
+					ID:   "rest_id",
+					Name: "rest",
 				},
 			},
 		},
