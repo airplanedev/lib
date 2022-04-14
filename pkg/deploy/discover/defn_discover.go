@@ -8,6 +8,7 @@ import (
 	"github.com/airplanedev/lib/pkg/deploy/taskdir"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
+	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
@@ -93,6 +94,8 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	if err == definitions.ErrNoEntrypoint {
 		return &tc, nil
 	} else if err != nil {
+		return nil, err
+	} else if err = fsx.AssertExistsAll(entrypoint); err != nil {
 		return nil, err
 	} else {
 		tc.TaskEntrypoint = entrypoint
