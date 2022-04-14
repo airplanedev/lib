@@ -737,6 +737,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Description: "A task for testing",
+				Configs:     &[]api.ConfigAttachment{},
 				Parameters:  []api.Parameter{},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
@@ -762,6 +763,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Node Task",
 				Slug:       "node_task",
 				Parameters: []api.Parameter{},
+				Configs:    &[]api.ConfigAttachment{},
 				Kind:       build.TaskKindNode,
 				KindOptions: build.KindOptions{
 					"entrypoint":  "main.ts",
@@ -786,6 +788,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Shell Task",
 				Slug:       "shell_task",
 				Parameters: []api.Parameter{},
+				Configs:    &[]api.ConfigAttachment{},
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.sh",
@@ -811,6 +814,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Image Task",
 				Slug:       "image_task",
 				Parameters: []api.Parameter{},
+				Configs:    &[]api.ConfigAttachment{},
 				Command:    []string{"bash"},
 				Arguments:  []string{"-c", `echo "foobar"`},
 				Kind:       build.TaskKindImage,
@@ -880,6 +884,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
+				Configs:     &[]api.ConfigAttachment{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
@@ -907,6 +912,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
+				Configs:     &[]api.ConfigAttachment{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
@@ -1049,7 +1055,8 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						},
 					},
 				},
-				Kind: build.TaskKindPython,
+				Configs: &[]api.ConfigAttachment{},
+				Kind:    build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
