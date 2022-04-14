@@ -23,6 +23,8 @@ type ParsedLine struct {
 	Value    ojson.Value
 }
 
+var ErrOutputLineTooLong = errors.New("output line too long")
+
 func parseOutputValue(matches []string) ojson.Value {
 	vs := strings.TrimSpace(matches[4])
 
@@ -147,10 +149,19 @@ func parseLogLineWithChunks(text string, chunks map[string]*strings.Builder) (st
 	return text, nil
 }
 
-func Parse(chunks map[string]*strings.Builder, logText string) (*ParsedLine, error) {
+type ParseOptions struct {
+	// If non-zero, returns an error if an output line is too long.
+	MaxOutputLineLen int
+}
+
+func Parse(chunks map[string]*strings.Builder, logText string, opts ParseOptions) (*ParsedLine, error) {
 	outputText, err := parseLogLineWithChunks(logText, chunks)
 	if err != nil {
 		return nil, err
+	}
+
+	if opts.MaxOutputLineLen != 0 && opts.MaxOutputLineLen < len(outputText) {
+		return nil, ErrOutputLineTooLong
 	}
 
 	// Extract subset of logs as output
