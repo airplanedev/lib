@@ -160,6 +160,11 @@ sql:
   # The transaction mode to use. Valid values: auto, readOnly, readWrite, none.
   # Default: auto.
   # transactionMode: readWrite
+
+  # A list of config variables that this task can access.
+  # configs:
+  #   - API_KEY
+  #   - DB_PASSWORD
 `
 
 const restTemplate = `
@@ -199,4 +204,9 @@ rest:
   # (https://docs.airplane.dev/runbooks/javascript-templates).
   # formData:
   #   name: Alfred Pennyworth
+
+  # A list of config variables that this task can access.
+  # configs:
+  #   - API_KEY
+  #   - DB_PASSWORD
 `
