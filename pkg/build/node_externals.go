@@ -50,6 +50,7 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 
 var esmModules = []string{
 	"node-fetch",
+	"got",
 }
 
 func appendDep(deps []string, dep string) []string {
