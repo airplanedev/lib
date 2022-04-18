@@ -205,7 +205,7 @@ func TestParseOutputV2(tt *testing.T) {
 				SetAndReturn("a", true).
 				SetAndReturn("\"] ", float64(3)),
 			opts: ParseOptions{
-				MaxOutputLineLen: 100,
+				OutputLineMaxBytes: 100,
 			},
 		},
 	} {
@@ -277,7 +277,7 @@ func TestParseOutputChunks(tt *testing.T) {
 				},
 			},
 			opts: ParseOptions{
-				MaxOutputLineLen: 100,
+				OutputLineMaxBytes: 100,
 			},
 		},
 	} {
@@ -333,7 +333,7 @@ func TestLongOutput(tt *testing.T) {
 			m := make(map[string]*strings.Builder)
 			for i, logText := range test.logs {
 				output, err := Parse(m, logText, ParseOptions{
-					MaxOutputLineLen: 10,
+					OutputLineMaxBytes: 10,
 				})
 				require.Nil(output)
 				if i == len(test.logs)-1 {

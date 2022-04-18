@@ -150,8 +150,11 @@ func parseLogLineWithChunks(text string, chunks map[string]*strings.Builder) (st
 }
 
 type ParseOptions struct {
-	// If non-zero, returns an error if an output line is too long.
-	MaxOutputLineLen int
+	// OutputLineMaxBytes is the maximum number of bytes a single line of output (across
+	// all output chunks) can contain. Any lines larger than this will return an error.
+	//
+	// Disabled if <= 0 (i.e. no limit is applied on the size of each output line).
+	OutputLineMaxBytes int
 }
 
 func Parse(chunks map[string]*strings.Builder, logText string, opts ParseOptions) (*ParsedLine, error) {
@@ -160,7 +163,7 @@ func Parse(chunks map[string]*strings.Builder, logText string, opts ParseOptions
 		return nil, err
 	}
 
-	if opts.MaxOutputLineLen != 0 && opts.MaxOutputLineLen < len(outputText) {
+	if opts.OutputLineMaxBytes > 0 && opts.OutputLineMaxBytes < len(outputText) {
 		return nil, ErrOutputLineTooLong
 	}
 
