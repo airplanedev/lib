@@ -62,6 +62,7 @@ sql:
   # configs:
   #   - API_KEY
   #   - DB_PASSWORD
+
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.
 # constraints:
