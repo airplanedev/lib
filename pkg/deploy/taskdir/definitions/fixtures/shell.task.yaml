@@ -1,3 +1,5 @@
+# Full reference: https://docs.airplane.dev/tasks/task-definition
+
 # Used by Airplane to identify your task. Do not change.
 slug: my_task
 
@@ -51,7 +53,6 @@ shell:
   #     config: database_url
   #   ENV_VAR_FROM_VALUE
   #     value: env_var_value
-
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.
 # constraints:
