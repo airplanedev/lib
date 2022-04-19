@@ -20,27 +20,28 @@ type IAPIClient interface {
 
 // Task represents a task.
 type Task struct {
-	URL                        string            `json:"-" yaml:"-"`
-	ID                         string            `json:"taskID" yaml:"id"`
-	Name                       string            `json:"name" yaml:"name"`
-	Slug                       string            `json:"slug" yaml:"slug"`
-	Description                string            `json:"description" yaml:"description"`
-	Image                      *string           `json:"image" yaml:"image"`
-	Command                    []string          `json:"command" yaml:"command"`
-	Arguments                  []string          `json:"arguments" yaml:"arguments"`
-	Parameters                 Parameters        `json:"parameters" yaml:"parameters"`
-	Constraints                RunConstraints    `json:"constraints" yaml:"constraints"`
-	Env                        TaskEnv           `json:"env" yaml:"env"`
-	ResourceRequests           ResourceRequests  `json:"resourceRequests" yaml:"resourceRequests"`
-	Resources                  Resources         `json:"resources" yaml:"resources"`
-	Kind                       build.TaskKind    `json:"kind" yaml:"kind"`
-	KindOptions                build.KindOptions `json:"kindOptions" yaml:"kindOptions"`
-	Repo                       string            `json:"repo" yaml:"repo"`
-	RequireExplicitPermissions bool              `json:"requireExplicitPermissions" yaml:"-"`
-	Permissions                Permissions       `json:"permissions" yaml:"-"`
-	ExecuteRules               ExecuteRules      `json:"executeRules" yaml:"-"`
-	Timeout                    int               `json:"timeout" yaml:"timeout"`
-	InterpolationMode          string            `json:"interpolationMode" yaml:"-"`
+	URL                        string             `json:"-" yaml:"-"`
+	ID                         string             `json:"taskID" yaml:"id"`
+	Name                       string             `json:"name" yaml:"name"`
+	Slug                       string             `json:"slug" yaml:"slug"`
+	Description                string             `json:"description" yaml:"description"`
+	Image                      *string            `json:"image" yaml:"image"`
+	Command                    []string           `json:"command" yaml:"command"`
+	Arguments                  []string           `json:"arguments" yaml:"arguments"`
+	Parameters                 Parameters         `json:"parameters" yaml:"parameters"`
+	Configs                    []ConfigAttachment `json:"configs" yaml:"configs"`
+	Constraints                RunConstraints     `json:"constraints" yaml:"constraints"`
+	Env                        TaskEnv            `json:"env" yaml:"env"`
+	ResourceRequests           ResourceRequests   `json:"resourceRequests" yaml:"resourceRequests"`
+	Resources                  Resources          `json:"resources" yaml:"resources"`
+	Kind                       build.TaskKind     `json:"kind" yaml:"kind"`
+	KindOptions                build.KindOptions  `json:"kindOptions" yaml:"kindOptions"`
+	Repo                       string             `json:"repo" yaml:"repo"`
+	RequireExplicitPermissions bool               `json:"requireExplicitPermissions" yaml:"-"`
+	Permissions                Permissions        `json:"permissions" yaml:"-"`
+	ExecuteRules               ExecuteRules       `json:"executeRules" yaml:"-"`
+	Timeout                    int                `json:"timeout" yaml:"timeout"`
+	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
 }
 
 type GetTaskRequest struct {
@@ -76,6 +77,7 @@ type UpdateTaskRequest struct {
 	Command                    []string                  `json:"command"`
 	Arguments                  []string                  `json:"arguments"`
 	Parameters                 Parameters                `json:"parameters"`
+	Configs                    *[]ConfigAttachment       `json:"configs"`
 	Constraints                RunConstraints            `json:"constraints"`
 	Env                        TaskEnv                   `json:"env"`
 	ResourceRequests           map[string]string         `json:"resourceRequests"`
@@ -241,8 +243,10 @@ type Parameter struct {
 	Constraints Constraints `json:"constraints" yaml:"constraints,omitempty"`
 }
 
-// TODO(amir): remove custom marshal/unmarshal once the API is updated.
-// type Parameters []Parameter
+// ConfigAttachment represents a config attachment.
+type ConfigAttachment struct {
+	NameTag string `json:"nameTag" yaml:"nameTag"`
+}
 
 // UnmarshalJSON implementation.
 func (p *Parameters) UnmarshalJSON(buf []byte) error {

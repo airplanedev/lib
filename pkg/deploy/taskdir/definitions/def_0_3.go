@@ -57,6 +57,7 @@ type taskKind_0_3 interface {
 	getKindOptions() (build.KindOptions, error)
 	getEntrypoint() (string, error)
 	getEnv() (api.TaskEnv, error)
+	getConfigAttachments() []api.ConfigAttachment
 }
 
 var _ taskKind_0_3 = &ImageDefinition_0_3{}
@@ -120,6 +121,10 @@ func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
 }
 
+func (d *ImageDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
+}
+
 var _ taskKind_0_3 = &DenoDefinition_0_3{}
 
 type DenoDefinition_0_3 struct {
@@ -177,6 +182,10 @@ func (d *DenoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
 }
 
+func (d *DenoDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
+}
+
 var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
 
 type DockerfileDefinition_0_3 struct {
@@ -225,6 +234,10 @@ func (d *DockerfileDefinition_0_3) getEntrypoint() (string, error) {
 
 func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
+}
+
+func (d *DockerfileDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
 }
 
 var _ taskKind_0_3 = &GoDefinition_0_3{}
@@ -282,6 +295,10 @@ func (d *GoDefinition_0_3) getEntrypoint() (string, error) {
 
 func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
+}
+
+func (d *GoDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
 }
 
 var _ taskKind_0_3 = &NodeDefinition_0_3{}
@@ -350,6 +367,10 @@ func (d *NodeDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
 }
 
+func (d *NodeDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
+}
+
 var _ taskKind_0_3 = &PythonDefinition_0_3{}
 
 type PythonDefinition_0_3 struct {
@@ -405,6 +426,10 @@ func (d *PythonDefinition_0_3) getEntrypoint() (string, error) {
 
 func (d *PythonDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
+}
+
+func (d *PythonDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
 }
 
 var _ taskKind_0_3 = &ShellDefinition_0_3{}
@@ -464,6 +489,10 @@ func (d *ShellDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return d.EnvVars, nil
 }
 
+func (d *ShellDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	return []api.ConfigAttachment{}
+}
+
 var _ taskKind_0_3 = &SQLDefinition_0_3{}
 
 type SQLDefinition_0_3 struct {
@@ -471,6 +500,7 @@ type SQLDefinition_0_3 struct {
 	Entrypoint      string                 `json:"entrypoint"`
 	QueryArgs       map[string]interface{} `json:"queryArgs,omitempty"`
 	TransactionMode SQLTransactionMode     `json:"transactionMode,omitempty"`
+	Configs         []string               `json:"configs,omitempty"`
 
 	// Contents of Entrypoint, cached
 	entrypointContents string `json:"-"`
@@ -559,6 +589,12 @@ func (d *SQLDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPI
 			return errors.Errorf("expected string transactionMode, got %T instead", v)
 		}
 	}
+
+	d.Configs = make([]string, len(t.Configs))
+	for idx, config := range t.Configs {
+		d.Configs[idx] = config.NameTag
+	}
+
 	return nil
 }
 
@@ -603,6 +639,15 @@ func (d *SQLDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return nil, nil
 }
 
+func (d *SQLDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	configAttachments := make([]api.ConfigAttachment, len(d.Configs))
+	for i, configName := range d.Configs {
+		configAttachments[i] = api.ConfigAttachment{NameTag: configName}
+	}
+
+	return configAttachments
+}
+
 var _ taskKind_0_3 = &RESTDefinition_0_3{}
 
 type RESTDefinition_0_3 struct {
@@ -614,6 +659,7 @@ type RESTDefinition_0_3 struct {
 	BodyType  string                 `json:"bodyType"`
 	Body      interface{}            `json:"body,omitempty"`
 	FormData  map[string]interface{} `json:"formData,omitempty"`
+	Configs   []string               `json:"configs,omitempty"`
 }
 
 func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
@@ -686,6 +732,12 @@ func (d *RESTDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 			return errors.Errorf("expected map formData, got %T instead", v)
 		}
 	}
+
+	d.Configs = make([]string, len(t.Configs))
+	for idx, config := range t.Configs {
+		d.Configs[idx] = config.NameTag
+	}
+
 	return nil
 }
 
@@ -728,6 +780,15 @@ func (d *RESTDefinition_0_3) getEntrypoint() (string, error) {
 
 func (d *RESTDefinition_0_3) getEnv() (api.TaskEnv, error) {
 	return nil, nil
+}
+
+func (d *RESTDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
+	configAttachments := make([]api.ConfigAttachment, len(d.Configs))
+	for i, configName := range d.Configs {
+		configAttachments[i] = api.ConfigAttachment{NameTag: configName}
+	}
+
+	return configAttachments
 }
 
 type ParameterDefinition_0_3 struct {
@@ -1176,6 +1237,12 @@ func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context,
 	}
 	req.Env = env
 
+	configAttachments, err := d.GetConfigAttachments()
+	if err != nil {
+		return err
+	}
+	req.Configs = &configAttachments
+
 	taskKind, err := d.taskKind()
 	if err != nil {
 		return err
@@ -1227,6 +1294,14 @@ func (d *Definition_0_3) GetEnv() (api.TaskEnv, error) {
 		return nil, err
 	}
 	return taskKind.getEnv()
+}
+
+func (d *Definition_0_3) GetConfigAttachments() ([]api.ConfigAttachment, error) {
+	taskKind, err := d.taskKind()
+	if err != nil {
+		return nil, err
+	}
+	return taskKind.getConfigAttachments(), nil
 }
 
 func (d *Definition_0_3) GetSlug() string {

@@ -206,7 +206,8 @@
                   "description": "The transaction mode to use.",
                   "default": "auto",
                   "enum": ["auto", "readOnly", "readWrite", "none"]
-                }
+                },
+                "configs": { "$ref": "#/$defs/configs" }
               },
               "additionalProperties": false,
               "required": ["resource", "entrypoint"]
@@ -266,7 +267,8 @@
                   "patternProperties": {
                     ".*": { "type": ["string", "boolean", "number"] }
                   }
-                }
+                },
+                "configs": { "$ref": "#/$defs/configs" }
               },
               "additionalProperties": false,
               "required": ["resource", "method", "path", "bodyType"]
@@ -417,6 +419,14 @@
             }
           ]
         }
+      }
+    },
+    "configs": {
+      "description": "A list of config variables that this task can access.",
+      "examples": ["API_KEY", "DB_PASSWORD"],
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     },
     "baseDefinition": {
