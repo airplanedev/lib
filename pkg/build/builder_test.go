@@ -3,9 +3,9 @@ package build
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/airplanedev/dlog"
@@ -77,8 +77,8 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 			}
 
 			// Run the produced docker image:
-			runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
-			// require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
+			require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
 		})
 	}
 }
@@ -121,7 +121,6 @@ func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image st
 		AppendNewline: true,
 	}))
 	require.NoError(err)
-	fmt.Println("ef", string(logs))
 
 	select {
 	case result := <-resultC:

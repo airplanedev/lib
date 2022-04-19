@@ -140,7 +140,7 @@ func node(root string, options KindOptions) (string, error) {
 	// Down the road, we may want to give customers more control over this build process
 	// in which case we could introduce an extra step for performing build commands.
 	return applyTemplate(heredoc.Doc(`
-		FROM node:16 as base
+		FROM {{.Base}}
 		ENV NODE_ENV=production
 		WORKDIR /airplane{{.Workdir}}
 		# Support setting BUILD_NPM_RC or BUILD_NPM_TOKEN to configure private registry auth
@@ -152,7 +152,8 @@ func node(root string, options KindOptions) (string, error) {
 		# postinstall scripts. We run as root with --unsafe-perm instead, skipping
 		# that lookup. Possibly could fix by building for linux/arm on m1 instead
 		# of always building for linux/amd64.
-		
+		RUN npm install -g typescript@4.2 && \
+			npm install -g esbuild@0.12 --unsafe-perm
 		RUN mkdir -p /airplane/.airplane && \
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
@@ -178,20 +179,6 @@ func node(root string, options KindOptions) (string, error) {
 		RUN {{.PostInstallCommand}}
 		{{end}}
 		
-		FROM node:16-slim
-		RUN apt-get -qy update
-RUN apt-get -qy install openssl
-		WORKDIR /airplane{{.Workdir}}
-
-		RUN npm install -g typescript@4.2 && \
-			npm install -g esbuild@0.12 --unsafe-perm
-
-		COPY --from=base /airplane /airplane
-
-		{{if .PostInstallCommand}}
-		RUN {{.PostInstallCommand}}
-		{{end}}
-
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
