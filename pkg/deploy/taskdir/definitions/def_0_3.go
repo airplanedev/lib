@@ -25,6 +25,7 @@ type Definition_0_3 struct {
 	Slug        string                    `json:"slug"`
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
+	DefnFile    string                    `json:"defnFile,omitempty"`
 
 	Deno       *DenoDefinition_0_3       `json:"deno,omitempty"`
 	Dockerfile *DockerfileDefinition_0_3 `json:"dockerfile,omitempty"`
@@ -42,8 +43,10 @@ type Definition_0_3 struct {
 	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
 	Timeout            int               `json:"timeout,omitempty"`
 
-	buildConfig build.BuildConfig
+	buildConfig build.BuildConfig `json:"buildConfig"`
 }
+
+var _ DefinitionInterface = &Definition_0_3{}
 
 type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
@@ -1189,6 +1192,10 @@ func (d Definition_0_3) Entrypoint() (string, error) {
 		return "", err
 	}
 	return taskKind.getEntrypoint()
+}
+
+func (d Definition_0_3) GetDefnFilePath() string {
+	return d.DefnFile
 }
 
 func (d *Definition_0_3) UpgradeJST() error {

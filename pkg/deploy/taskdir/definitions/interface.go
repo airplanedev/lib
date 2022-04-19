@@ -39,6 +39,9 @@ type DefinitionInterface interface {
 	// Entrypoint returns ErrNoEntrypoint if the task kind definition requires no entrypoint. May be
 	// empty. May be absolute or relative; if relative, it is relative to the defn file.
 	Entrypoint() (string, error)
+
+	// GetDefnFilePath returns the absolute path to the file that configured this definition, if one exists.
+	GetDefnFilePath() string
 }
 
 var ErrNoEntrypoint = errors.New("No entrypoint")

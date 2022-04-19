@@ -24,7 +24,9 @@ func (td TaskDirectory) ReadDefinition() (definitions.DefinitionInterface, error
 		defPath = path
 	}
 
-	def := definitions.Definition_0_3{}
+	def := definitions.Definition_0_3{
+		DefnFile: defPath,
+	}
 	if err := def.Unmarshal(definitions.GetTaskDefFormat(defPath), buf); err != nil {
 		switch err := errors.Cause(err).(type) {
 		case definitions.ErrSchemaValidation:
