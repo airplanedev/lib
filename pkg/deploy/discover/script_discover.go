@@ -25,6 +25,11 @@ type ScriptDiscoverer struct {
 
 var _ TaskDiscoverer = &ScriptDiscoverer{}
 
+func (sd *ScriptDiscoverer) IsAirplaneTask(ctx context.Context, file string) (string, error) {
+	slug := runtime.Slug(file)
+	return slug, nil
+}
+
 func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	slug := runtime.Slug(file)
 	if slug == "" {

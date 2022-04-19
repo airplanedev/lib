@@ -27,6 +27,25 @@ type DefnDiscoverer struct {
 
 var _ TaskDiscoverer = &DefnDiscoverer{}
 
+func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (string, error) {
+	if !definitions.IsTaskDef(file) {
+		return "", nil
+	}
+
+	dir, err := taskdir.Open(file)
+	if err != nil {
+		return "", err
+	}
+	defer dir.Close()
+
+	def, err := dir.ReadDefinition()
+	if err != nil {
+		return "", err
+	}
+
+	return def.GetSlug(), nil
+}
+
 func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	if !definitions.IsTaskDef(file) {
 		// Check if there is a file in the same directory with the same name that is a task defn.
