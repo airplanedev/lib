@@ -25,7 +25,6 @@ type Definition_0_3 struct {
 	Slug        string                    `json:"slug"`
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
-	DefnFile    string                    `json:"defnFile,omitempty"`
 
 	Deno       *DenoDefinition_0_3       `json:"deno,omitempty"`
 	Dockerfile *DockerfileDefinition_0_3 `json:"dockerfile,omitempty"`
@@ -43,7 +42,8 @@ type Definition_0_3 struct {
 	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
 	Timeout            int               `json:"timeout,omitempty"`
 
-	buildConfig build.BuildConfig `json:"buildConfig"`
+	buildConfig  build.BuildConfig
+	defnFilePath string
 }
 
 var _ DefinitionInterface = &Definition_0_3{}
@@ -1262,7 +1262,11 @@ func (d Definition_0_3) Entrypoint() (string, error) {
 }
 
 func (d Definition_0_3) GetDefnFilePath() string {
-	return d.DefnFile
+	return d.defnFilePath
+}
+
+func (d *Definition_0_3) SetDefnFilePath(filePath string) {
+	d.defnFilePath = filePath
 }
 
 func (d *Definition_0_3) UpgradeJST() error {

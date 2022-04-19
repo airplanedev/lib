@@ -22,6 +22,7 @@ func TestDiscoverTasks(t *testing.T) {
 		expectedErr    bool
 		want           []TaskConfig
 		buildConfigs   []build.BuildConfig
+		defnFilePath   string
 		absEntrypoints []string
 	}{
 		{
@@ -148,7 +149,6 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint:  "./single_task.js",
 							NodeVersion: "14",
 						},
-						DefnFile: "fixtures/defn.task.yaml",
 					},
 					Source: TaskConfigSourceDefn,
 				},
@@ -158,6 +158,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
+			defnFilePath: "fixtures/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/single_task.js",
 			},
@@ -187,7 +188,6 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint:  "./single_task.js",
 							NodeVersion: "14",
 						},
-						DefnFile: "fixtures/defn.task.yaml",
 					},
 					Source: TaskConfigSourceDefn,
 				},
@@ -197,6 +197,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
+			defnFilePath: "fixtures/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/single_task.js",
 			},
@@ -245,7 +246,6 @@ func TestDiscoverTasks(t *testing.T) {
 							Entrypoint:  "./single_task.js",
 							NodeVersion: "14",
 						},
-						DefnFile: "fixtures/subdir/defn.task.yaml",
 					},
 					Source: TaskConfigSourceDefn,
 				},
@@ -256,6 +256,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "subdir/single_task.js",
 				},
 			},
+			defnFilePath: "fixtures/subdir/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/subdir/single_task.js",
 			},
@@ -306,6 +307,7 @@ func TestDiscoverTasks(t *testing.T) {
 					err := tC.want[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
 					require.NoError(err)
 				}
+				tC.want[i].Def.SetDefnFilePath(tC.defnFilePath)
 				require.Equal(tC.want[i], got[i])
 			}
 		})

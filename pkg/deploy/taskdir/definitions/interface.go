@@ -43,6 +43,7 @@ type DefinitionInterface interface {
 
 	// GetDefnFilePath returns the absolute path to the file that configured this definition, if one exists.
 	GetDefnFilePath() string
+	SetDefnFilePath(filePath string)
 }
 
 var ErrNoEntrypoint = errors.New("No entrypoint")
