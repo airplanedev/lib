@@ -158,7 +158,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
-			defnFilePath: "fixtures/defn.task.yaml",
+			defnFilePath: fixturesPath + "/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/single_task.js",
 			},
@@ -197,7 +197,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"workdir": "",
 				},
 			},
-			defnFilePath: "fixtures/defn.task.yaml",
+			defnFilePath: fixturesPath + "/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/single_task.js",
 			},
@@ -256,7 +256,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "subdir/single_task.js",
 				},
 			},
-			defnFilePath: "fixtures/subdir/defn.task.yaml",
+			defnFilePath: fixturesPath + "/subdir/defn.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/subdir/single_task.js",
 			},
