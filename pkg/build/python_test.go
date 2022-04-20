@@ -17,6 +17,27 @@ func TestPythonBuilder(t *testing.T) {
 				"entrypoint": "main.py",
 			},
 		},
+		{
+			Root: "python/requirements",
+			Kind: TaskKindPython,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.py",
+			},
+			SearchString: "[1]",
+		},
+		{
+			Root: "python/requirementswithbuildargs",
+			Kind: TaskKindPython,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.py",
+			},
+			BuildArgs: map[string]string{
+				"VER": "3.1.0",
+			},
+			SearchString: "[1]",
+		},
 	}
 
 	RunTests(t, ctx, tests)

@@ -9,6 +9,6 @@
     "prettier": "^2.4.1"
   },
   "airplane": {
-    "install": "yarn install --production=false"
+    "install": "yarn install --production=$IS_PRODUCTION"
   }
 }
