@@ -148,6 +148,9 @@ func TestNodeBuilder(t *testing.T) {
 				"shim":       "true",
 				"entrypoint": "main.ts",
 			},
+			BuildArgs: map[string]string{
+				"IS_PRODUCTION": "false",
+			},
 		},
 		{
 			Root: "typescript/custompostinstall",
