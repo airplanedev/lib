@@ -256,6 +256,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "nonlinkedscript/single_task.js",
 				},
 			},
+			defnFilePath: fixturesPath + "/nonlinkedscript/single_task.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/nonlinkedscript/single_task.js",
 			},
@@ -289,6 +290,7 @@ func TestDiscoverTasks(t *testing.T) {
 					"entrypoint": "nonlinkedscript/single_task.js",
 				},
 			},
+			defnFilePath: fixturesPath + "/nonlinkedscript/single_task.task.yaml",
 			absEntrypoints: []string{
 				fixturesPath + "/nonlinkedscript/single_task.js",
 			},
