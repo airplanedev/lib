@@ -34,6 +34,7 @@ func node(root string, options KindOptions) (string, error) {
 		return "", err
 	}
 
+	isDurable, _ := options["isDurable"].(bool)
 	workdir, _ := options["workdir"].(string)
 	pathPackageJSON := filepath.Join(root, "package.json")
 	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
@@ -63,20 +64,24 @@ func node(root string, options KindOptions) (string, error) {
 		Base                  string
 		HasPackageJSON        bool
 		UsesWorkspaces        bool
+		IsDurable             bool
 		InlineShim            string
 		InlineShimPackageJSON string
 		NodeVersion           string
 		ExternalFlags         string
 		InstallCommand        string
 		PostInstallCommand    string
+		Entrypoint            string
 	}{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
 		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
+		IsDurable:      isDurable,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
+		Entrypoint:         entrypoint,
 	}
 
 	// Workaround to get esbuild to not bundle dependencies.
@@ -178,15 +183,19 @@ func node(root string, options KindOptions) (string, error) {
 		{{if .PostInstallCommand}}
 		RUN {{.PostInstallCommand}}
 		{{end}}
-		
+
+		{{if .IsDurable}}
+		ENTRYPOINT ["node", "{{.Entrypoint}}"]
+		{{else}}
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
-				--bundle \
-				--external:airplane \
-				--platform=node {{.ExternalFlags}} \
-				--target=node{{.NodeVersion}} \
-				--outfile=/airplane/.airplane/dist/shim.js
+			--bundle \
+			--external:airplane \
+			--platform=node {{.ExternalFlags}} \
+			--target=node{{.NodeVersion}} \
+			--outfile=/airplane/.airplane/dist/shim.js
 		ENTRYPOINT ["node", "/airplane/.airplane/dist/shim.js"]
+		{{end}}
 	`), cfg)
 }
 
