@@ -42,8 +42,11 @@ type Definition_0_3 struct {
 	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
 	Timeout            int               `json:"timeout,omitempty"`
 
-	buildConfig build.BuildConfig
+	buildConfig  build.BuildConfig
+	defnFilePath string
 }
+
+var _ DefinitionInterface = &Definition_0_3{}
 
 type taskKind_0_3 interface {
 	fillInUpdateTaskRequest(context.Context, api.IAPIClient, *api.UpdateTaskRequest) error
@@ -1256,6 +1259,14 @@ func (d Definition_0_3) Entrypoint() (string, error) {
 		return "", err
 	}
 	return taskKind.getEntrypoint()
+}
+
+func (d Definition_0_3) GetDefnFilePath() string {
+	return d.defnFilePath
+}
+
+func (d *Definition_0_3) SetDefnFilePath(filePath string) {
+	d.defnFilePath = filePath
 }
 
 func (d *Definition_0_3) UpgradeJST() error {
