@@ -63,14 +63,15 @@ type LocalConfig struct {
 	// If nil, Push will produce an error.
 	Auth *RegistryAuth
 
-	// BuildEnv is a map of build-time environment variables to use.
-	BuildEnv map[string]string
+	// BuildArgs is a map of build-time environment variables to use.
+	BuildArgs map[string]string
 }
 
 type DockerfileConfig struct {
-	Builder string
-	Root    string
-	Options KindOptions
+	Builder      string
+	Root         string
+	Options      KindOptions
+	BuildArgKeys []string
 }
 
 // Builder implements an image builder.
@@ -110,7 +111,7 @@ func New(c LocalConfig) (*Builder, error) {
 		name:     c.Builder,
 		options:  c.Options,
 		auth:     c.Auth,
-		buildEnv: c.BuildEnv,
+		buildEnv: c.BuildArgs,
 		client:   client,
 	}, nil
 }
@@ -146,10 +147,15 @@ func (b *Builder) Build(ctx context.Context, taskID, version string) (*Response,
 	}
 	defer tree.Close()
 
+	var buildEnvKeys []string
+	for k := range b.buildEnv {
+		buildEnvKeys = append(buildEnvKeys, k)
+	}
 	dockerfile, err := BuildDockerfile(DockerfileConfig{
-		Builder: b.name,
-		Root:    b.root,
-		Options: b.options,
+		Builder:      b.name,
+		Root:         b.root,
+		Options:      b.options,
+		BuildArgKeys: buildEnvKeys,
 	})
 	if err != nil {
 		return nil, errors.Wrap(err, "creating dockerfile")
@@ -321,9 +327,9 @@ func BuildDockerfile(c DockerfileConfig) (string, error) {
 	case NameDeno:
 		return deno(c.Root, c.Options)
 	case NamePython:
-		return python(c.Root, c.Options)
+		return python(c.Root, c.Options, c.BuildArgKeys)
 	case NameNode:
-		return node(c.Root, c.Options)
+		return node(c.Root, c.Options, c.BuildArgKeys)
 	case NameDockerfile:
 		return dockerfile(c.Root, c.Options)
 	case NameShell:

@@ -15,7 +15,7 @@ import (
 )
 
 // node creates a dockerfile for Node (typescript/javascript).
-func node(root string, options KindOptions) (string, error) {
+func node(root string, options KindOptions, buildArgs []string) (string, error) {
 	var err error
 
 	// For backwards compatibility, continue to build old Node tasks
@@ -58,6 +58,11 @@ func node(root string, options KindOptions) (string, error) {
 		}
 	}
 
+	for i, a := range buildArgs {
+		buildArgs[i] = fmt.Sprintf("ARG %s", a)
+	}
+	argsCommand := strings.Join(buildArgs, "\n")
+
 	cfg := struct {
 		Workdir               string
 		Base                  string
@@ -69,6 +74,7 @@ func node(root string, options KindOptions) (string, error) {
 		ExternalFlags         string
 		InstallCommand        string
 		PostInstallCommand    string
+		Args                  string
 	}{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
@@ -77,6 +83,7 @@ func node(root string, options KindOptions) (string, error) {
 		// https://esbuild.github.io/api/#target
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
+		Args:               argsCommand,
 	}
 
 	// Workaround to get esbuild to not bundle dependencies.
@@ -168,6 +175,8 @@ func node(root string, options KindOptions) (string, error) {
 		{{if .UsesWorkspaces}}
 		COPY . /airplane
 		{{end}}
+
+		{{.Args}}
 
 		RUN {{.InstallCommand}}
 

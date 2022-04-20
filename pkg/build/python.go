@@ -2,6 +2,7 @@ package build
 
 import (
 	_ "embed"
+	"fmt"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -12,13 +13,13 @@ import (
 )
 
 // Python creates a dockerfile for Python.
-func python(root string, args KindOptions) (string, error) {
-	if args["shim"] != "true" {
-		return pythonLegacy(root, args)
+func python(root string, opts KindOptions, buildArgs []string) (string, error) {
+	if opts["shim"] != "true" {
+		return pythonLegacy(root, opts)
 	}
 
 	// Assert that the entrypoint file exists:
-	entrypoint, _ := args["entrypoint"].(string)
+	entrypoint, _ := opts["entrypoint"].(string)
 	if err := fsx.AssertExistsAll(filepath.Join(root, entrypoint)); err != nil {
 		return "", err
 	}
@@ -33,6 +34,11 @@ func python(root string, args KindOptions) (string, error) {
 		return "", err
 	}
 
+	for i, a := range buildArgs {
+		buildArgs[i] = fmt.Sprintf("ARG %s", a)
+	}
+	argsCommand := strings.Join(buildArgs, "\n")
+
 	dockerfile := heredoc.Doc(`
 		FROM {{ .Base }}
 
@@ -45,6 +51,9 @@ func python(root string, args KindOptions) (string, error) {
 		WORKDIR /airplane
 		RUN pip install "airplanesdk>=0.3.0,<0.4.0"
 		RUN mkdir -p .airplane && {{.InlineShim}} > .airplane/shim.py
+
+		{{.Args}}
+
 		{{if .HasRequirements}}
 		COPY requirements.txt .
 		{{if .HasPipConf}}
@@ -63,11 +72,13 @@ func python(root string, args KindOptions) (string, error) {
 		InlineShim      string
 		HasRequirements bool
 		HasPipConf      bool
+		Args            string
 	}{
 		Base:            v.String(),
 		InlineShim:      inlineString(shim),
 		HasRequirements: fsx.Exists(filepath.Join(root, "requirements.txt")),
 		HasPipConf:      fsx.Exists(filepath.Join(root, "pip.conf")),
+		Args:            argsCommand,
 	})
 	if err != nil {
 		return "", errors.Wrapf(err, "rendering dockerfile")
