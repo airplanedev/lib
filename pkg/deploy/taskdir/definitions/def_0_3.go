@@ -303,6 +303,7 @@ var _ taskKind_0_3 = &NodeDefinition_0_3{}
 type NodeDefinition_0_3 struct {
 	Entrypoint  string      `json:"entrypoint"`
 	NodeVersion string      `json:"nodeVersion"`
+	IsDurable   bool        `json:"isDurable"`
 	EnvVars     api.TaskEnv `json:"envVars,omitempty"`
 
 	absoluteEntrypoint string `json:"-"`
@@ -326,6 +327,13 @@ func (d *NodeDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAP
 			d.NodeVersion = sv
 		} else {
 			return errors.Errorf("expected string nodeVersion, got %T instead", v)
+		}
+	}
+	if v, ok := t.KindOptions["isDurable"]; ok {
+		if sv, ok := v.(bool); ok {
+			d.IsDurable = sv
+		} else {
+			return errors.Errorf("expected bool isDurable, got %T instead", v)
 		}
 	}
 	d.EnvVars = t.Env
@@ -353,6 +361,7 @@ func (d *NodeDefinition_0_3) getKindOptions() (build.KindOptions, error) {
 	return build.KindOptions{
 		"entrypoint":  d.Entrypoint,
 		"nodeVersion": d.NodeVersion,
+		"isDurable":   d.IsDurable,
 	}, nil
 }
 

@@ -20,6 +20,11 @@
                   "description": "The version of Node to use.",
                   "enum": ["12", "14", "15", "16"]
                 },
+                "isDurable": {
+                  "description": "Set to true to indicate that ",
+                  "default": false,
+                  "type": "boolean"
+                },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },
               "additionalProperties": false,
