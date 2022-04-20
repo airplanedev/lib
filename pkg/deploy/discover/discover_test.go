@@ -258,6 +258,39 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 		},
 		{
+			name:  "non linked script with def in same directory - entire directory deployed",
+			paths: []string{"./fixtures/nonlinkedscript"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
+			},
+			want: []TaskConfig{
+				{
+					TaskID:         "tsk123",
+					TaskRoot:       fixturesPath,
+					TaskEntrypoint: fixturesPath + "/nonlinkedscript/single_task.js",
+					Def: &definitions.Definition_0_3{
+						Name:        "sunt in tempor eu",
+						Slug:        "my_task",
+						Description: "ut dolor sit officia ea",
+						Node: &definitions.NodeDefinition_0_3{
+							Entrypoint:  "./single_task.js",
+							NodeVersion: "14",
+						},
+					},
+					Source: TaskConfigSourceDefn,
+				},
+			},
+			buildConfigs: []build.BuildConfig{
+				{
+					"workdir":    "/nonlinkedscript",
+					"entrypoint": "nonlinkedscript/single_task.js",
+				},
+			},
+			absEntrypoints: []string{
+				fixturesPath + "/nonlinkedscript/single_task.js",
+			},
+		},
+		{
 			name:  "discovers definition when script is deployed",
 			paths: []string{"./fixtures/subdir/defn.task.yaml"},
 			existingTasks: map[string]api.Task{
