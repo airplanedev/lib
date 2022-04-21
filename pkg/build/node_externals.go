@@ -30,7 +30,7 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 	}
 	for _, dep := range allDeps {
 		// Mark all dependencies as external, except for known ESM-only deps. These deps
-		// need to be bundled by esbuild so that esbuild can convert them to CommonJS format.
+		// need to be bundled by esbuild so that esbuild can convert them to CommonJS.
 		// As long as these modules don't happen to pull in any optional modules, we should be OK.
 		// This is a bandaid until we figure out how to handle ESM without bundling.
 		if !contains(esmModules, dep) {
