@@ -174,7 +174,8 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	}
 
 	// Install the dependencies we need for our shim file:
-	pjson, err := build.GenShimPackageJSON()
+	pathPackageJSON := filepath.Join(root, "package.json")
+	pjson, err := build.GenShimPackageJSON(pathPackageJSON)
 	if err != nil {
 		return nil, nil, err
 	}
