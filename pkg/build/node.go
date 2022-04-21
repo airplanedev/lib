@@ -159,8 +159,8 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		# postinstall scripts. We run as root with --unsafe-perm instead, skipping
 		# that lookup. Possibly could fix by building for linux/arm on m1 instead
 		# of always building for linux/amd64.
-		RUN npm install -g typescript@4.2 && \
-			npm install -g esbuild@0.12 --unsafe-perm
+		RUN npm install -g esbuild@0.12 --unsafe-perm
+		
 		RUN mkdir -p /airplane/.airplane && \
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
@@ -204,8 +204,7 @@ func GenShimPackageJSON() ([]byte, error) {
 		Dependencies map[string]string `json:"dependencies"`
 	}{
 		Dependencies: map[string]string{
-			"airplane":    "~0.1.2",
-			"@types/node": "^16",
+			"airplane": "~0.1.2",
 		},
 	})
 	return b, errors.Wrap(err, "generating shim dependencies")
