@@ -3,6 +3,7 @@ package discover
 import (
 	"context"
 	"path/filepath"
+	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir"
@@ -47,6 +48,14 @@ func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (stri
 
 func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
 	if !definitions.IsTaskDef(file) {
+		// Check if there is a file in the same directory with the same name that is a task defn.
+		fileWithoutExtension := strings.TrimSuffix(file, filepath.Ext(file))
+		for _, tde := range definitions.TaskDefExtensions {
+			fileWithTaskDefExtension := fileWithoutExtension + tde
+			if fsx.Exists(fileWithTaskDefExtension) {
+				return dd.GetTaskConfig(ctx, fileWithTaskDefExtension)
+			}
+		}
 		return nil, nil
 	}
 

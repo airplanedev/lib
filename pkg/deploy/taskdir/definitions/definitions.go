@@ -7,6 +7,12 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 )
 
+var (
+	YamlDefExtensions = []string{".task.yaml", ".task.yml"}
+	JSONDefExtensions = []string{".task.json"}
+	TaskDefExtensions = append(YamlDefExtensions, JSONDefExtensions...)
+)
+
 func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Task) (DefinitionInterface, error) {
 	def, err := NewDefinitionFromTask_0_3(ctx, client, t)
 	if err != nil {
@@ -28,11 +34,15 @@ func IsTaskDef(fn string) bool {
 }
 
 func GetTaskDefFormat(fn string) TaskDefFormat {
-	if strings.HasSuffix(fn, ".task.yaml") || strings.HasSuffix(fn, ".task.yml") {
-		return TaskDefFormatYAML
+	for _, de := range YamlDefExtensions {
+		if strings.HasSuffix(fn, de) {
+			return TaskDefFormatYAML
+		}
 	}
-	if strings.HasSuffix(fn, ".task.json") {
-		return TaskDefFormatJSON
+	for _, de := range JSONDefExtensions {
+		if strings.HasSuffix(fn, de) {
+			return TaskDefFormatJSON
+		}
 	}
 	return TaskDefFormatUnknown
 }
