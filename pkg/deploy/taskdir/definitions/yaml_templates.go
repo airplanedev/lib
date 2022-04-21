@@ -1,6 +1,8 @@
 package definitions
 
-const definitionTemplate = `# Used by Airplane to identify your task. Do not change.
+const definitionTemplate = `# Full reference: https://docs.airplane.dev/tasks/task-definition
+
+# Used by Airplane to identify your task. Do not change.
 slug: {{.slug}}
 
 # A human-readable name for your task.
