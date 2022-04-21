@@ -7,10 +7,12 @@
   resolved "https://registry.yarnpkg.com/@headlessui/react/-/react-1.4.1.tgz#0a8dbb20e1d63dcea55bfc3ab1b87637aaac7777"
   integrity sha512-gL6Ns5xQM57cZBzX6IVv6L7nsam8rDEpRhs5fg28SN64ikfmuuMgunc+Rw5C1cMScnvFM+cz32ueVrlSFEVlSg==
 
-airplane@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/airplane/-/airplane-0.0.5.tgz#01888b9ee80869dd66e12933e4a783c2c141a9fd"
-  integrity sha512-HPPAoB+IjdzQQSuW66Mq5BgqKZevrgJJpiUj8TXtc8MBBlg1rZTaNgYr5h9fneSZ4wr+yS8QC8T4sTErLsT/hQ==
+airplane@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/airplane/-/airplane-0.1.2.tgz#56a16c70e9550e52f658186bce89f2ffed93d5b6"
+  integrity sha512-X37WLeGZSZoMP8Zmy3pVa87vQuShEdKoUyLXVcwTy8YBBv+udYFL0yqHbkuN1q0uXIJcRRd8Sf4qmFPHbrTLBA==
+  dependencies:
+    uuid "^8.3.0"
 
 buffer-writer@2.0.0:
   version "2.0.0"
@@ -142,6 +144,11 @@ util-deprecate@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
+
+uuid@^8.3.0:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 xtend@^4.0.0:
   version "4.0.2"

@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@headlessui/react": "^1.4.1",
-    "airplane": "^0.0.5",
+    "airplane": "0.1.2",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4"
   },
