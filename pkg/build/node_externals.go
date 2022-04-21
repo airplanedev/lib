@@ -8,6 +8,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+var esmModules = []string{
+	"node-fetch",
+}
+
 // ExternalPackages reads package.json and returns all dependencies and dev dependencies.
 // This is used as a bit of a workaround for esbuild - we're using esbuild to transform code but
 // don't actually want it to bundle. We hit issues when it tries to bundle optional packages
@@ -16,6 +20,28 @@ import (
 // TODO: replace this with a cleaner esbuild plugin that can mark dependencies as external:
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
 func ExternalPackages(pathPackageJSON string) ([]string, error) {
+	var deps []string
+
+	allDeps, err := ListDependencies(pathPackageJSON)
+	if err != nil {
+		return nil, err
+	}
+	for _, dep := range allDeps {
+		// For known ESM modules, do not mark as external and use esbuild to bundle.
+		// As long as these modules don't happen to pull in any optional modules, we should be OK.
+		// This is a bandaid until we figure out how to handle ESM without bundling.
+		for _, m := range esmModules {
+			if m == dep {
+				deps = append(deps, dep)
+			}
+		}
+	}
+
+	return deps, nil
+}
+
+// ListDependencies lists all dependencies (including dev and optional) in a `package.json` file.
+func ListDependencies(pathPackageJSON string) ([]string, error) {
 	var deps []string
 
 	f, err := os.Open(pathPackageJSON)
@@ -37,29 +63,13 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 	}
 
 	for k := range d.Dependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	for k := range d.DevDependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	for k := range d.OptionalDependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	return deps, nil
-}
-
-var esmModules = []string{
-	"node-fetch",
-}
-
-func appendDep(deps []string, dep string) []string {
-	// For known ESM modules, do not mark as external and use esbuild to bundle.
-	// As long as these modules don't happen to pull in any optional modules, we should be OK.
-	// This is a bandaid until we figure out how to handle ESM without bundling.
-	for _, m := range esmModules {
-		if m == dep {
-			return deps
-		}
-	}
-	return append(deps, dep)
 }
