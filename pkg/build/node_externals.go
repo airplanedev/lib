@@ -47,7 +47,8 @@ func ListDependencies(pathPackageJSON string) ([]string, error) {
 
 	f, err := os.Open(pathPackageJSON)
 	if err != nil {
-		return nil, errors.Wrap(err, "opening package.json")
+		// There is no package.json (or we can't open it). Treat as having no dependencies.
+		return []string{}, nil
 	}
 	defer f.Close()
 	b, err := ioutil.ReadAll(f)
