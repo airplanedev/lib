@@ -74,7 +74,7 @@ node:
   # envVars:
   #   ENV_VAR_FROM_CONFIG:
   #     config: database_url
-  #   ENV_VAR_FROM_VALUE
+  #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
 
@@ -93,7 +93,7 @@ python:
   # envVars:
   #   ENV_VAR_FROM_CONFIG:
   #     config: database_url
-  #   ENV_VAR_FROM_VALUE
+  #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
 
@@ -112,7 +112,7 @@ shell:
   # envVars:
   #   ENV_VAR_FROM_CONFIG:
   #     config: database_url
-  #   ENV_VAR_FROM_VALUE
+  #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
 
@@ -137,7 +137,7 @@ docker:
   # envVars:
   #   ENV_VAR_FROM_CONFIG:
   #     config: database_url
-  #   ENV_VAR_FROM_VALUE
+  #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
 
