@@ -10,6 +10,7 @@ import (
 
 var esmModules = []string{
 	"node-fetch",
+	// airplane>=0.2.0 depends on node-fetch:
 	"airplane",
 }
 
@@ -28,13 +29,12 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 		return nil, err
 	}
 	for _, dep := range allDeps {
-		// For known ESM modules, do not mark as external and use esbuild to bundle.
+		// Mark all dependencies as external, except for known ESM-only deps. These deps
+		// need to be bundled by esbuild so that esbuild can convert them to CommonJS format.
 		// As long as these modules don't happen to pull in any optional modules, we should be OK.
 		// This is a bandaid until we figure out how to handle ESM without bundling.
-		for _, m := range esmModules {
-			if m == dep {
-				deps = append(deps, dep)
-			}
+		if !contains(esmModules, dep) {
+			deps = append(deps, dep)
 		}
 	}
 
@@ -73,4 +73,14 @@ func ListDependencies(pathPackageJSON string) ([]string, error) {
 		deps = append(deps, k)
 	}
 	return deps, nil
+}
+
+// contains returns true if `list` includes `needle`.
+func contains(list []string, needle string) bool {
+	for _, elem := range list {
+		if elem == needle {
+			return true
+		}
+	}
+	return false
 }
