@@ -14,9 +14,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:embed tsconfig.default.json
-var defaultTSConfig string
-
 // node creates a dockerfile for Node (typescript/javascript).
 func node(root string, options KindOptions, buildArgs []string) (string, error) {
 	var err error
@@ -288,8 +285,8 @@ func nodeLegacyBuilder(root string, options KindOptions) (string, error) {
 		if buildDir == "" {
 			buildDir = ".airplane"
 		}
-		cmds = append(cmds, `npm install -g typescript@4.6`)
-		cmds = append(cmds, fmt.Sprintf(`[ -f tsconfig.json ] || %s > tsconfig.json`, inlineString(defaultTSConfig)))
+		cmds = append(cmds, `npm install -g typescript@4.1`)
+		cmds = append(cmds, `[ -f tsconfig.json ] || echo '{"include": ["*", "**/*"], "exclude": ["node_modules"]}' >tsconfig.json`)
 		cmds = append(cmds, fmt.Sprintf(`rm -rf %s && tsc --outDir %s --rootDir .`, buildDir, buildDir))
 		if buildCommand != "" {
 			// It's not totally expected, but if you do set buildCommand we'll run it after tsc
