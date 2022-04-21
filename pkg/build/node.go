@@ -217,6 +217,7 @@ func GenShimPackageJSON(pathPackageJSON string) ([]byte, error) {
 	// Allow users to override any shim dependencies. Given shim code is bundled
 	// with user code, we cannot use separate versions of these dependencies so
 	// default to whichever version the user requests.
+	fmt.Printf("Excluding user-installed deps: %+v\n", deps)
 	for _, dep := range deps {
 		delete(pjson.Dependencies, dep)
 	}
