@@ -36,13 +36,6 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 		}
 	}
 
-	if contains(allDeps, "airplane") {
-		// airplane>=0.2.0 depends on node-fetch
-		// TODO: add an esbuild plugin that traverses the dependency tree and adds any ESM modules
-		// then we can remove this manual override.
-		deps = append(deps, "node-fetch")
-	}
-
 	return deps, nil
 }
 
