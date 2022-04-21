@@ -44,6 +44,9 @@ type DefinitionInterface interface {
 	// GetDefnFilePath returns the absolute path to the file that configured this definition, if one exists.
 	GetDefnFilePath() string
 	SetDefnFilePath(filePath string)
+
+	// Marshal returns a serialized version of the definition in the given format.
+	Marshal(format TaskDefFormat) ([]byte, error)
 }
 
 var ErrNoEntrypoint = errors.New("No entrypoint")
