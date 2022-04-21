@@ -11,7 +11,7 @@ import (
 var esmModules = []string{
 	"node-fetch",
 	// airplane>=0.2.0 depends on node-fetch
-	// "airplane",
+	"airplane",
 }
 
 // ExternalPackages reads package.json and returns all dependencies and dev dependencies.
