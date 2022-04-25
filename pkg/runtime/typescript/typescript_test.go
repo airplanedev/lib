@@ -24,6 +24,10 @@ func TestDev(tt *testing.T) {
 		},
 		{
 			Kind: build.TaskKindNode,
+			Opts: runtime.PrepareRunOptions{Path: "typescript/airplaneoverride/main.ts"},
+		},
+		{
+			Kind: build.TaskKindNode,
 			Opts: runtime.PrepareRunOptions{Path: "typescript/npm/main.ts"},
 		},
 		{
