@@ -344,6 +344,7 @@ func TestDiscoverTasks(t *testing.T) {
 			expectedAppConfigs: []AppConfig{
 				{
 					Slug:       "my_app",
+					Root:       fixturesPath + "/app",
 					Entrypoint: "foo.js",
 					Source:     AppConfigSourceDefn,
 				},

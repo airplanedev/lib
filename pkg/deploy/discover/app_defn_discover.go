@@ -3,8 +3,8 @@ package discover
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
+	"path/filepath"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
@@ -26,12 +26,9 @@ type AppDefnDiscoverer struct {
 var _ AppDiscoverer = &AppDefnDiscoverer{}
 
 func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*AppConfig, error) {
-	fmt.Println("hi")
-
 	if !definitions.IsAppDef(file) {
 		return nil, nil
 	}
-	fmt.Println("hi")
 
 	buf, err := ioutil.ReadFile(file)
 	if err != nil {
@@ -56,10 +53,16 @@ func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*A
 		return nil, err
 	}
 
+	root, err := filepath.Abs(filepath.Dir(file))
+	if err != nil {
+		return nil, errors.Wrap(err, "getting absolute app definition root")
+	}
+
 	return &AppConfig{
 		Slug:       d.Slug,
 		Entrypoint: d.Entrypoint,
 		Source:     dd.AppConfigSource(),
+		Root:       root,
 	}, nil
 }
 

@@ -38,6 +38,7 @@ type TaskConfig struct {
 
 type AppConfig struct {
 	ID         string
+	Root       string
 	Entrypoint string
 	Slug       string
 	Source     AppConfigSource
