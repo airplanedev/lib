@@ -93,17 +93,17 @@ func TestDev(tt *testing.T) {
 		// Check if this example uses npm or yarn:
 		r, err := runtime.Lookup(p, test.Kind)
 		require.NoError(tt, err)
-		root, err := r.Root(p)
+		workdir, err := r.Workdir(p)
 		require.NoError(tt, err)
 		var cmd *exec.Cmd
-		if fsx.Exists(filepath.Join(root, "yarn.lock")) {
+		if fsx.Exists(filepath.Join(workdir, "yarn.lock")) {
 			cmd = exec.CommandContext(ctx, "yarn", "install", "--frozen-lockfile")
 		} else {
 			cmd = exec.CommandContext(ctx, "npm", "install", "--no-save")
 		}
 
 		// Install dependencies:
-		cmd.Dir = root
+		cmd.Dir = workdir
 		out, err := cmd.CombinedOutput()
 		require.NoError(tt, err, "Failed to run %q for %q:\n%s", cmd.String(), test.Opts.Path, string(out))
 	}
