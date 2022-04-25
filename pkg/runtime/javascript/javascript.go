@@ -238,6 +238,10 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 		return nil, nil, errors.Wrap(err, "serializing param values")
 	}
 
+	if len(res.OutputFiles) == 0 {
+		return nil, nil, errors.New("esbuild failed: see logs")
+	}
+
 	return []string{"node", res.OutputFiles[0].Path, string(pv)}, closer, nil
 }
 
