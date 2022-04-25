@@ -8,9 +8,13 @@ import (
 )
 
 var (
-	YamlDefExtensions = []string{".task.yaml", ".task.yml"}
-	JSONDefExtensions = []string{".task.json"}
-	TaskDefExtensions = append(YamlDefExtensions, JSONDefExtensions...)
+	YamlTaskDefExtensions = []string{".task.yaml", ".task.yml"}
+	JSONTaskDefExtensions = []string{".task.json"}
+	TaskDefExtensions     = append(YamlTaskDefExtensions, JSONTaskDefExtensions...)
+
+	YamlAppDefExtensions = []string{".app.yaml", ".app.yml"}
+	JSONAppDefExtensions = []string{".app.json"}
+	AppDefExtensions     = append(YamlAppDefExtensions, JSONAppDefExtensions...)
 )
 
 func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Task) (DefinitionInterface, error) {
@@ -21,28 +25,46 @@ func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Tas
 	return &def, nil
 }
 
-type TaskDefFormat string
+type DefFormat string
 
 const (
-	TaskDefFormatUnknown TaskDefFormat = ""
-	TaskDefFormatYAML    TaskDefFormat = "yaml"
-	TaskDefFormatJSON    TaskDefFormat = "json"
+	DefFormatUnknown DefFormat = ""
+	DefFormatYAML    DefFormat = "yaml"
+	DefFormatJSON    DefFormat = "json"
 )
 
 func IsTaskDef(fn string) bool {
-	return GetTaskDefFormat(fn) != TaskDefFormatUnknown
+	return GetTaskDefFormat(fn) != DefFormatUnknown
 }
 
-func GetTaskDefFormat(fn string) TaskDefFormat {
-	for _, de := range YamlDefExtensions {
+func GetTaskDefFormat(fn string) DefFormat {
+	for _, de := range YamlTaskDefExtensions {
 		if strings.HasSuffix(fn, de) {
-			return TaskDefFormatYAML
+			return DefFormatYAML
 		}
 	}
-	for _, de := range JSONDefExtensions {
+	for _, de := range JSONTaskDefExtensions {
 		if strings.HasSuffix(fn, de) {
-			return TaskDefFormatJSON
+			return DefFormatJSON
 		}
 	}
-	return TaskDefFormatUnknown
+	return DefFormatUnknown
+}
+
+func IsAppDef(fn string) bool {
+	return GetAppDefFormat(fn) != DefFormatUnknown
+}
+
+func GetAppDefFormat(fn string) DefFormat {
+	for _, de := range YamlAppDefExtensions {
+		if strings.HasSuffix(fn, de) {
+			return DefFormatYAML
+		}
+	}
+	for _, de := range JSONAppDefExtensions {
+		if strings.HasSuffix(fn, de) {
+			return DefFormatJSON
+		}
+	}
+	return DefFormatUnknown
 }

@@ -20,10 +20,12 @@ var ignoredDirectories = map[string]bool{
 }
 
 type TaskConfigSource string
+type AppConfigSource string
 
 const (
 	TaskConfigSourceScript TaskConfigSource = "script"
 	TaskConfigSourceDefn   TaskConfigSource = "defn"
+	AppConfigSourceDefn    AppConfigSource  = "defn"
 )
 
 type TaskConfig struct {
@@ -32,6 +34,13 @@ type TaskConfig struct {
 	TaskEntrypoint string
 	Def            definitions.DefinitionInterface
 	Source         TaskConfigSource
+}
+
+type AppConfig struct {
+	ID         string
+	Entrypoint string
+	Slug       string
+	Source     AppConfigSource
 }
 
 type TaskDiscoverer interface {
@@ -45,8 +54,17 @@ type TaskDiscoverer interface {
 	TaskConfigSource() TaskConfigSource
 }
 
+type AppDiscoverer interface {
+	// IsAirplaneApp inspects a file and if that file represents an Airplane app, it returns
+	// that app's definition. If that file is not an app, it will return an empty definition.
+	IsAirplaneApp(ctx context.Context, file string) (*AppConfig, error)
+	// AppConfigSource returns a unique identifier of this TaskDiscoverer.
+	AppConfigSource() AppConfigSource
+}
+
 type Discoverer struct {
 	TaskDiscoverers []TaskDiscoverer
+	AppDiscoverers  []AppDiscoverer
 	Client          api.IAPIClient
 	Logger          logger.Logger
 
@@ -57,34 +75,35 @@ type Discoverer struct {
 	EnvSlug string
 }
 
-// DiscoverTasks recursively discovers Airplane tasks. Only one task config per slug is returned.
-// If there are multiple tasks discovered with the same slug, the order of the discoverers takes
-// precedence; if a single discoverer discovers multiple tasks with the same slug, the first task
-// discovered takes precedence. Task configs are returned in alphabetical order of their slugs.
-func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]TaskConfig, error) {
+// Discover recursively discovers Airplane tasks & apps. Only one config per slug is returned.
+// If there are multiple configs discovered with the same slug, the order of the discoverers takes
+// precedence; if a single discoverer discovers multiple configs with the same slug, the first config
+// discovered takes precedence. Configs are returned in alphabetical order of their slugs.
+func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfig, []AppConfig, error) {
 	taskConfigsBySlug := map[string][]TaskConfig{}
+	appConfigsBySlug := map[string][]AppConfig{}
 	for _, p := range paths {
 		if ignoredDirectories[p] {
 			continue
 		}
 		fileInfo, err := os.Stat(p)
 		if err != nil {
-			return nil, errors.Wrapf(err, "determining if %s is file or directory", p)
+			return nil, nil, errors.Wrapf(err, "determining if %s is file or directory", p)
 		}
 
 		if fileInfo.IsDir() {
 			// We found a directory. Recursively explore all of the files and directories in it.
 			nestedFiles, err := ioutil.ReadDir(p)
 			if err != nil {
-				return nil, errors.Wrapf(err, "reading directory %s", p)
+				return nil, nil, errors.Wrapf(err, "reading directory %s", p)
 			}
 			var nestedPaths []string
 			for _, nestedFile := range nestedFiles {
 				nestedPaths = append(nestedPaths, path.Join(p, nestedFile.Name()))
 			}
-			nestedTaskConfigs, err := d.DiscoverTasks(ctx, nestedPaths...)
+			nestedTaskConfigs, nestedAppConfigs, err := d.Discover(ctx, nestedPaths...)
 			if err != nil {
-				return nil, err
+				return nil, nil, err
 			}
 			for _, tc := range nestedTaskConfigs {
 				slug := tc.Def.GetSlug()
@@ -93,12 +112,19 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				}
 				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], tc)
 			}
+			for _, ac := range nestedAppConfigs {
+				slug := ac.Slug
+				if _, ok := appConfigsBySlug[slug]; !ok {
+					appConfigsBySlug[slug] = []AppConfig{}
+				}
+				appConfigsBySlug[slug] = append(appConfigsBySlug[slug], ac)
+			}
 		} else {
 			// We found a file.
 			for _, td := range d.TaskDiscoverers {
 				taskConfig, err := td.GetTaskConfig(ctx, p)
 				if err != nil {
-					return nil, err
+					return nil, nil, err
 				}
 				if taskConfig == nil {
 					// This file is not an Airplane task.
@@ -110,10 +136,25 @@ func (d *Discoverer) DiscoverTasks(ctx context.Context, paths ...string) ([]Task
 				}
 				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], *taskConfig)
 			}
+			for _, ad := range d.AppDiscoverers {
+				appConfig, err := ad.IsAirplaneApp(ctx, p)
+				if err != nil {
+					return nil, nil, err
+				}
+				if appConfig == nil {
+					// This file is not an Airplane app.
+					continue
+				}
+				slug := appConfig.Slug
+				if _, ok := appConfigsBySlug[slug]; !ok {
+					appConfigsBySlug[slug] = []AppConfig{}
+				}
+				appConfigsBySlug[slug] = append(appConfigsBySlug[slug], *appConfig)
+			}
 		}
 	}
 
-	return d.deduplicateTaskConfigs(taskConfigsBySlug), nil
+	return d.deduplicateTaskConfigs(taskConfigsBySlug), d.deduplicateAppConfigs(appConfigsBySlug), nil
 }
 
 // Given a map of slug -> [task config, ...], returns a list of task configs unique by slug, sorted
@@ -158,4 +199,48 @@ func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskCo
 		}
 	}
 	return taskConfigs
+}
+
+// Given a map of slug -> [app config, ...], returns a list of app configs unique by slug, sorted
+// by slug. App configs are chosen based on order of AppDiscoverers & order of discovery.
+func (d Discoverer) deduplicateAppConfigs(appConfigsBySlug map[string][]AppConfig) []AppConfig {
+	// Short-circuit if we have no app configs.
+	if len(appConfigsBySlug) == 0 {
+		return nil
+	}
+
+	// Sort by slugs, so we have a deterministic order.
+	slugs := make([]string, 0, len(appConfigsBySlug))
+	for slug := range appConfigsBySlug {
+		slugs = append(slugs, slug)
+	}
+	sort.Strings(slugs)
+
+	appConfigs := make([]AppConfig, len(slugs))
+	for i, slug := range slugs {
+		tcs := appConfigsBySlug[slug]
+
+		// Short-circuit if there's only one app config in the list.
+		if len(tcs) == 1 {
+			appConfigs[i] = tcs[0]
+			continue
+		}
+
+		// Otherwise, loop through the AppDiscoverers. Take the first app config that matches the
+		// discoverer in this order.
+		found := false
+		for _, ad := range d.AppDiscoverers {
+			for _, tc := range tcs {
+				if ad.AppConfigSource() == tc.Source {
+					appConfigs[i] = tc
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	return appConfigs
 }

@@ -126,25 +126,25 @@ func TestDefinitionSerialization_0_3(t *testing.T) {
 	// marshalling tests
 	for _, test := range []struct {
 		name     string
-		format   TaskDefFormat
+		format   DefFormat
 		def      Definition_0_3
 		expected []byte
 	}{
 		{
 			name:     "marshal yaml",
-			format:   TaskDefFormatYAML,
+			format:   DefFormatYAML,
 			def:      fullDef,
 			expected: fullYAML,
 		},
 		{
 			name:     "marshal json",
-			format:   TaskDefFormatJSON,
+			format:   DefFormatJSON,
 			def:      fullDef,
 			expected: fullJSON,
 		},
 		{
 			name:   "marshal yaml with multiline",
-			format: TaskDefFormatYAML,
+			format: DefFormatYAML,
 			def: Definition_0_3{
 				Name: "REST task",
 				Slug: "rest_task",
@@ -175,7 +175,7 @@ timeout: 300
 		},
 		{
 			name:   "marshal json with multiline",
-			format: TaskDefFormatJSON,
+			format: DefFormatJSON,
 			def: Definition_0_3{
 				Name: "REST task",
 				Slug: "rest_task",
@@ -214,31 +214,31 @@ timeout: 300
 	// unmarshalling tests
 	for _, test := range []struct {
 		name     string
-		format   TaskDefFormat
+		format   DefFormat
 		bytestr  []byte
 		expected Definition_0_3
 	}{
 		{
 			name:     "unmarshal yaml",
-			format:   TaskDefFormatYAML,
+			format:   DefFormatYAML,
 			bytestr:  fullYAML,
 			expected: fullDef,
 		},
 		{
 			name:     "unmarshal json",
-			format:   TaskDefFormatJSON,
+			format:   DefFormatJSON,
 			bytestr:  fullJSON,
 			expected: fullDef,
 		},
 		{
 			name:     "unmarshal yaml with default",
-			format:   TaskDefFormatYAML,
+			format:   DefFormatYAML,
 			bytestr:  yamlWithDefault,
 			expected: defWithDefault,
 		},
 		{
 			name:     "unmarshal json with default",
-			format:   TaskDefFormatJSON,
+			format:   DefFormatJSON,
 			bytestr:  jsonWithDefault,
 			expected: defWithDefault,
 		},

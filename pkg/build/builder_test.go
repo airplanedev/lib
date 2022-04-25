@@ -46,8 +46,8 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 			// test performance in CI becomes an issue, we should look into caching
 			// Docker builds in CI since (locally) that appears to have a significant
 			// impact on e2e times for this test suite.
-			//
-			// t.Parallel()
+			//d
+			t.Parallel()
 
 			require := require.New(t)
 

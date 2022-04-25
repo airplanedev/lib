@@ -57,7 +57,7 @@ func TestYAMLComments(t *testing.T) {
 			def, err := NewDefinition_0_3("My Task", "my_task", test.kind, test.entrypoint)
 			require.NoError(err)
 
-			got, err := def.GenerateCommentedFile(TaskDefFormatYAML)
+			got, err := def.GenerateCommentedFile(DefFormatYAML)
 			require.NoError(err)
 
 			expected, err := os.ReadFile(test.file)
@@ -66,7 +66,7 @@ func TestYAMLComments(t *testing.T) {
 			require.Equal(string(expected), string(got))
 
 			unmarshalled := Definition_0_3{}
-			err = unmarshalled.Unmarshal(TaskDefFormatYAML, got)
+			err = unmarshalled.Unmarshal(DefFormatYAML, got)
 			require.NoError(err)
 			require.Equal(def, unmarshalled)
 		})
