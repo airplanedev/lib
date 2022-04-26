@@ -14,6 +14,7 @@ import (
 )
 
 type AppDefinition struct {
+	// TODO: expand this with additional fields that configure an app.
 	Slug       string `json:"slug"`
 	Entrypoint string `json:"entrypoint"`
 }
@@ -64,6 +65,7 @@ func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*A
 		if !errors.As(err, &merr) {
 			return nil, errors.Wrap(err, "unable to get app")
 		}
+		// TODO offer to create the app.
 		if dd.Logger != nil {
 			dd.Logger.Warning(`App with slug %s does not exist, skipping deploy.`, d.Slug)
 		}
