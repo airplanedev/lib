@@ -58,7 +58,20 @@ func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*A
 		return nil, errors.Wrap(err, "getting absolute app definition root")
 	}
 
+	app, err := dd.Client.GetApp(ctx, api.GetAppRequest{Slug: d.Slug})
+	if err != nil {
+		var merr *api.AppMissingError
+		if !errors.As(err, &merr) {
+			return nil, errors.Wrap(err, "unable to get app")
+		}
+		if dd.Logger != nil {
+			dd.Logger.Warning(`App with slug %s does not exist, skipping deploy.`, d.Slug)
+		}
+		return nil, nil
+	}
+
 	return &AppConfig{
+		ID:         app.ID,
 		Slug:       d.Slug,
 		Entrypoint: d.Entrypoint,
 		Source:     dd.AppConfigSource(),

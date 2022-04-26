@@ -14,6 +14,7 @@ type IAPIClient interface {
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
 	// GetTaskMetadata fetches a task's metadata by slug. If the slug does not match a task, a *TaskMissingError is returned.
 	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
+	GetApp(ctx context.Context, req GetAppRequest) (res App, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 }
@@ -328,4 +329,20 @@ type AgentLabel struct {
 type ExecuteRules struct {
 	DisallowSelfApprove bool `json:"disallowSelfApprove"`
 	RequireRequests     bool `json:"requireRequests"`
+}
+
+type App struct {
+	ID          string     `json:"id"`
+	Slug        string     `json:"slug"`
+	ArchivedAt  *time.Time `json:"archivedAt"`
+	ArchivedBy  *string    `json:"archivedBy"`
+	Name        string     `json:"name"`
+	Description string     `json:"description"`
+	CreatedBy   string     `json:"createdBy"`
+	CreatedAt   time.Time  `json:"createdAt"`
+}
+
+type GetAppRequest struct {
+	ID   string
+	Slug string
 }

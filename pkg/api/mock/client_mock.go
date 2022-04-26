@@ -9,6 +9,7 @@ import (
 type MockClient struct {
 	Tasks     map[string]api.Task
 	Resources []api.Resource
+	Apps      map[string]api.App
 }
 
 var _ api.IAPIClient = &MockClient{}
@@ -42,4 +43,12 @@ func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuild
 	return api.CreateBuildUploadResponse{
 		WriteOnlyURL: "writeOnlyURL",
 	}, nil
+}
+
+func (mc *MockClient) GetApp(ctx context.Context, req api.GetAppRequest) (res api.App, err error) {
+	a, ok := mc.Apps[req.Slug]
+	if !ok {
+		return api.App{}, &api.AppMissingError{AppURL: "api/", Slug: req.Slug}
+	}
+	return a, nil
 }
