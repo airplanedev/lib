@@ -70,6 +70,14 @@ func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*A
 		return nil, nil
 	}
 
+	if !filepath.IsAbs(d.Entrypoint) {
+		defnDir := filepath.Dir(file)
+		d.Entrypoint, err = filepath.Abs(filepath.Join(defnDir, d.Entrypoint))
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	return &AppConfig{
 		ID:         app.ID,
 		Slug:       d.Slug,

@@ -19,6 +19,7 @@ func TestDiscoverTasks(t *testing.T) {
 		name                string
 		paths               []string
 		existingTasks       map[string]api.Task
+		existingApps        map[string]api.App
 		expectedErr         bool
 		expectedTaskConfigs []TaskConfig
 		expectedAppConfigs  []AppConfig
@@ -341,11 +342,15 @@ func TestDiscoverTasks(t *testing.T) {
 		{
 			name:  "app defn",
 			paths: []string{"./fixtures/app/defn.app.yaml"},
+			existingApps: map[string]api.App{
+				"my_app": {ID: "app123", Slug: "my_app", Name: "My App"},
+			},
 			expectedAppConfigs: []AppConfig{
 				{
+					ID:         "app123",
 					Slug:       "my_app",
 					Root:       fixturesPath + "/app",
-					Entrypoint: "foo.js",
+					Entrypoint: fixturesPath + "/app/foo.js",
 					Source:     AppConfigSourceDefn,
 				},
 			},
@@ -356,6 +361,7 @@ func TestDiscoverTasks(t *testing.T) {
 			require := require.New(t)
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
+				Apps:  tC.existingApps,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
 				Client: apiClient,
@@ -372,10 +378,8 @@ func TestDiscoverTasks(t *testing.T) {
 			d := &Discoverer{
 				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
 				AppDiscoverers:  []AppDiscoverer{appDefnDiscoverer},
-				Client: &mock.MockClient{
-					Tasks: tC.existingTasks,
-				},
-				Logger: &logger.MockLogger{},
+				Client:          apiClient,
+				Logger:          &logger.MockLogger{},
 			}
 			taskConfigs, appConfigs, err := d.Discover(context.Background(), tC.paths...)
 			if tC.expectedErr {
