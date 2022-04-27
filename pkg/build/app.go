@@ -32,7 +32,7 @@ func app(root string) (string, error) {
 	}
 
 	return applyTemplate(heredoc.Doc(`
-		FROM {{.Base}}
+		FROM {{.Base}} as builder
 		WORKDIR /airplane
 
 		COPY package*.json yarn.* /airplane/
@@ -40,5 +40,8 @@ func app(root string) (string, error) {
 
 		COPY . /airplane/
 		RUN yarn build --outDir {{.OutDir}}
+
+		FROM scratch
+		COPY --from=builder /airplane/{{.OutDir}}/ .
 	`), cfg)
 }
