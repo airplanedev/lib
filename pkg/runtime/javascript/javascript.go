@@ -174,7 +174,8 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	}
 
 	// Install the dependencies we need for our shim file:
-	pjson, err := build.GenShimPackageJSON()
+	pathPackageJSON := filepath.Join(root, "package.json")
+	pjson, err := build.GenShimPackageJSON(pathPackageJSON)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -235,6 +236,10 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	pv, err := json.Marshal(opts.ParamValues)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "serializing param values")
+	}
+
+	if len(res.OutputFiles) == 0 {
+		return nil, nil, errors.New("esbuild failed: see logs")
 	}
 
 	return []string{"node", res.OutputFiles[0].Path, string(pv)}, closer, nil

@@ -2,7 +2,7 @@ name: golang
 on: push
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2004
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -29,7 +29,7 @@ jobs:
           scripts/check_gotidy.sh
 
   test:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2004
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3
@@ -53,7 +53,7 @@ jobs:
         run: bash <(curl -s https://codecov.io/bash)
 
   snyk:
-    runs-on: ubuntu-latest
+    runs-on: buildjet-8vcpu-ubuntu-2004
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v3

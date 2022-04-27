@@ -26,6 +26,14 @@ func TestNodeBuilder(t *testing.T) {
 			},
 		},
 		{
+			Root: "typescript/airplaneoverride",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
+		{
 			Root: "typescript/npm",
 			Kind: TaskKindNode,
 			Options: KindOptions{

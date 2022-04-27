@@ -109,7 +109,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON()
+	pjson, err := GenShimPackageJSON(pathPackageJSON)
 	if err != nil {
 		return "", err
 	}
@@ -187,11 +187,10 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		{{if .PostInstallCommand}}
 		RUN {{.PostInstallCommand}}
 		{{end}}
-		
+
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
-				--external:airplane \
 				--platform=node {{.ExternalFlags}} \
 				--target=node{{.NodeVersion}} \
 				--outfile=/airplane/.airplane/dist/shim.js
@@ -199,15 +198,29 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	`), cfg)
 }
 
-func GenShimPackageJSON() ([]byte, error) {
-	b, err := json.Marshal(struct {
+func GenShimPackageJSON(pathPackageJSON string) ([]byte, error) {
+	deps, err := ListDependencies(pathPackageJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	pjson := struct {
 		Dependencies map[string]string `json:"dependencies"`
 	}{
 		Dependencies: map[string]string{
 			"airplane": "~0.1.2",
 		},
-	})
-	return b, errors.Wrap(err, "generating shim dependencies")
+	}
+
+	// Allow users to override any shim dependencies. Given shim code is bundled
+	// with user code, we cannot use separate versions of these dependencies so
+	// default to whichever version the user requests.
+	for _, dep := range deps {
+		delete(pjson.Dependencies, dep)
+	}
+
+	b, err := json.Marshal(pjson)
+	return b, errors.Wrap(err, "marshalling shim dependencies")
 }
 
 func GetNodeVersion(opts KindOptions) string {
