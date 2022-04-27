@@ -17,6 +17,7 @@ const (
 	TaskKindNode       TaskKind = "node"
 	TaskKindPython     TaskKind = "python"
 	TaskKindShell      TaskKind = "shell"
+	TaskKindApp        TaskKind = "app"
 
 	TaskKindSQL  TaskKind = "sql"
 	TaskKindREST TaskKind = "rest"
