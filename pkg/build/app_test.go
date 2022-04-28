@@ -10,9 +10,9 @@ func TestAppBuilder(t *testing.T) {
 
 	tests := []Test{
 		{
-			Root:        "app/simple",
-			Kind:        "app",
-			SkipCommand: true,
+			Root:    "app/simple",
+			Kind:    "app",
+			SkipRun: true,
 		},
 	}
 

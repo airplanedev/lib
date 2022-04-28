@@ -25,8 +25,7 @@ type Test struct {
 	Options     KindOptions
 	ParamValues Values
 	BuildArgs   map[string]string
-	// Skip running a command on the built image.
-	SkipCommand bool
+	SkipRun     bool
 	// SearchString is a string to look for in the example's output
 	// to validate that the task completed successfully. If not set,
 	// defaults to a random value which is passed into the example
@@ -75,32 +74,30 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 			if test.ParamValues == nil {
 				test.ParamValues = Values{}
 			}
-			if test.SearchString == "" && !test.SkipCommand {
+			if test.SearchString == "" {
 				test.SearchString = ksuid.New().String()
 				test.ParamValues["id"] = test.SearchString
 			}
 
-			// Run the produced docker image:
-			out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues, test.SkipCommand)
-			require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			if !test.SkipRun {
+				// Run the produced docker image:
+				out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
+				require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			}
 		})
 	}
 }
 
-func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image string, paramValues Values, skipCommand bool) []byte {
+func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image string, paramValues Values) []byte {
 	require := require.New(t)
 
 	pv, err := json.Marshal(paramValues)
 	require.NoError(err)
 
-	var cmd strslice.StrSlice
-	if !skipCommand {
-		cmd = strslice.StrSlice{string(pv)}
-	}
 	resp, err := dclient.ContainerCreate(ctx, &container.Config{
 		Image: image,
 		Tty:   false,
-		Cmd:   cmd,
+		Cmd:   strslice.StrSlice{string(pv)},
 	}, nil, nil, nil, "")
 	require.NoError(err)
 	containerID := resp.ID
