@@ -85,7 +85,7 @@ type UpdateTaskRequest struct {
 	Resources                  map[string]string         `json:"resources"`
 	Kind                       build.TaskKind            `json:"kind"`
 	KindOptions                build.KindOptions         `json:"kindOptions"`
-	Runtime                    build.TaskRuntime         `json:"taskRuntime"`
+	Runtime                    build.TaskRuntime         `json:"runtime"`
 	Repo                       string                    `json:"repo"`
 	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
 	Permissions                *Permissions              `json:"permissions"`
