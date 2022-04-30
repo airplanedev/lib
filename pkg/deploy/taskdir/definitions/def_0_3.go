@@ -1125,6 +1125,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Name:        d.Name,
 		Description: d.Description,
 		Timeout:     d.Timeout,
+		Runtime:     d.Runtime,
 		ExecuteRules: api.UpdateExecuteRulesRequest{
 			RequireRequests: &d.RequireRequests,
 		},
