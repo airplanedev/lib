@@ -170,6 +170,20 @@ func TestDiscoverTasks(t *testing.T) {
 			expectedErr:   false,
 		},
 		{
+			name:  "defn task archived - deploy skipped",
+			paths: []string{"./fixtures/defn.task.yaml"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst", IsArchived: true},
+			},
+		},
+		{
+			name:  "script task archived - deploy skipped",
+			paths: []string{"./fixtures/single_task.js"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst", IsArchived: true},
+			},
+		},
+		{
 			name:  "same task, multiple discoverers",
 			paths: []string{"./fixtures/defn.task.yaml", "./fixtures/single_task.js"},
 			existingTasks: map[string]api.Task{
