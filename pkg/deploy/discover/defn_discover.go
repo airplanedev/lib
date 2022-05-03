@@ -72,7 +72,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 
 	tc := TaskConfig{
 		Def:    def,
-		Source: dd.TaskConfigSource(),
+		Source: dd.ConfigSource(),
 	}
 
 	metadata, err := dd.Client.GetTaskMetadata(ctx, def.GetSlug())
@@ -147,6 +147,6 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	return &tc, nil
 }
 
-func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
-	return TaskConfigSourceDefn
+func (dd *DefnDiscoverer) ConfigSource() ConfigSource {
+	return ConfigSourceDefn
 }

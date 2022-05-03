@@ -84,11 +84,11 @@ func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*A
 		ID:         app.ID,
 		Slug:       d.Slug,
 		Entrypoint: d.Entrypoint,
-		Source:     dd.AppConfigSource(),
+		Source:     dd.ConfigSource(),
 		Root:       root,
 	}, nil
 }
 
-func (dd *AppDefnDiscoverer) AppConfigSource() AppConfigSource {
-	return AppConfigSourceDefn
+func (dd *AppDefnDiscoverer) ConfigSource() ConfigSource {
+	return ConfigSourceDefn
 }

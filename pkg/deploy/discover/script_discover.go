@@ -94,10 +94,10 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
 		Def:            def,
-		Source:         sd.TaskConfigSource(),
+		Source:         sd.ConfigSource(),
 	}, nil
 }
 
-func (sd *ScriptDiscoverer) TaskConfigSource() TaskConfigSource {
-	return TaskConfigSourceScript
+func (sd *ScriptDiscoverer) ConfigSource() ConfigSource {
+	return ConfigSourceScript
 }

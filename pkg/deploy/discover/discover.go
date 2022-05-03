@@ -19,13 +19,11 @@ var ignoredDirectories = map[string]bool{
 	".git":         true,
 }
 
-type TaskConfigSource string
-type AppConfigSource string
+type ConfigSource string
 
 const (
-	TaskConfigSourceScript TaskConfigSource = "script"
-	TaskConfigSourceDefn   TaskConfigSource = "defn"
-	AppConfigSourceDefn    AppConfigSource  = "defn"
+	ConfigSourceScript ConfigSource = "script"
+	ConfigSourceDefn   ConfigSource = "defn"
 )
 
 type TaskConfig struct {
@@ -33,7 +31,7 @@ type TaskConfig struct {
 	TaskRoot       string
 	TaskEntrypoint string
 	Def            definitions.DefinitionInterface
-	Source         TaskConfigSource
+	Source         ConfigSource
 }
 
 type AppConfig struct {
@@ -41,7 +39,7 @@ type AppConfig struct {
 	Root       string
 	Entrypoint string
 	Slug       string
-	Source     AppConfigSource
+	Source     ConfigSource
 }
 
 type TaskDiscoverer interface {
@@ -51,16 +49,16 @@ type TaskDiscoverer interface {
 	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
 	// If the task should not be discovered as an Airplane task, a nil task config is returned.
 	GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error)
-	// TaskConfigSource returns a unique identifier of this TaskDiscoverer.
-	TaskConfigSource() TaskConfigSource
+	// ConfigSource returns a unique identifier of this Discoverer.
+	ConfigSource() ConfigSource
 }
 
 type AppDiscoverer interface {
 	// IsAirplaneApp inspects a file and if that file represents an Airplane app, it returns
 	// that app's definition. If that file is not an app, it will return an empty definition.
 	IsAirplaneApp(ctx context.Context, file string) (*AppConfig, error)
-	// AppConfigSource returns a unique identifier of this TaskDiscoverer.
-	AppConfigSource() AppConfigSource
+	// ConfigSource returns a unique identifier of this Discoverer.
+	ConfigSource() ConfigSource
 }
 
 type Discoverer struct {
@@ -188,7 +186,7 @@ func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskCo
 		found := false
 		for _, td := range d.TaskDiscoverers {
 			for _, tc := range tcs {
-				if td.TaskConfigSource() == tc.Source {
+				if td.ConfigSource() == tc.Source {
 					taskConfigs[i] = tc
 					found = true
 					break
@@ -232,7 +230,7 @@ func (d Discoverer) deduplicateAppConfigs(appConfigsBySlug map[string][]AppConfi
 		found := false
 		for _, ad := range d.AppDiscoverers {
 			for _, tc := range tcs {
-				if ad.AppConfigSource() == tc.Source {
+				if ad.ConfigSource() == tc.Source {
 					appConfigs[i] = tc
 					found = true
 					break

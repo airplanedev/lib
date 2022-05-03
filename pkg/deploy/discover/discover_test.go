@@ -42,7 +42,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -68,7 +68,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 				{
 					TaskID:         "tsk456",
@@ -78,7 +78,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -108,7 +108,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 				{
 					TaskID:         "tsk456",
@@ -118,7 +118,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -152,7 +152,7 @@ func TestDiscover(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -191,7 +191,7 @@ func TestDiscover(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -219,7 +219,7 @@ func TestDiscover(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -249,7 +249,7 @@ func TestDiscover(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -283,7 +283,7 @@ func TestDiscover(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -317,7 +317,7 @@ func TestDiscover(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -351,7 +351,7 @@ func TestDiscover(t *testing.T) {
 					Slug:       "my_app",
 					Root:       fixturesPath + "/app",
 					Entrypoint: fixturesPath + "/app/foo.js",
-					Source:     AppConfigSourceDefn,
+					Source:     ConfigSourceDefn,
 				},
 			},
 		},
