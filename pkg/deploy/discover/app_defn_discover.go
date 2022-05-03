@@ -26,7 +26,7 @@ type AppDefnDiscoverer struct {
 
 var _ AppDiscoverer = &AppDefnDiscoverer{}
 
-func (dd *AppDefnDiscoverer) IsAirplaneApp(ctx context.Context, file string) (*AppConfig, error) {
+func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*AppConfig, error) {
 	if !definitions.IsAppDef(file) {
 		return nil, nil
 	}

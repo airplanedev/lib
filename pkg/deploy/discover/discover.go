@@ -54,9 +54,9 @@ type TaskDiscoverer interface {
 }
 
 type AppDiscoverer interface {
-	// IsAirplaneApp inspects a file and if that file represents an Airplane app, it returns
-	// that app's definition. If that file is not an app, it will return an empty definition.
-	IsAirplaneApp(ctx context.Context, file string) (*AppConfig, error)
+	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
+	// If the task should not be discovered as an Airplane task, a nil task config is returned.
+	GetAppConfig(ctx context.Context, file string) (*AppConfig, error)
 	// ConfigSource returns a unique identifier of this Discoverer.
 	ConfigSource() ConfigSource
 }
@@ -136,7 +136,7 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], *taskConfig)
 			}
 			for _, ad := range d.AppDiscoverers {
-				appConfig, err := ad.IsAirplaneApp(ctx, p)
+				appConfig, err := ad.GetAppConfig(ctx, p)
 				if err != nil {
 					return nil, nil, err
 				}
