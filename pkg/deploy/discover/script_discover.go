@@ -49,6 +49,10 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		sd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, slug)
 		return nil, nil
 	}
+	if task.IsArchived {
+		sd.Logger.Warning(`Task with slug %s is archived, skipping deploy.`, slug)
+		return nil, nil
+	}
 
 	def, err := definitions.NewDefinitionFromTask(ctx, sd.Client, task)
 	if err != nil {

@@ -97,6 +97,10 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		}
 		metadata = *mptr
 	}
+	if metadata.IsArchived {
+		dd.Logger.Warning(`Task with slug %s is archived, skipping deploy.`, metadata.Slug)
+		return nil, nil
+	}
 	tc.TaskID = metadata.ID
 
 	entrypoint, err := def.GetAbsoluteEntrypoint()
