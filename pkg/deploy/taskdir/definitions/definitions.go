@@ -37,34 +37,28 @@ func IsTaskDef(fn string) bool {
 	return GetTaskDefFormat(fn) != DefFormatUnknown
 }
 
-func GetTaskDefFormat(fn string) DefFormat {
-	for _, de := range YamlTaskDefExtensions {
-		if strings.HasSuffix(fn, de) {
-			return DefFormatYAML
-		}
-	}
-	for _, de := range JSONTaskDefExtensions {
-		if strings.HasSuffix(fn, de) {
-			return DefFormatJSON
-		}
-	}
-	return DefFormatUnknown
-}
-
 func IsAppDef(fn string) bool {
 	return GetAppDefFormat(fn) != DefFormatUnknown
 }
 
-func GetAppDefFormat(fn string) DefFormat {
-	for _, de := range YamlAppDefExtensions {
+func GetDefFormat(fn string, yamlExtensions, jsonExtensions []string) DefFormat {
+	for _, de := range yamlExtensions {
 		if strings.HasSuffix(fn, de) {
 			return DefFormatYAML
 		}
 	}
-	for _, de := range JSONAppDefExtensions {
+	for _, de := range jsonExtensions {
 		if strings.HasSuffix(fn, de) {
 			return DefFormatJSON
 		}
 	}
 	return DefFormatUnknown
+}
+
+func GetAppDefFormat(fn string) DefFormat {
+	return GetDefFormat(fn, YamlAppDefExtensions, JSONAppDefExtensions)
+}
+
+func GetTaskDefFormat(fn string) DefFormat {
+	return GetDefFormat(fn, YamlTaskDefExtensions, JSONTaskDefExtensions)
 }
