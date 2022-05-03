@@ -13,7 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDiscoverTasks(t *testing.T) {
+func TestDiscover(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
 	tests := []struct {
 		name                string
