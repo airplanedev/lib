@@ -25,6 +25,7 @@ parameters:
 python:
   entrypoint: hello_world.py
 timeout: 3600
+runtime: durable
 `)
 
 var fullJSON = []byte(
@@ -45,7 +46,8 @@ var fullJSON = []byte(
 	"python": {
 		"entrypoint": "hello_world.py"
 	},
-	"timeout": 3600
+	"timeout": 3600,
+	"runtime": "durable"
 }`)
 
 var yamlWithDefault = []byte(
@@ -100,6 +102,7 @@ var fullDef = Definition_0_3{
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
 	},
+	Runtime: "durable",
 	Timeout: 3600,
 }
 

@@ -18,3 +18,6 @@ vendor/
 .dccache
 
 node_modules/
+
+# IntelliJ editors
+.idea/

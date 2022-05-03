@@ -37,6 +37,7 @@ type Task struct {
 	Resources                  Resources          `json:"resources" yaml:"resources"`
 	Kind                       build.TaskKind     `json:"kind" yaml:"kind"`
 	KindOptions                build.KindOptions  `json:"kindOptions" yaml:"kindOptions"`
+	Runtime                    build.TaskRuntime  `json:"runtime" yaml:"runtime"`
 	Repo                       string             `json:"repo" yaml:"repo"`
 	RequireExplicitPermissions bool               `json:"requireExplicitPermissions" yaml:"-"`
 	Permissions                Permissions        `json:"permissions" yaml:"-"`
@@ -85,6 +86,7 @@ type UpdateTaskRequest struct {
 	Resources                  map[string]string         `json:"resources"`
 	Kind                       build.TaskKind            `json:"kind"`
 	KindOptions                build.KindOptions         `json:"kindOptions"`
+	Runtime                    build.TaskRuntime         `json:"runtime"`
 	Repo                       string                    `json:"repo"`
 	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
 	Permissions                *Permissions              `json:"permissions"`

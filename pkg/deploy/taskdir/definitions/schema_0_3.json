@@ -288,6 +288,7 @@
     "requireRequests": true,
     "allowSelfApprovals": true,
     "timeout": true,
+    "runtime": true,
 
     "node": true,
     "python": true,
@@ -476,6 +477,11 @@
           "default": 3600,
           "type": "number",
           "exclusiveMinimum": 0
+        },
+        "runtime": {
+          "description": "Set the runtime used for this task.",
+          "enum": ["", "durable"],
+          "default": ""
         }
       },
       "required": ["name", "slug"]

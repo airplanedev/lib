@@ -41,6 +41,7 @@ type Definition_0_3 struct {
 	RequireRequests    bool              `json:"requireRequests,omitempty"`
 	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
 	Timeout            int               `json:"timeout,omitempty"`
+	Runtime            build.TaskRuntime `json:"runtime,omitempty"`
 
 	buildConfig  build.BuildConfig
 	defnFilePath string
@@ -1124,6 +1125,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Name:        d.Name,
 		Description: d.Description,
 		Timeout:     d.Timeout,
+		Runtime:     d.Runtime,
 		ExecuteRules: api.UpdateExecuteRulesRequest{
 			RequireRequests: &d.RequireRequests,
 		},
@@ -1490,6 +1492,9 @@ func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
 	for key, val := range options {
 		config[key] = val
 	}
+
+	// Pass runtime through to builder
+	config["runtime"] = d.Runtime
 
 	for key, val := range d.buildConfig {
 		if val == nil { // Nil masks out the value.
