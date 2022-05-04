@@ -14,7 +14,7 @@ export async function apWorkflow(params) {
 }
 
 // Equivalent to logChunks in node SDK, but with extra sinks wrapping so we
-// identity
+// identify which task run generated the output.
 const logChunks = (output) => {
   const CHUNK_SIZE = 8192;
   if (output.length <= CHUNK_SIZE) {

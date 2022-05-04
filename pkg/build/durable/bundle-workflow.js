@@ -5,7 +5,7 @@ import { writeFile } from 'fs/promises';
 // see https://docs.temporal.io/docs/typescript/workers/#prebuilt-workflow-bundles
 // for details.
 const { code } = await bundleWorkflowCode({
-  workflowsPath: './workflow-wrapper.js',
+  workflowsPath: './workflow-shim.js',
   workflowInterceptorModules: ['./workflow-interceptors.js'],
 });
 
