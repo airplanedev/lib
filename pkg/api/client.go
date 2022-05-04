@@ -43,6 +43,7 @@ type Task struct {
 	Permissions                Permissions        `json:"permissions" yaml:"-"`
 	ExecuteRules               ExecuteRules       `json:"executeRules" yaml:"-"`
 	Timeout                    int                `json:"timeout" yaml:"timeout"`
+	IsArchived                 bool               `json:"isArchived" yaml:"isArchived"`
 	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
 }
 
@@ -52,8 +53,9 @@ type GetTaskRequest struct {
 }
 
 type TaskMetadata struct {
-	ID   string `json:"id"`
-	Slug string `json:"slug"`
+	ID         string `json:"id"`
+	Slug       string `json:"slug"`
+	IsArchived bool   `json:"isArchived"`
 }
 
 type CreateBuildUploadRequest struct {
