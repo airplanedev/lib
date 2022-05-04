@@ -23,6 +23,13 @@ const (
 	TaskKindREST TaskKind = "rest"
 )
 
+type TaskRuntime string
+
+const (
+	TaskRuntimeLegacy  TaskRuntime = ""
+	TaskRuntimeDurable TaskRuntime = "durable"
+)
+
 // Value represents a value.
 type Value interface{}
 

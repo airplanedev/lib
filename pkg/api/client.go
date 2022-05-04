@@ -36,11 +36,13 @@ type Task struct {
 	Resources                  Resources          `json:"resources" yaml:"resources"`
 	Kind                       build.TaskKind     `json:"kind" yaml:"kind"`
 	KindOptions                build.KindOptions  `json:"kindOptions" yaml:"kindOptions"`
+	Runtime                    build.TaskRuntime  `json:"runtime" yaml:"runtime"`
 	Repo                       string             `json:"repo" yaml:"repo"`
 	RequireExplicitPermissions bool               `json:"requireExplicitPermissions" yaml:"-"`
 	Permissions                Permissions        `json:"permissions" yaml:"-"`
 	ExecuteRules               ExecuteRules       `json:"executeRules" yaml:"-"`
 	Timeout                    int                `json:"timeout" yaml:"timeout"`
+	IsArchived                 bool               `json:"isArchived" yaml:"isArchived"`
 	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
 }
 
@@ -50,8 +52,9 @@ type GetTaskRequest struct {
 }
 
 type TaskMetadata struct {
-	ID   string `json:"id"`
-	Slug string `json:"slug"`
+	ID         string `json:"id"`
+	Slug       string `json:"slug"`
+	IsArchived bool   `json:"isArchived"`
 }
 
 type CreateBuildUploadRequest struct {
@@ -84,6 +87,7 @@ type UpdateTaskRequest struct {
 	Resources                  map[string]string         `json:"resources"`
 	Kind                       build.TaskKind            `json:"kind"`
 	KindOptions                build.KindOptions         `json:"kindOptions"`
+	Runtime                    build.TaskRuntime         `json:"runtime"`
 	Repo                       string                    `json:"repo"`
 	RequireExplicitPermissions *bool                     `json:"requireExplicitPermissions"`
 	Permissions                *Permissions              `json:"permissions"`

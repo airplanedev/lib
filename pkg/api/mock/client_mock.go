@@ -27,8 +27,9 @@ func (mc *MockClient) GetTaskMetadata(ctx context.Context, slug string) (res api
 		return api.TaskMetadata{}, &api.TaskMissingError{AppURL: "api/", Slug: slug}
 	}
 	return api.TaskMetadata{
-		ID:   task.ID,
-		Slug: task.Slug,
+		ID:         task.ID,
+		Slug:       task.Slug,
+		IsArchived: task.IsArchived,
 	}, nil
 }
 
