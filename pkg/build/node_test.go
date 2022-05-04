@@ -180,3 +180,21 @@ func TestNodeBuilder(t *testing.T) {
 
 	RunTests(t, ctx, tests)
 }
+
+func TestNodeDurableBuilder(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []Test{
+		{
+			Root: "javascript/durable",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "task.js",
+				"runtime":    TaskRuntimeDurable,
+			},
+		},
+	}
+
+	RunDurableTests(t, ctx, tests)
+}

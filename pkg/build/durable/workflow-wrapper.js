@@ -1,12 +1,12 @@
 import { proxySinks } from '@temporalio/workflow';
-import workflow from '{{.Entrypoint}}';
+import task from '{{.Entrypoint}}';
 
 const { logger } = proxySinks();
 
 // Main entrypoint to workflow; wraps a `workflow` function in the user code.
 export async function apWorkflow(params) {
   logger.info('airplane_status:started');
-  const result = await workflow(params);
+  const result = await task(params);
   const output = result === undefined ? null : JSON.stringify(result);
   logChunks(`airplane_output_set ${output}`);
   logger.info('airplane_status:succeeded');

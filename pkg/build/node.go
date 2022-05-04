@@ -14,6 +14,24 @@ import (
 	"github.com/pkg/errors"
 )
 
+type templateParams struct {
+	Workdir                          string
+	Base                             string
+	HasPackageJSON                   bool
+	UsesWorkspaces                   bool
+	InlineShim                       string
+	InlineShimPackageJSON            string
+	InlineBundleWorkflowScript       string
+	InlineWorkflowInterceptorsScript string
+	InlineWorkflowWrapperScript      string
+	IsDurable                        bool
+	NodeVersion                      string
+	ExternalFlags                    string
+	InstallCommand                   string
+	PostInstallCommand               string
+	Args                             string
+}
+
 // node creates a dockerfile for Node (typescript/javascript).
 func node(root string, options KindOptions, buildArgs []string) (string, error) {
 	var err error
@@ -42,6 +60,12 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
 
+	var isDurable bool
+	runtime, ok := options["runtime"].(TaskRuntime)
+	if ok && runtime == TaskRuntimeDurable {
+		isDurable = true
+	}
+
 	var pkg pkgJSON
 	if hasPackageJSON {
 		// Check to see if the package.json uses yarn/npm workspaces.
@@ -63,19 +87,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	}
 	argsCommand := strings.Join(buildArgs, "\n")
 
-	cfg := struct {
-		Workdir               string
-		Base                  string
-		HasPackageJSON        bool
-		UsesWorkspaces        bool
-		InlineShim            string
-		InlineShimPackageJSON string
-		NodeVersion           string
-		ExternalFlags         string
-		InstallCommand        string
-		PostInstallCommand    string
-		Args                  string
-	}{
+	cfg := templateParams{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
 		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
@@ -84,6 +96,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
 		Args:               argsCommand,
+		IsDurable:          isDurable,
 	}
 
 	// Workaround to get esbuild to not bundle dependencies.
@@ -97,6 +110,13 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		for _, dep := range deps {
 			flags = append(flags, fmt.Sprintf("--external:%s", dep))
 		}
+		if isDurable {
+			// Even if these are imported, we need to mark the root packages
+			// as external for esbuild to work properly. Esbuild doesn't
+			// care about repeats, so no need to dedupe.
+			flags = append(flags, "--external:@temporalio", "--external:@swc")
+		}
+
 		cfg.ExternalFlags = strings.Join(flags, " ")
 	}
 
@@ -109,17 +129,29 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON(pathPackageJSON)
+	pjson, err := GenShimPackageJSON(pathPackageJSON, isDurable)
 	if err != nil {
 		return "", err
 	}
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
-	shim, err := NodeShim(entrypoint)
-	if err != nil {
-		return "", err
+	if isDurable {
+		cfg.InlineShim = inlineString(nodeDurableShim)
+		cfg.InlineBundleWorkflowScript = inlineString(bundleWorkflowScript)
+		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
+
+		workflowWrapper, err := TemplateEntrypoint(workflowWrapperScript, entrypoint)
+		if err != nil {
+			return "", err
+		}
+		cfg.InlineWorkflowWrapperScript = inlineString(workflowWrapper)
+	} else {
+		shim, err := TemplateEntrypoint(nodeShim, entrypoint)
+		if err != nil {
+			return "", err
+		}
+		cfg.InlineShim = inlineString(shim)
 	}
-	cfg.InlineShim = inlineString(shim)
 
 	installCommand := "npm install --production"
 	if pkg.Settings.InstallCommand != "" {
@@ -188,6 +220,15 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		RUN {{.PostInstallCommand}}
 		{{end}}
 
+		{{if .IsDurable}}
+		RUN {{.InlineWorkflowWrapperScript}} >> /airplane/.airplane/workflow-wrapper.js
+		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
+		RUN {{.InlineBundleWorkflowScript}} >> /airplane/.airplane/bundle-workflow.js
+		WORKDIR /airplane/.airplane
+		RUN node bundle-workflow.js
+		WORKDIR /airplane{{.Workdir}}
+		{{end}}
+
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
@@ -198,7 +239,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	`), cfg)
 }
 
-func GenShimPackageJSON(pathPackageJSON string) ([]byte, error) {
+func GenShimPackageJSON(pathPackageJSON string, isDurable bool) ([]byte, error) {
 	deps, err := ListDependencies(pathPackageJSON)
 	if err != nil {
 		return nil, err
@@ -206,10 +247,18 @@ func GenShimPackageJSON(pathPackageJSON string) ([]byte, error) {
 
 	pjson := struct {
 		Dependencies map[string]string `json:"dependencies"`
+		Type         string            `json:"type,omitempty"`
 	}{
 		Dependencies: map[string]string{
 			"airplane": "~0.1.2",
 		},
+	}
+
+	if isDurable {
+		pjson.Dependencies["temporalio"] = "^0.20.2"
+
+		// Need this so that bundler runs correctly.
+		pjson.Type = "module"
 	}
 
 	// Allow users to override any shim dependencies. Given shim code is bundled
@@ -239,7 +288,19 @@ func GetNodeVersion(opts KindOptions) string {
 //go:embed node-shim.js
 var nodeShim string
 
-func NodeShim(entrypoint string) (string, error) {
+//go:embed durable/node-durable-shim.js
+var nodeDurableShim string
+
+//go:embed durable/bundle-workflow.js
+var bundleWorkflowScript string
+
+//go:embed durable/workflow-interceptors.js
+var workflowInterceptorsScript string
+
+//go:embed durable/workflow-wrapper.js
+var workflowWrapperScript string
+
+func TemplateEntrypoint(script string, entrypoint string) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept
 	// import paths with `.ts` endings. `.js` endings are fine.
 	entrypoint = strings.TrimSuffix(entrypoint, ".ts")
@@ -248,7 +309,7 @@ func NodeShim(entrypoint string) (string, error) {
 	// Escape for embedding into a string
 	entrypoint = backslashEscape(entrypoint, `"`)
 
-	shim, err := applyTemplate(nodeShim, struct {
+	shim, err := applyTemplate(script, struct {
 		Entrypoint string
 	}{
 		Entrypoint: entrypoint,
