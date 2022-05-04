@@ -146,7 +146,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		}
 		cfg.InlineWorkflowWrapperScript = inlineString(workflowWrapper)
 	} else {
-		shim, err := TemplateEntrypoint(nodeShim, entrypoint)
+		shim, err := TemplatedNodeShim(entrypoint)
 		if err != nil {
 			return "", err
 		}
@@ -299,6 +299,10 @@ var workflowInterceptorsScript string
 
 //go:embed durable/workflow-wrapper.js
 var workflowWrapperScript string
+
+func TemplatedNodeShim(entrypoint string) (string, error) {
+	return TemplateEntrypoint(nodeShim, entrypoint)
+}
 
 func TemplateEntrypoint(script string, entrypoint string) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept

@@ -164,7 +164,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "entrypoint is not within the task root")
 	}
-	shim, err := build.NodeShim(entrypoint)
+	shim, err := build.TemplatedNodeShim(entrypoint)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -175,7 +175,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 
 	// Install the dependencies we need for our shim file:
 	pathPackageJSON := filepath.Join(root, "package.json")
-	pjson, err := build.GenShimPackageJSON(pathPackageJSON)
+	pjson, err := build.GenShimPackageJSON(pathPackageJSON, false)
 	if err != nil {
 		return nil, nil, err
 	}
