@@ -32,8 +32,9 @@ async function runWorker(params) {
   };
 
   const worker = await Worker.create({
-    // Path to bundle created by bundle-workflow.js script
-    workflowBundle: { path: './workflow-bundle.js' },
+    // Path to bundle created by bundle-workflow.js script; this should be relative
+    // to shim.
+    workflowBundle: { path: '../workflow-bundle.js' },
     activities,
     connection,
     namespace,
