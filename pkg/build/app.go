@@ -21,12 +21,17 @@ func app(root string) (string, error) {
 		return "", err
 	}
 
+	base, err := getBaseNodeImage("")
+	if err != nil {
+		return "", err
+	}
+
 	cfg := struct {
 		Base           string
 		InstallCommand string
 		OutDir         string
 	}{
-		Base:           "node@sha256:d388b6e0648a0f56765260daa20ee4533225845ee1e4d48886c3d0f7aaaa6384",
+		Base:           base,
 		InstallCommand: "yarn install --non-interactive --frozen-lockfile",
 		OutDir:         "dist",
 	}
@@ -41,6 +46,7 @@ func app(root string) (string, error) {
 		COPY . /airplane/
 		RUN yarn build --outDir {{.OutDir}}
 
+		# Docker's minimal image - we just need an empty place to copy the build artifacts.
 		FROM scratch
 		COPY --from=builder /airplane/{{.OutDir}}/ .
 	`), cfg)
