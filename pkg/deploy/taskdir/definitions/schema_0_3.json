@@ -18,7 +18,7 @@
                 },
                 "nodeVersion": {
                   "description": "The version of Node to use.",
-                  "enum": ["12", "14", "15", "16"]
+                  "enum": ["12", "14", "15", "16", "18"]
                 },
                 "envVars": { "$ref": "#/$defs/envVars" }
               },

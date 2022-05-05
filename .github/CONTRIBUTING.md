@@ -12,7 +12,7 @@ export AIRPLANE_LIB_TAG=v0.0.1 && \
 
 ## Base images
 
-If you make changes to the base images -- `pkg/versions.json` -- then you'll need to push these into the public cache:
+If you make changes to the base images -- `pkg/build/versions.json` -- then you'll need to push these into the public cache:
 
 ```
 airplane dev scripts/cache/main.ts -- --gcp_project=airplane-stage

@@ -1,5 +1,10 @@
 {
   "node": {
+    "18": {
+      "image": "registry.hub.docker.com/library/node",
+      "tag": "18.1.0-buster",
+      "digest": "sha256:9b2fc7ff617cd4b6beb123d452b56ad5fd3849dfaefda152c8d4c0836ccb1a9a"
+    },
     "16": {
       "image": "registry.hub.docker.com/library/node",
       "tag": "16.2.0-buster",
