@@ -168,8 +168,8 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 	return deduplicateConfigs(taskConfigsBySlug, d.TaskDiscoverers), deduplicateConfigs(appConfigsBySlug, d.TaskDiscoverers), nil
 }
 
-// Given a map of slug -> [task config, ...], returns a list of configs unique by slug, sorted
-// by slug. Configs are chosen based on order of Discoverers & order of discovery.
+// deduplicateConfigs returns a list of configs unique by slug, sorted by slug
+// from a map of slug -> [task config, ...]. Configs are chosen based on order of Discoverers & order of discovery.
 func deduplicateConfigs[C interface{ GetSource() ConfigSource }, D ConfigDiscoverer](taskConfigsBySlug map[string][]C, configDiscoverers []D) []C {
 	// Short-circuit if we have no task configs.
 	if len(taskConfigsBySlug) == 0 {
