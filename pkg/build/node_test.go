@@ -81,15 +81,6 @@ func TestNodeBuilder(t *testing.T) {
 			Options: KindOptions{
 				"shim":        "true",
 				"entrypoint":  "main.ts",
-				"nodeVersion": "12",
-			},
-		},
-		{
-			Root: "typescript/esnext",
-			Kind: TaskKindNode,
-			Options: KindOptions{
-				"shim":        "true",
-				"entrypoint":  "main.ts",
 				"nodeVersion": "14",
 			},
 		},

@@ -43,7 +43,7 @@ node:
   # can be absolute or relative to the location of the definition file.
   entrypoint: my_task.ts
 
-  # The version of Node to use. Valid values: 12, 14, 15, 16.
+  # The version of Node to use. Valid values: 14, 16.
   nodeVersion: "16"
 
   # A map of environment variables to use when running the task. The value
