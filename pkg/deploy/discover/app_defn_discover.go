@@ -71,6 +71,10 @@ func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*Ap
 		}
 		return nil, nil
 	}
+	if app.ArchivedAt != nil {
+		dd.Logger.Warning(`App with slug %s is archived, skipping deployment.`, app.Slug)
+		return nil, nil
+	}
 
 	if !filepath.IsAbs(d.Entrypoint) {
 		defnDir := filepath.Dir(file)
