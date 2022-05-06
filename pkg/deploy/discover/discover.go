@@ -165,17 +165,15 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 		}
 	}
 
-	return deduplicateConfigs(taskConfigsBySlug, d.TaskDiscoverers), deduplicateConfigs(appConfigsBySlug, d.TaskDiscoverers), nil
+	return d.deduplicateTaskConfigs(taskConfigsBySlug), d.deduplicateAppConfigs(appConfigsBySlug), nil
 }
 
-// deduplicateConfigs returns a list of configs unique by slug, sorted by slug
-// from a map of slug -> [task config, ...]. Configs are chosen based on order of Discoverers & order of discovery.
-func deduplicateConfigs[C interface{ GetSource() ConfigSource }, D ConfigDiscoverer](taskConfigsBySlug map[string][]C, configDiscoverers []D) []C {
+// by slug. Task configs are chosen based on order of TaskDiscoverers & order of discovery.
+func (d Discoverer) deduplicateTaskConfigs(taskConfigsBySlug map[string][]TaskConfig) []TaskConfig {
 	// Short-circuit if we have no task configs.
 	if len(taskConfigsBySlug) == 0 {
 		return nil
 	}
-
 	// Sort by slugs, so we have a deterministic order.
 	slugs := make([]string, 0, len(taskConfigsBySlug))
 	for slug := range taskConfigsBySlug {
@@ -183,7 +181,7 @@ func deduplicateConfigs[C interface{ GetSource() ConfigSource }, D ConfigDiscove
 	}
 	sort.Strings(slugs)
 
-	taskConfigs := make([]C, len(slugs))
+	taskConfigs := make([]TaskConfig, len(slugs))
 	for i, slug := range slugs {
 		tcs := taskConfigsBySlug[slug]
 
@@ -193,12 +191,12 @@ func deduplicateConfigs[C interface{ GetSource() ConfigSource }, D ConfigDiscove
 			continue
 		}
 
-		// Otherwise, loop through the Discoverers. Take the first task config that matches the
+		// Otherwise, loop through the TaskDiscoverers. Take the first task config that matches the
 		// discoverer in this order.
 		found := false
-		for _, td := range configDiscoverers {
+		for _, td := range d.TaskDiscoverers {
 			for _, tc := range tcs {
-				if td.ConfigSource() == tc.GetSource() {
+				if td.ConfigSource() == tc.Source {
 					taskConfigs[i] = tc
 					found = true
 					break
@@ -210,4 +208,48 @@ func deduplicateConfigs[C interface{ GetSource() ConfigSource }, D ConfigDiscove
 		}
 	}
 	return taskConfigs
+}
+
+// Given a map of slug -> [app config, ...], returns a list of app configs unique by slug, sorted
+// by slug. App configs are chosen based on order of AppDiscoverers & order of discovery.
+func (d Discoverer) deduplicateAppConfigs(appConfigsBySlug map[string][]AppConfig) []AppConfig {
+	// Short-circuit if we have no app configs.
+	if len(appConfigsBySlug) == 0 {
+		return nil
+	}
+
+	// Sort by slugs, so we have a deterministic order.
+	slugs := make([]string, 0, len(appConfigsBySlug))
+	for slug := range appConfigsBySlug {
+		slugs = append(slugs, slug)
+	}
+	sort.Strings(slugs)
+
+	appConfigs := make([]AppConfig, len(slugs))
+	for i, slug := range slugs {
+		tcs := appConfigsBySlug[slug]
+
+		// Short-circuit if there's only one app config in the list.
+		if len(tcs) == 1 {
+			appConfigs[i] = tcs[0]
+			continue
+		}
+
+		// Otherwise, loop through the AppDiscoverers. Take the first app config that matches the
+		// discoverer in this order.
+		found := false
+		for _, ad := range d.AppDiscoverers {
+			for _, tc := range tcs {
+				if ad.ConfigSource() == tc.Source {
+					appConfigs[i] = tc
+					found = true
+					break
+				}
+			}
+			if found {
+				break
+			}
+		}
+	}
+	return appConfigs
 }
