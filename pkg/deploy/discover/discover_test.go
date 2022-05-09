@@ -13,17 +13,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestDiscoverTasks(t *testing.T) {
+func TestDiscover(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
 	tests := []struct {
-		name           string
-		paths          []string
-		existingTasks  map[string]api.Task
-		expectedErr    bool
-		want           []TaskConfig
-		buildConfigs   []build.BuildConfig
-		defnFilePath   string
-		absEntrypoints []string
+		name                string
+		paths               []string
+		existingTasks       map[string]api.Task
+		existingApps        map[string]api.App
+		expectedErr         bool
+		expectedTaskConfigs []TaskConfig
+		expectedAppConfigs  []AppConfig
+		buildConfigs        []build.BuildConfig
+		defnFilePath        string
+		absEntrypoints      []string
 	}{
 		{
 			name:  "single script",
@@ -31,7 +33,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "handlebars"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -40,7 +42,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -57,7 +59,7 @@ func TestDiscoverTasks(t *testing.T) {
 				"my_task":  {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 				"my_task2": {ID: "tsk456", Slug: "my_task2", Kind: build.TaskKindNode, InterpolationMode: "handlebars"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -66,7 +68,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 				{
 					TaskID:         "tsk456",
@@ -76,7 +78,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -97,7 +99,7 @@ func TestDiscoverTasks(t *testing.T) {
 				"my_task":  {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 				"my_task2": {ID: "tsk456", Slug: "my_task2", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath + "/nestedScripts",
@@ -106,7 +108,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 				{
 					TaskID:         "tsk456",
@@ -116,7 +118,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task2",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -136,7 +138,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -150,7 +152,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -170,12 +172,26 @@ func TestDiscoverTasks(t *testing.T) {
 			expectedErr:   false,
 		},
 		{
+			name:  "defn task archived - deploy skipped",
+			paths: []string{"./fixtures/defn.task.yaml"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst", IsArchived: true},
+			},
+		},
+		{
+			name:  "script task archived - deploy skipped",
+			paths: []string{"./fixtures/single_task.js"},
+			existingTasks: map[string]api.Task{
+				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst", IsArchived: true},
+			},
+		},
+		{
 			name:  "same task, multiple discoverers",
 			paths: []string{"./fixtures/defn.task.yaml", "./fixtures/single_task.js"},
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -189,7 +205,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -208,7 +224,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -217,7 +233,7 @@ func TestDiscoverTasks(t *testing.T) {
 						Slug: "my_task",
 						Node: &definitions.NodeDefinition_0_3{},
 					},
-					Source: TaskConfigSourceScript,
+					Source: ConfigSourceScript,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -233,7 +249,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -247,7 +263,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -267,7 +283,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -281,7 +297,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -301,7 +317,7 @@ func TestDiscoverTasks(t *testing.T) {
 			existingTasks: map[string]api.Task{
 				"my_task": {ID: "tsk123", Slug: "my_task", Kind: build.TaskKindNode, InterpolationMode: "jst"},
 			},
-			want: []TaskConfig{
+			expectedTaskConfigs: []TaskConfig{
 				{
 					TaskID:         "tsk123",
 					TaskRoot:       fixturesPath,
@@ -315,7 +331,7 @@ func TestDiscoverTasks(t *testing.T) {
 							NodeVersion: "14",
 						},
 					},
-					Source: TaskConfigSourceDefn,
+					Source: ConfigSourceDefn,
 				},
 			},
 			buildConfigs: []build.BuildConfig{
@@ -337,12 +353,29 @@ func TestDiscoverTasks(t *testing.T) {
 			},
 			expectedErr: true,
 		},
+		{
+			name:  "app defn",
+			paths: []string{"./fixtures/app/defn.app.yaml"},
+			existingApps: map[string]api.App{
+				"my_app": {ID: "app123", Slug: "my_app", Name: "My App"},
+			},
+			expectedAppConfigs: []AppConfig{
+				{
+					ID:         "app123",
+					Slug:       "my_app",
+					Root:       fixturesPath + "/app",
+					Entrypoint: fixturesPath + "/app/foo.js",
+					Source:     ConfigSourceDefn,
+				},
+			},
+		},
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {
 			require := require.New(t)
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
+				Apps:  tC.existingApps,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
 				Client: apiClient,
@@ -352,31 +385,39 @@ func TestDiscoverTasks(t *testing.T) {
 				Client: apiClient,
 				Logger: &logger.MockLogger{},
 			}
-			d := &Discoverer{
-				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
-				Client: &mock.MockClient{
-					Tasks: tC.existingTasks,
-				},
+			appDefnDiscoverer := &AppDefnDiscoverer{
+				Client: apiClient,
 				Logger: &logger.MockLogger{},
 			}
-			got, err := d.DiscoverTasks(context.Background(), tC.paths...)
+			d := &Discoverer{
+				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
+				AppDiscoverers:  []AppDiscoverer{appDefnDiscoverer},
+				Client:          apiClient,
+				Logger:          &logger.MockLogger{},
+			}
+			taskConfigs, appConfigs, err := d.Discover(context.Background(), tC.paths...)
 			if tC.expectedErr {
 				require.NotNil(err)
 				return
 			}
 			require.NoError(err)
 
-			require.Equal(len(tC.want), len(got))
-			for i := range tC.want {
+			require.Equal(len(tC.expectedTaskConfigs), len(taskConfigs))
+			for i := range tC.expectedTaskConfigs {
 				for k, v := range tC.buildConfigs[i] {
-					tC.want[i].Def.SetBuildConfig(k, v)
+					tC.expectedTaskConfigs[i].Def.SetBuildConfig(k, v)
 				}
 				if i < len(tC.absEntrypoints) {
-					err := tC.want[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
+					err := tC.expectedTaskConfigs[i].Def.SetAbsoluteEntrypoint(tC.absEntrypoints[i])
 					require.NoError(err)
 				}
-				tC.want[i].Def.SetDefnFilePath(tC.defnFilePath)
-				require.Equal(tC.want[i], got[i])
+				tC.expectedTaskConfigs[i].Def.SetDefnFilePath(tC.defnFilePath)
+				require.Equal(tC.expectedTaskConfigs[i], taskConfigs[i])
+			}
+
+			require.Equal(len(tC.expectedAppConfigs), len(appConfigs))
+			for i := range tC.expectedAppConfigs {
+				require.Equal(tC.expectedAppConfigs[i], appConfigs[i])
 			}
 		})
 	}

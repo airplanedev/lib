@@ -890,16 +890,16 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 	return def, nil
 }
 
-func (d Definition_0_3) Marshal(format TaskDefFormat) ([]byte, error) {
+func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 	switch format {
-	case TaskDefFormatYAML:
+	case DefFormatYAML:
 		buf, err := yaml.MarshalWithOptions(d, yaml.UseLiteralStyleIfMultiline(true))
 		if err != nil {
 			return nil, err
 		}
 		return buf, nil
 
-	case TaskDefFormatJSON:
+	case DefFormatJSON:
 		buf, err := json.MarshalIndent(d, "", "\t")
 		if err != nil {
 			return nil, err
@@ -914,9 +914,9 @@ func (d Definition_0_3) Marshal(format TaskDefFormat) ([]byte, error) {
 // GenerateCommentedFile generates a commented YAML file under certain circumstances. If the format
 // requested isn't YAML, or if the definition has other things filled in, this method defaults to
 // calling Marshal(format).
-func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, error) {
+func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) {
 	// If it's not YAML, or you have other things defined on your task def, bail.
-	if format != TaskDefFormatYAML ||
+	if format != DefFormatYAML ||
 		d.Description != "" ||
 		len(d.Parameters) > 0 ||
 		len(d.Constraints) > 0 ||
@@ -1021,15 +1021,15 @@ func (d Definition_0_3) GenerateCommentedFile(format TaskDefFormat) ([]byte, err
 	return buf.Bytes(), nil
 }
 
-func (d *Definition_0_3) Unmarshal(format TaskDefFormat, buf []byte) error {
+func (d *Definition_0_3) Unmarshal(format DefFormat, buf []byte) error {
 	var err error
 	switch format {
-	case TaskDefFormatYAML:
+	case DefFormatYAML:
 		buf, err = yaml.YAMLToJSON(buf)
 		if err != nil {
 			return err
 		}
-	case TaskDefFormatJSON:
+	case DefFormatJSON:
 		// nothing
 	default:
 		return errors.Errorf("unknown format: %s", format)

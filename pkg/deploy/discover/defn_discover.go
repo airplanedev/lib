@@ -72,7 +72,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 
 	tc := TaskConfig{
 		Def:    def,
-		Source: dd.TaskConfigSource(),
+		Source: dd.ConfigSource(),
 	}
 
 	metadata, err := dd.Client.GetTaskMetadata(ctx, def.GetSlug())
@@ -91,11 +91,15 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 			return nil, err
 		} else if mptr == nil {
 			if dd.Logger != nil {
-				dd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, def.GetSlug())
+				dd.Logger.Warning(`Task with slug %s does not exist, skipping deployment.`, def.GetSlug())
 			}
 			return nil, nil
 		}
 		metadata = *mptr
+	}
+	if metadata.IsArchived {
+		dd.Logger.Warning(`Task with slug %s is archived, skipping deployment.`, metadata.Slug)
+		return nil, nil
 	}
 	tc.TaskID = metadata.ID
 
@@ -147,6 +151,6 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 	return &tc, nil
 }
 
-func (dd *DefnDiscoverer) TaskConfigSource() TaskConfigSource {
-	return TaskConfigSourceDefn
+func (dd *DefnDiscoverer) ConfigSource() ConfigSource {
+	return ConfigSourceDefn
 }

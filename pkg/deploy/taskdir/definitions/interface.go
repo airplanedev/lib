@@ -46,7 +46,7 @@ type DefinitionInterface interface {
 	SetDefnFilePath(filePath string)
 
 	// Marshal returns a serialized version of the definition in the given format.
-	Marshal(format TaskDefFormat) ([]byte, error)
+	Marshal(format DefFormat) ([]byte, error)
 }
 
 var ErrNoEntrypoint = errors.New("No entrypoint")

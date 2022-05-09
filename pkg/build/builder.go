@@ -304,6 +304,7 @@ const (
 	NameNode       Name = "node"
 	NameDockerfile Name = "dockerfile"
 	NameShell      Name = "shell"
+	NameApp        Name = "app"
 
 	NameSQL  Name = "sql"
 	NameREST Name = "rest"
@@ -334,6 +335,8 @@ func BuildDockerfile(c DockerfileConfig) (string, error) {
 		return dockerfile(c.Root, c.Options)
 	case NameShell:
 		return shell(c.Root, c.Options)
+	case NameApp:
+		return app(c.Root)
 	default:
 		return "", errors.Errorf("build: unknown builder type %q", c.Builder)
 	}

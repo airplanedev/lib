@@ -25,6 +25,7 @@ type Test struct {
 	Options     KindOptions
 	ParamValues Values
 	BuildArgs   map[string]string
+	SkipRun     bool
 	// SearchString is a string to look for in the example's output
 	// to validate that the task completed successfully. If not set,
 	// defaults to a random value which is passed into the example
@@ -78,9 +79,11 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 				test.ParamValues["id"] = test.SearchString
 			}
 
-			// Run the produced docker image:
-			out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
-			require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			if !test.SkipRun {
+				// Run the produced docker image:
+				out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
+				require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			}
 		})
 	}
 }
