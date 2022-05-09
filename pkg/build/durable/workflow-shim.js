@@ -4,7 +4,7 @@ import task from '{{.Entrypoint}}';
 const { logger } = proxySinks();
 
 // Main entrypoint to workflow; wraps a `workflow` function in the user code.
-export async function apWorkflow(params) {
+export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
   const result = await task(params);
   const output = result === undefined ? null : JSON.stringify(result);
