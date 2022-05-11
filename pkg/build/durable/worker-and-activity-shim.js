@@ -37,7 +37,9 @@ async function runWorker(params) {
           // Prefix all logs with the Temporal workflow ID (equivalent to the Airplane run ID)
           // and the Temporal run ID so we can link the logs back to specific
           // Airplane and Temporal runs.
-          console.log(`[ap:workflow::${workflowInfo.workflowId}:${workflowInfo.runId}] ${message}`);
+          console.log(
+            `airplane_durable_log:workflow//${workflowInfo.workflowId}/${workflowInfo.runId} ${message}`
+          );
         },
         callDuringReplay: false,
       },
@@ -86,7 +88,7 @@ function activityLog(info, message) {
   // Prefix all logs with metadata that we can use to link the message back to a
   // specific task run.
   console.log(
-    `[ap:activity:${info.activityType}:${info.workflowExecution.workflowId}:${info.workflowExecution.runId}] ${message}`
+    `airplane_durable_log:activity/${info.activityType}/${info.workflowExecution.workflowId}/${info.workflowExecution.runId} ${message}`
   );
 }
 

@@ -6,7 +6,7 @@ export async function queryDB(query) {
     key: 'value',
   };
 }
-  
+
 export async function makeHTTPCall(url) {
   log('Doing another interesting thing');
   return {
@@ -18,6 +18,6 @@ export async function makeHTTPCall(url) {
 function log(message) {
   const info = Context.current().info;
   console.log(
-    `[ap:activity:${info.activityType}:${info.workflowExecution.workflowId}:${info.workflowExecution.runId}] ${message}`
+    `airplane_durable_log:activity/${info.activityType}/${info.workflowExecution.workflowId}/${info.workflowExecution.runId} ${message}`
   );
 }
