@@ -10,8 +10,7 @@ import * as activities from '../activities.js';
 async function runWorker(params) {
   // Get temporal address, queue, and namespace from the environment
   const temporalHost = process.env.AP_TEMPORAL_ADDR || 'localhost:7233';
-  const taskQueue =
-    process.env.AP_TASK_QUEUE || 'fake-task-revision-id';
+  const taskQueue = process.env.AP_TASK_QUEUE || 'fake-task-revision-id';
   const namespace = process.env.AP_NAMESPACE || 'default';
 
   const connection = await NativeConnection.create({
@@ -26,9 +25,7 @@ async function runWorker(params) {
         fn(workflowInfo, message) {
           // Prefix all logs with the workflow ID (equivalent to the run ID) so we
           // can link the logs back to a specific task run.
-          console.log(
-            `[ap:workflow::${workflowInfo.workflowId}:${workflowInfo.runId}] ${message}`
-          );
+          console.log(`[ap:workflow::${workflowInfo.workflowId}:${workflowInfo.runId}] ${message}`);
         },
         callDuringReplay: false,
       },
@@ -100,9 +97,7 @@ async function main() {
     }
   } catch (err) {
     console.error(err);
-    console.log(
-      'airplane_output_append:error ' + JSON.stringify({ error: String(err) })
-    );
+    console.log('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
     process.exit(1);
   }
 }

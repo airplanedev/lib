@@ -1,7 +1,7 @@
 import { workflowInfo } from '@temporalio/workflow';
 
 // Interceptor that allows us to log outbound client calls made from workflow.
-// See https://docs.temporal.io/docs/typescript/interceptors for details. 
+// See https://docs.temporal.io/docs/typescript/interceptors for details.
 class WorkflowLogOutboundInterceptor {
   info;
   constructor(info) {
@@ -11,10 +11,7 @@ class WorkflowLogOutboundInterceptor {
   async scheduleActivity(input, next) {
     const activityType = input.activityType;
 
-    workflowLog(
-      this.info,
-      `Scheduling activity ${activityType}: ${JSON.stringify(input)}`
-    );
+    workflowLog(this.info, `Scheduling activity ${activityType}: ${JSON.stringify(input)}`);
     try {
       const result = await next(input);
       workflowLog(
@@ -32,10 +29,7 @@ class WorkflowLogOutboundInterceptor {
     workflowLog(this.info, `Scheduling local activity: ${JSON.stringify(input)}`);
     try {
       const result = await next(input);
-      workflowLog(
-        this.info,
-        `Scheduling local activity result: ${JSON.stringify(result)}`
-      );
+      workflowLog(this.info, `Scheduling local activity result: ${JSON.stringify(result)}`);
       return result;
     } catch (error) {
       workflowLog(this.info, `Error scheduling local activity: ${error}`);
@@ -57,7 +51,7 @@ class WorkflowLogOutboundInterceptor {
 }
 
 // Interceptor that allows us to log inbound client calls made to workflow.
-// See https://docs.temporal.io/docs/typescript/interceptors for details. 
+// See https://docs.temporal.io/docs/typescript/interceptors for details.
 class WorkflowLogInboundInterceptor {
   info;
   constructor(info) {
@@ -65,10 +59,7 @@ class WorkflowLogInboundInterceptor {
   }
 
   async execute(input, next) {
-    workflowLog(
-      this.info,
-      `Workflow inbound activity execution: ${JSON.stringify(input)}`
-    );
+    workflowLog(this.info, `Workflow inbound activity execution: ${JSON.stringify(input)}`);
     try {
       const result = await next(input);
       workflowLog(

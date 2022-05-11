@@ -9,7 +9,13 @@ const { logger } = proxySinks();
 // the Airplane API.
 export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
-  const result = await task(params);
+
+  try {
+    var result = await task(params);
+  } catch (err) {
+    logger.info('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
+    throw err;
+  }
 
   // TODO: Update SDK to include a durable version of setOutput, then
   // use that instead.
