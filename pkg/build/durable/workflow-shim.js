@@ -10,8 +10,13 @@ const { logger } = proxySinks();
 export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
   const result = await task(params);
-  const output = result === undefined ? null : JSON.stringify(result);
-  logChunks(`airplane_output_set ${output}`);
+
+  // TODO: Update SDK to include a durable version of setOutput, then
+  // use that instead.
+  if (result !== undefined) {
+    const output = JSON.stringify(result);
+    logChunks(`airplane_output_set ${output}`);
+  }
   logger.info('airplane_status:succeeded');
   return result;
 }
