@@ -6,11 +6,11 @@ const promises = require('fs/promises');
 // for details.
 async function bundle() {
   const { code } = await worker.bundleWorkflowCode({
-    workflowsPath: './workflow-shim.js',
-    workflowInterceptorModules: ['./workflow-interceptors.js'],
+    workflowsPath: '/airplane/.airplane/workflow-shim.js',
+    workflowInterceptorModules: ['/airplane/.airplane/workflow-interceptors.js'],
   });
 
-  promises.writeFile('workflow-bundle.js', code);
+  promises.writeFile('/airplane/.airplane/workflow-bundle.js', code);
 }
 
 bundle();

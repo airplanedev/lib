@@ -224,9 +224,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
 		RUN {{.InlineBundleWorkflowScript}} >> /airplane/.airplane/bundle-workflow.js
-		WORKDIR /airplane/.airplane
-		RUN node bundle-workflow.js
-		WORKDIR /airplane{{.Workdir}}
+		RUN node /airplane/.airplane/bundle-workflow.js
 		{{end}}
 
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
