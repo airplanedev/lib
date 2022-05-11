@@ -1166,10 +1166,9 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 	req.Parameters = make([]api.Parameter, len(d.Parameters))
 	for i, pd := range d.Parameters {
 		param := api.Parameter{
-			Name:    pd.Name,
-			Slug:    pd.Slug,
-			Desc:    pd.Description,
-			Default: pd.Default,
+			Name: pd.Name,
+			Slug: pd.Slug,
+			Desc: pd.Description,
 		}
 
 		switch pd.Type {
@@ -1185,6 +1184,26 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			param.Type = api.Type(pd.Type)
 		default:
 			return errors.Errorf("unknown parameter type: %s", pd.Type)
+		}
+
+		switch reflect.ValueOf(pd.Default).Kind() {
+		case reflect.Map:
+			m, ok := pd.Default.(map[string]interface{})
+			if !ok {
+				return errors.Errorf("unhandled default: %v", pd.Default)
+			}
+			if configName, ok := m["config"]; !ok {
+				return errors.Errorf("unhandled default: %v", pd.Default)
+			} else {
+				param.Default = map[string]interface{}{
+					"__airplaneType": "configvar",
+					"name":           configName,
+				}
+			}
+		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float32, reflect.Float64:
+			param.Default = pd.Default
 		}
 
 		if pd.Required != nil && !*pd.Required {
@@ -1380,7 +1399,6 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			Name:        param.Name,
 			Slug:        param.Slug,
 			Description: param.Desc,
-			Default:     param.Default,
 		}
 
 		switch param.Type {
@@ -1401,6 +1419,21 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			return errors.Errorf("unknown parameter type: %s", param.Type)
 		}
 
+		switch k := reflect.ValueOf(param.Default).Kind(); k {
+		case reflect.Map:
+			configName, err := extractConfigVarValue(param.Default)
+			if err != nil {
+				return errors.Wrap(err, "unhandled default")
+			}
+			p.Default = map[string]interface{}{
+				"config": configName,
+			}
+		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+			reflect.Float32, reflect.Float64:
+			p.Default = param.Default
+		}
+
 		if param.Constraints.Optional {
 			v := false
 			p.Required = &v
@@ -1413,22 +1446,13 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			for j, opt := range param.Constraints.Options {
 				switch k := reflect.ValueOf(opt.Value).Kind(); k {
 				case reflect.Map:
-					m, ok := opt.Value.(map[string]interface{})
-					if !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
+					configName, err := extractConfigVarValue(opt.Value)
+					if err != nil {
+						return errors.Wrap(err, "unhandled option")
 					}
-					if airplaneType, ok := m["__airplaneType"]; !ok || airplaneType != "configvar" {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					}
-					if configName, ok := m["name"]; !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					} else if configNameStr, ok := configName.(string); !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					} else {
-						p.Options[j] = OptionDefinition_0_3{
-							Label:  opt.Label,
-							Config: &configNameStr,
-						}
+					p.Options[j] = OptionDefinition_0_3{
+						Label:  opt.Label,
+						Config: &configName,
 					}
 				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
@@ -1446,6 +1470,23 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 		d.Parameters[idx] = p
 	}
 	return nil
+}
+
+func extractConfigVarValue(v interface{}) (string, error) {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return "", errors.Errorf("unhandled value: %v", v)
+	}
+	if airplaneType, ok := m["__airplaneType"]; !ok || airplaneType != "configvar" {
+		return "", errors.Errorf("unhandled value: %v", v)
+	}
+	if configName, ok := m["name"]; !ok {
+		return "", errors.Errorf("unhandled value: %v", v)
+	} else if configNameStr, ok := configName.(string); !ok {
+		return "", errors.Errorf("unhandled value: %v", v)
+	} else {
+		return configNameStr, nil
+	}
 }
 
 func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {

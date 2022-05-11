@@ -340,7 +340,14 @@
           "oneOf": [
             { "type": "string" },
             { "type": "number" },
-            { "type": "boolean" }
+            { "type": "boolean" },
+            {
+              "type": "object",
+              "properties": {
+                "config": { "type": "string" }
+              },
+              "required": ["config"]
+            }
           ]
         },
         "required": {
