@@ -193,8 +193,9 @@ func TestNodeDurableBuilder(t *testing.T) {
 				"entrypoint": "task.js",
 				"runtime":    TaskRuntimeDurable,
 			},
+			SkipRun: true,
 		},
 	}
 
-	RunDurableTests(t, ctx, tests)
+	RunTests(t, ctx, tests)
 }

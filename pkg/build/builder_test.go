@@ -88,56 +88,6 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 	}
 }
 
-// RunDurableTests performs a series of builder tests and looks for a given SearchString
-// in the task's output to validate that the task built correctly. Unlike RunTests,
-// it does not yet run a task (yet).
-func RunDurableTests(tt *testing.T, ctx context.Context, tests []Test) {
-	for _, test := range tests {
-		test := test // loop local reference
-		tt.Run(filepath.Base(test.Root), func(t *testing.T) {
-			// These tests can run in parallel, but it may exhaust all memory
-			// allocated to the Docker daemon on your computer. For that reason,
-			// we don't currently run them in parallel. We could gate parallel
-			// execution to CI via `os.Getenv("CI") == "true"`, but that may
-			// lead to scenarios where tests break in CI but not locally. If
-			// test performance in CI becomes an issue, we should look into caching
-			// Docker builds in CI since (locally) that appears to have a significant
-			// impact on e2e times for this test suite.
-			//
-			// t.Parallel()
-
-			require := require.New(t)
-
-			b, err := New(LocalConfig{
-				Root:      examples.Path(t, test.Root),
-				Builder:   string(test.Kind),
-				Options:   test.Options,
-				BuildArgs: test.BuildArgs,
-			})
-			require.NoError(err)
-			t.Cleanup(func() {
-				require.NoError(b.Close())
-			})
-
-			// Perform the docker build:
-			resp, err := b.Build(ctx, "builder-tests", ksuid.New().String())
-			require.NoError(err)
-			defer func() {
-				_, err := b.client.ImageRemove(ctx, resp.ImageURL, types.ImageRemoveOptions{})
-				require.NoError(err)
-			}()
-
-			if test.ParamValues == nil {
-				test.ParamValues = Values{}
-			}
-			if test.SearchString == "" {
-				test.SearchString = ksuid.New().String()
-				test.ParamValues["id"] = test.SearchString
-			}
-		})
-	}
-}
-
 func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image string, paramValues Values) []byte {
 	require := require.New(t)
 
