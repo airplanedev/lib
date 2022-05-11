@@ -62,10 +62,19 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
 
+	runtime, ok := options["runtime"]
 	var isDurable bool
-	runtime, ok := options["runtime"].(TaskRuntime)
-	if ok && runtime == TaskRuntimeDurable {
-		isDurable = true
+
+	if ok {
+		// Depending on how the options were serialized, the runtime can be
+		// either a string or TaskRuntime; handle both.
+		switch v := runtime.(type) {
+		case string:
+			isDurable = v == string(TaskRuntimeDurable)
+		case TaskRuntime:
+			isDurable = v == TaskRuntimeDurable
+		default:
+		}
 	}
 
 	var pkg pkgJSON
