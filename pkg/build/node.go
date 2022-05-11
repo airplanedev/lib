@@ -21,7 +21,7 @@ type templateParams struct {
 	UsesWorkspaces                   bool
 	InlineShim                       string
 	InlineShimPackageJSON            string
-	InlineBundleWorkflowScript       string
+	InlineWorkflowBundlerScript      string
 	InlineWorkflowInterceptorsScript string
 	InlineWorkflowShimScript         string
 	IsDurable                        bool
@@ -137,7 +137,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 
 	if isDurable {
 		cfg.InlineShim = inlineString(workerAndActivityShim)
-		cfg.InlineBundleWorkflowScript = inlineString(bundleWorkflowScript)
+		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
 		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
 
 		workflowShim, err := TemplateEntrypoint(workflowShimScript, entrypoint)
@@ -223,8 +223,8 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		{{if .IsDurable}}
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
-		RUN {{.InlineBundleWorkflowScript}} >> /airplane/.airplane/bundle-workflow.js
-		RUN node /airplane/.airplane/bundle-workflow.js
+		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js
+		RUN node /airplane/.airplane/workflow-bundler.js
 		{{end}}
 
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
@@ -288,8 +288,8 @@ var nodeShim string
 //go:embed durable/worker-and-activity-shim.js
 var workerAndActivityShim string
 
-//go:embed durable/bundle-workflow.js
-var bundleWorkflowScript string
+//go:embed durable/workflow-bundler.js
+var workflowBundlerScript string
 
 //go:embed durable/workflow-interceptors.js
 var workflowInterceptorsScript string

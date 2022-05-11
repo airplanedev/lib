@@ -13,6 +13,7 @@ export async function __airplaneEntrypoint(params) {
   try {
     var result = await task(params);
   } catch (err) {
+    logger.info(err);
     logger.info('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
     throw err;
   }

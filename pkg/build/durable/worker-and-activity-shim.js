@@ -23,8 +23,9 @@ async function runWorker(params) {
     logger: {
       info: {
         fn(workflowInfo, message) {
-          // Prefix all logs with the workflow ID (equivalent to the run ID) so we
-          // can link the logs back to a specific task run.
+          // Prefix all logs with the Temporal workflow ID (equivalent to the Airplane run ID)
+          // and the Temporal run ID so we can link the logs back to specific
+          // Airplane and Temporal runs.
           console.log(`[ap:workflow::${workflowInfo.workflowId}:${workflowInfo.runId}] ${message}`);
         },
         callDuringReplay: false,
