@@ -8,10 +8,21 @@ import * as activities from '../activities.js';
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
 async function runWorker(params) {
-  // Get temporal address, queue, and namespace from the environment
-  const temporalHost = process.env.AP_TEMPORAL_ADDR || 'localhost:7233';
-  const taskQueue = process.env.AP_TASK_QUEUE || 'fake-task-revision-id';
-  const namespace = process.env.AP_NAMESPACE || 'default';
+  // Get temporal address, queue, and namespace from the environment.
+  const temporalHost = process.env.AP_TEMPORAL_ADDR;
+  if (temporalHost === undefined) {
+    throw 'AP_TEMPORAL_ADDR is not set in environment';
+  }
+
+  const taskQueue = process.env.AP_TASK_QUEUE;
+  if (taskQueue === undefined) {
+    throw 'AP_TASK_QUEUE is not set in environment';
+  }
+
+  const namespace = process.env.AP_NAMESPACE;
+  if (namespace === undefined) {
+    throw 'AP_NAMESPACE is not set in environment';
+  }
 
   const connection = await NativeConnection.create({
     // TODO: Insert a token for auth purposes
