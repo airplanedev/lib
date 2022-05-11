@@ -1344,6 +1344,7 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		Slug:            t.Slug,
 		Description:     t.Description,
 		RequireRequests: t.ExecuteRules.RequireRequests,
+		Runtime:         t.Runtime,
 		Timeout:         t.Timeout,
 	}
 

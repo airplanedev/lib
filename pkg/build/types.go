@@ -26,7 +26,7 @@ const (
 type TaskRuntime string
 
 const (
-	TaskRuntimeLegacy  TaskRuntime = ""
+	TaskRuntimeNormal  TaskRuntime = ""
 	TaskRuntimeDurable TaskRuntime = "durable"
 )
 
