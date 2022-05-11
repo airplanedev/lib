@@ -5,7 +5,6 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -1495,8 +1494,6 @@ func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
 		config[key] = val
 	}
 
-	fmt.Printf(">>>>>>> Getting build config: %+v", d)
-
 	// Pass runtime through to builder
 	config["runtime"] = d.Runtime
 
@@ -1507,8 +1504,6 @@ func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
 			config[key] = val
 		}
 	}
-
-	fmt.Printf(">>>>> Config is now: %+v", config)
 
 	return config, nil
 }

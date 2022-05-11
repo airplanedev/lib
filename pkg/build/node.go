@@ -52,8 +52,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		return "", err
 	}
 
-	fmt.Printf(">>>>>>> Creating node dockerfile with options: %+v\n", options)
-
 	workdir, _ := options["workdir"].(string)
 	pathPackageJSON := filepath.Join(root, "package.json")
 	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
