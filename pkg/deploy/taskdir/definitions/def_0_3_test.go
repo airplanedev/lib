@@ -528,6 +528,33 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 							Regex: "foo.*",
 						},
 					},
+					{
+						Name: "Config var",
+						Slug: "config_var",
+						Type: api.TypeConfigVar,
+						Default: map[string]interface{}{
+							"__airplaneType": "configvar",
+							"name":           "API_KEY",
+						},
+						Constraints: api.Constraints{
+							Options: []api.ConstraintOption{
+								{
+									Label: "API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "API_KEY",
+									},
+								},
+								{
+									Label: "Other API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "OTHER_API_KEY",
+									},
+								},
+							},
+						},
+					},
 				},
 				Arguments: []string{"{{JSON.stringify(params)}}"},
 				Kind:      build.TaskKindPython,
@@ -590,6 +617,24 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Slug:  "regex",
 						Type:  "shorttext",
 						Regex: "foo.*",
+					},
+					{
+						Name: "Config var",
+						Slug: "config_var",
+						Type: "configvar",
+						Default: map[string]interface{}{
+							"config": "API_KEY",
+						},
+						Options: []OptionDefinition_0_3{
+							{
+								Label:  "API key",
+								Config: pointers.String("API_KEY"),
+							},
+							{
+								Label:  "Other API key",
+								Config: pointers.String("OTHER_API_KEY"),
+							},
+						},
 					},
 				},
 				Python: &PythonDefinition_0_3{
@@ -985,6 +1030,24 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						Type:  "shorttext",
 						Regex: "foo.*",
 					},
+					{
+						Name: "Config var",
+						Slug: "config_var",
+						Type: "configvar",
+						Default: map[string]interface{}{
+							"config": "API_KEY",
+						},
+						Options: []OptionDefinition_0_3{
+							{
+								Label:  "API key",
+								Config: pointers.String("API_KEY"),
+							},
+							{
+								Label:  "Other API key",
+								Config: pointers.String("OTHER_API_KEY"),
+							},
+						},
+					},
 				},
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
@@ -1055,6 +1118,33 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						Type: api.TypeString,
 						Constraints: api.Constraints{
 							Regex: "foo.*",
+						},
+					},
+					{
+						Name: "Config var",
+						Slug: "config_var",
+						Type: api.TypeConfigVar,
+						Default: map[string]interface{}{
+							"__airplaneType": "configvar",
+							"name":           "API_KEY",
+						},
+						Constraints: api.Constraints{
+							Options: []api.ConstraintOption{
+								{
+									Label: "API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "API_KEY",
+									},
+								},
+								{
+									Label: "Other API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "OTHER_API_KEY",
+									},
+								},
+							},
 						},
 					},
 				},
