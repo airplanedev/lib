@@ -1508,6 +1508,8 @@ func (d *Definition_0_3) GetBuildConfig() (build.BuildConfig, error) {
 		}
 	}
 
+	fmt.Printf(">>>>> Config is now: %+v", config)
+
 	return config, nil
 }
 
