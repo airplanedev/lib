@@ -26,8 +26,8 @@ const (
 type TaskRuntime string
 
 const (
-	TaskRuntimeNormal  TaskRuntime = ""
-	TaskRuntimeDurable TaskRuntime = "durable"
+	TaskRuntimeStandard TaskRuntime = ""
+	TaskRuntimeDurable  TaskRuntime = "durable"
 )
 
 // Value represents a value.
