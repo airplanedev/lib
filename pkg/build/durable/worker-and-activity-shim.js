@@ -9,6 +9,8 @@ import * as activities from '../activities.js';
 // and workflows for a single task queue (equivalent to airplane task revision).
 async function runWorker(params) {
   // Get temporal address, queue, and namespace from the environment.
+  //
+  // TODO: Also get auth token.
   const temporalHost = process.env.AP_TEMPORAL_ADDR;
   if (temporalHost === undefined) {
     throw 'AP_TEMPORAL_ADDR is not set in environment';
