@@ -140,6 +140,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, err
 	}
+	logger.Debug("root: %s", root)
 	workdir, err := r.Workdir(opts.Path)
 	if err != nil {
 		return nil, nil, err
@@ -164,6 +165,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "entrypoint is not within the task root")
 	}
+	logger.Debug("entrypoint: %s", entrypoint)
 	shim, err := build.TemplatedNodeShim(entrypoint)
 	if err != nil {
 		return nil, nil, err
@@ -208,6 +210,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, err
 	}
+	logger.Debug("external deps: %v", externalDeps)
 
 	start := time.Now()
 	res := esbuild.Build(esbuild.BuildOptions{
