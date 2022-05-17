@@ -289,6 +289,7 @@
     "allowSelfApprovals": true,
     "timeout": true,
     "runtime": true,
+    "schedules": true,
 
     "node": true,
     "python": true,
@@ -482,6 +483,21 @@
           "description": "Set the runtime used for this task.",
           "enum": ["", "durable"],
           "default": ""
+        },
+        "schedules": {
+          "description": "Mapping of slugs to schedules for the task.",
+          "type": "object",
+          "examples": [{ 
+            "run_at_midnight": {
+              "name": "Daily Midnight Batch",
+              "description": "Runs this task daily at midnight.",
+              "cronExpr": "0 0 * * *",
+              "params": {
+                "param_one": 5,
+                "param_two": "hello"
+              }
+            }
+          }]
         }
       },
       "required": ["name", "slug"]
