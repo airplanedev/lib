@@ -1170,7 +1170,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 	}
 }
 
-func TestDefinition_0_3GetSchedules(t *testing.T) {
+func TestDefinitionGetSchedules_0_3(t *testing.T) {
 	require := require.New(t)
 
 	def := Definition_0_3{
