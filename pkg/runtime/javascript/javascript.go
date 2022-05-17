@@ -211,6 +211,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 		return nil, nil, err
 	}
 	logger.Debug("external deps: %v", externalDeps)
+	externalDeps = []string{}
 
 	start := time.Now()
 	res := esbuild.Build(esbuild.BuildOptions{
