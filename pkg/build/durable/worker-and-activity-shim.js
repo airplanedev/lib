@@ -27,7 +27,7 @@ async function runWorker(params) {
   }
 
   const temporalToken = process.env.AP_TEMPORAL_TOKEN;
-  if (namespace === undefined) {
+  if (temporalToken === undefined) {
     throw 'AP_TEMPORAL_TOKEN is not set in environment';
   }
 
@@ -35,6 +35,10 @@ async function runWorker(params) {
   // but not a local one. The easiest way to tell the difference is by
   // looking at the port.
   const useTLS = temporalHost.endsWith(':443');
+
+  console.log(
+    `Starting worker with temporal host ${temporalHost}, task queue ${taskQueue}, namespace ${namespace}, useTLS ${useTLS}`
+  );
 
   const connection = await NativeConnection.create({
     address: temporalHost,
