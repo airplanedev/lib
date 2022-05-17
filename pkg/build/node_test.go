@@ -3,6 +3,8 @@ package build
 import (
 	"context"
 	"testing"
+
+	"github.com/airplanedev/lib/pkg/examples"
 )
 
 func TestNodeBuilder(t *testing.T) {
@@ -123,6 +125,7 @@ func TestNodeBuilder(t *testing.T) {
 			Options: KindOptions{
 				"shim":       "true",
 				"entrypoint": "pkg2/src/index.ts",
+				"workdir":    examples.Path(t, "typescript/yarnworkspaces/pkg2"),
 			},
 		},
 		{

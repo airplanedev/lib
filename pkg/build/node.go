@@ -53,8 +53,9 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	}
 
 	workdir, _ := options["workdir"].(string)
-	pathPackageJSON := filepath.Join(root, "package.json")
-	hasPackageJSON := fsx.AssertExistsAll(pathPackageJSON) == nil
+	rootPackageJSON := filepath.Join(root, "package.json")
+	workdirPackageJSON := filepath.Join(workdir, "package.json")
+	hasPackageJSON := fsx.AssertExistsAll(rootPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
 	pathPackageLock := filepath.Join(root, "package-lock.json")
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
@@ -81,13 +82,13 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		// If the package.json has a "workspaces" key, it uses workspaces!
 		// We want to know this because if we are in a workspace, our install
 		// has to honor all of the package.json in the workspace.
-		buf, err := os.ReadFile(pathPackageJSON)
+		buf, err := os.ReadFile(rootPackageJSON)
 		if err != nil {
-			return "", errors.Wrapf(err, "node: reading %s", pathPackageJSON)
+			return "", errors.Wrapf(err, "node: reading %s", rootPackageJSON)
 		}
 
 		if err := json.Unmarshal(buf, &pkg); err != nil {
-			return "", fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
+			return "", fmt.Errorf("node: parsing %s - %w", rootPackageJSON, err)
 		}
 	}
 
@@ -110,24 +111,22 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 
 	// Workaround to get esbuild to not bundle dependencies.
 	// See build.ExternalPackages for details.
-	if cfg.HasPackageJSON {
-		deps, err := ExternalPackages(pathPackageJSON)
-		if err != nil {
-			return "", err
-		}
-		var flags []string
-		for _, dep := range deps {
-			flags = append(flags, fmt.Sprintf("--external:%s", dep))
-		}
-		if isDurable {
-			// Even if these are imported, we need to mark the root packages
-			// as external for esbuild to work properly. Esbuild doesn't
-			// care about repeats, so no need to dedupe.
-			flags = append(flags, "--external:@temporalio", "--external:@swc")
-		}
-
-		cfg.ExternalFlags = strings.Join(flags, " ")
+	deps, err := ExternalPackages(rootPackageJSON, workdirPackageJSON)
+	if err != nil {
+		return "", err
 	}
+	var flags []string
+	for _, dep := range deps {
+		flags = append(flags, fmt.Sprintf("--external:%s", dep))
+	}
+	if isDurable {
+		// Even if these are imported, we need to mark the root packages
+		// as external for esbuild to work properly. Esbuild doesn't
+		// care about repeats, so no need to dedupe.
+		flags = append(flags, "--external:@temporalio", "--external:@swc")
+	}
+
+	cfg.ExternalFlags = strings.Join(flags, " ")
 
 	if !strings.HasPrefix(cfg.Workdir, "/") {
 		cfg.Workdir = "/" + cfg.Workdir
@@ -138,7 +137,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON(pathPackageJSON, isDurable)
+	pjson, err := GenShimPackageJSON(rootPackageJSON, isDurable)
 	if err != nil {
 		return "", err
 	}

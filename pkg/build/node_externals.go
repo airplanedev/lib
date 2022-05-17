@@ -4,6 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"path/filepath"
+	"regexp"
 
 	"github.com/pkg/errors"
 )
@@ -21,20 +24,33 @@ var esmModules = []string{
 // using just pg causes esbuild to bundle pg which bundles pg-native, which errors.
 // TODO: replace this with a cleaner esbuild plugin that can mark dependencies as external:
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
-func ExternalPackages(pathPackageJSON string) ([]string, error) {
+func ExternalPackages(pathPackageJSONs ...string) ([]string, error) {
 	var deps []string
 
-	allDeps, err := ListDependencies(pathPackageJSON)
-	if err != nil {
-		return nil, err
-	}
-	for _, dep := range allDeps {
-		// Mark all dependencies as external, except for known ESM-only deps. These deps
-		// need to be bundled by esbuild so that esbuild can convert them to CommonJS.
-		// As long as these modules don't happen to pull in any optional modules, we should be OK.
-		// This is a bandaid until we figure out how to handle ESM without bundling.
-		if !contains(esmModules, dep) {
-			deps = append(deps, dep)
+	for _, pathPackageJSON := range pathPackageJSONs {
+		if pathPackageJSON == "" {
+			continue
+		}
+
+		// If we are in a npm/yarn workspace, we want to bundle all packages in the same
+		// workspaces so they are run through esbuild.
+		yarnWorkspacePackages, err := getYarnWorkspacePackages(pathPackageJSON)
+		for _, p := range yarnWorkspacePackages {
+			esmModules = append(esmModules, p)
+		}
+
+		allDeps, err := ListDependencies(pathPackageJSON)
+		if err != nil {
+			return nil, err
+		}
+		for _, dep := range allDeps {
+			// Mark all dependencies as external, except for known ESM-only deps. These deps
+			// need to be bundled by esbuild so that esbuild can convert them to CommonJS.
+			// As long as these modules don't happen to pull in any optional modules, we should be OK.
+			// This is a bandaid until we figure out how to handle ESM without bundling.
+			if !contains(esmModules, dep) {
+				deps = append(deps, dep)
+			}
 		}
 	}
 
@@ -84,4 +100,60 @@ func contains(list []string, needle string) bool {
 		}
 	}
 	return false
+}
+
+func getYarnWorkspacePackages(pathPackageJSON string) ([]string, error) {
+	cmd := exec.Command("yarn", "workspaces", "info")
+	cmd.Dir = filepath.Dir(pathPackageJSON)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		// We are not in a npm/yarn workspace
+		return nil, nil
+	}
+	// out will be something like:
+	// yarn workspaces v1.22.17
+	// {
+	//   "pkg1": {
+	//     "location": "pkg1",
+	//     "workspaceDependencies": [],
+	//     "mismatchedWorkspaceDependencies": []
+	//   },
+	//   "pkg2": {
+	//     "location": "pkg2",
+	//     "workspaceDependencies": [
+	//       "pkg1"
+	//     ],
+	//     "mismatchedWorkspaceDependencies": []
+	//   }
+	// }
+	// Done in 0.02s.
+	//
+	// We want to grab the keys of the JSON object.
+	r := regexp.MustCompile(`{[\S\s]+}`)
+	yarnWorkspaceJSON := r.FindString(string(out))
+	if yarnWorkspaceJSON == "" {
+		return nil, errors.New("empty yarn workspace info")
+	}
+	keys, err := getJSONKeys(yarnWorkspaceJSON)
+	if err != nil {
+		return nil, errors.Wrap(err, "output of `yarn workspace info` is not JSON")
+	}
+	return keys, nil
+}
+
+func getJSONKeys(jsonString string) ([]string, error) {
+	c := make(map[string]json.RawMessage)
+	if err := json.Unmarshal([]byte(jsonString), &c); err != nil {
+		return nil, err
+	}
+
+	keys := make([]string, len(c))
+
+	i := 0
+	for key, _ := range c {
+		keys[i] = key
+		i++
+	}
+
+	return keys, nil
 }
