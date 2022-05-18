@@ -140,10 +140,6 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, err
 	}
-	workdir, err := r.Workdir(opts.Path)
-	if err != nil {
-		return nil, nil, err
-	}
 
 	tmpdir := filepath.Join(root, ".airplane")
 	if err := os.Mkdir(tmpdir, os.ModeDir|0777); err != nil && !os.IsExist(err) {
@@ -195,10 +191,9 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 		return nil, nil, errors.Wrap(err, "cleaning dist folder")
 	}
 
-	workdirPkgJSON := filepath.Join(workdir, "package.json")
 	// Workaround to get esbuild to not bundle dependencies.
 	// See build.ExternalPackages for details.
-	externalDeps, err := build.ExternalPackages(rootPackageJSON, workdirPkgJSON)
+	externalDeps, err := build.ExternalPackages(rootPackageJSON)
 	if err != nil {
 		return nil, nil, err
 	}

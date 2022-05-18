@@ -3,11 +3,13 @@ package build
 import (
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"strings"
 
 	"github.com/pkg/errors"
 )
@@ -25,18 +27,25 @@ var esmModules = []string{
 // using just pg causes esbuild to bundle pg which bundles pg-native, which errors.
 // TODO: replace this with a cleaner esbuild plugin that can mark dependencies as external:
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
-func ExternalPackages(rootPackageJSON string, otherPackageJSONs ...string) ([]string, error) {
+func ExternalPackages(rootPackageJSON string) ([]string, error) {
 	usesWorkspaces, err := hasWorkspaces(rootPackageJSON)
 	if err != nil {
 		return nil, err
 	}
-	var deps []string
 	pathPackageJSONs := []string{rootPackageJSON}
-	for _, otherPackageJSON := range otherPackageJSONs {
-		if otherPackageJSON != rootPackageJSON {
-			pathPackageJSONs = append(pathPackageJSONs, otherPackageJSON)
+	if usesWorkspaces {
+		nestedPackageJSONs, err := findNestedPackageJSONs(filepath.Dir(rootPackageJSON))
+		if err != nil {
+			return nil, err
+		}
+		for _, j := range nestedPackageJSONs {
+			if j != rootPackageJSON {
+				pathPackageJSONs = append(pathPackageJSONs, j)
+			}
 		}
 	}
+
+	var deps []string
 	for _, pathPackageJSON := range pathPackageJSONs {
 		if pathPackageJSON == "" {
 			continue
@@ -115,6 +124,18 @@ func contains(list []string, needle string) bool {
 		}
 	}
 	return false
+}
+
+func findNestedPackageJSONs(dir string) ([]string, error) {
+	var pathPackageJSONs []string
+	err := filepath.WalkDir(dir,
+		func(path string, di fs.DirEntry, err error) error {
+			if !strings.Contains(path, "node_modules") && di.Name() == "package.json" {
+				pathPackageJSONs = append(pathPackageJSONs, path)
+			}
+			return nil
+		})
+	return pathPackageJSONs, err
 }
 
 func hasWorkspaces(pathPackageJSON string) (bool, error) {

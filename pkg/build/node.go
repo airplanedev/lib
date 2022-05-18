@@ -54,7 +54,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 
 	workdir, _ := options["workdir"].(string)
 	rootPackageJSON := filepath.Join(root, "package.json")
-	workdirPackageJSON := filepath.Join(workdir, "package.json")
 	hasPackageJSON := fsx.AssertExistsAll(rootPackageJSON) == nil
 	pathYarnLock := filepath.Join(root, "yarn.lock")
 	pathPackageLock := filepath.Join(root, "package-lock.json")
@@ -111,7 +110,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 
 	// Workaround to get esbuild to not bundle dependencies.
 	// See build.ExternalPackages for details.
-	deps, err := ExternalPackages(rootPackageJSON, workdirPackageJSON)
+	deps, err := ExternalPackages(rootPackageJSON)
 	if err != nil {
 		return "", err
 	}
