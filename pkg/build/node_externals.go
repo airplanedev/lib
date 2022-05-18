@@ -2,6 +2,7 @@ package build
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -24,22 +25,33 @@ var esmModules = []string{
 // using just pg causes esbuild to bundle pg which bundles pg-native, which errors.
 // TODO: replace this with a cleaner esbuild plugin that can mark dependencies as external:
 // https://github.com/evanw/esbuild/issues/619#issuecomment-751995294
-func ExternalPackages(pathPackageJSONs ...string) ([]string, error) {
+func ExternalPackages(rootPackageJSON string, otherPackageJSONs ...string) ([]string, error) {
+	usesWorkspaces, err := hasWorkspaces(rootPackageJSON)
+	if err != nil {
+		return nil, err
+	}
 	var deps []string
-
+	pathPackageJSONs := []string{rootPackageJSON}
+	for _, otherPackageJSON := range otherPackageJSONs {
+		if otherPackageJSON != rootPackageJSON {
+			pathPackageJSONs = append(pathPackageJSONs, otherPackageJSON)
+		}
+	}
 	for _, pathPackageJSON := range pathPackageJSONs {
 		if pathPackageJSON == "" {
 			continue
 		}
 
-		// If we are in a npm/yarn workspace, we want to bundle all packages in the same
-		// workspaces so they are run through esbuild.
-		yarnWorkspacePackages, err := getYarnWorkspacePackages(pathPackageJSON)
-		if err != nil {
-			return nil, err
-		}
-		for _, p := range yarnWorkspacePackages {
-			esmModules = append(esmModules, p)
+		if usesWorkspaces {
+			// If we are in a npm/yarn workspace, we want to bundle all packages in the same
+			// workspaces so they are run through esbuild.
+			yarnWorkspacePackages, err := getYarnWorkspacePackages(pathPackageJSON)
+			if err != nil {
+				return nil, err
+			}
+			for _, p := range yarnWorkspacePackages {
+				esmModules = append(esmModules, p)
+			}
 		}
 
 		allDeps, err := ListDependencies(pathPackageJSON)
@@ -105,13 +117,28 @@ func contains(list []string, needle string) bool {
 	return false
 }
 
+func hasWorkspaces(pathPackageJSON string) (bool, error) {
+	if _, err := os.Stat(pathPackageJSON); errors.Is(err, os.ErrNotExist) {
+		return false, nil
+	}
+	var pkg pkgJSON
+	buf, err := os.ReadFile(pathPackageJSON)
+	if err != nil {
+		return false, errors.Wrapf(err, "node: reading %s", pathPackageJSON)
+	}
+
+	if err := json.Unmarshal(buf, &pkg); err != nil {
+		return false, fmt.Errorf("node: parsing %s - %w", pathPackageJSON, err)
+	}
+	return len(pkg.Workspaces.workspaces) > 0, nil
+}
+
 func getYarnWorkspacePackages(pathPackageJSON string) ([]string, error) {
 	cmd := exec.Command("yarn", "workspaces", "info")
 	cmd.Dir = filepath.Dir(pathPackageJSON)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		// We are not in a npm/yarn workspace
-		return nil, nil
+		return nil, errors.Wrap(err, "reading yarn/npm workspaces. Do you have yarn installed?")
 	}
 	// out will be something like:
 	// yarn workspaces v1.22.17
