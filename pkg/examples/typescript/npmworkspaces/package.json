@@ -1,0 +1,9 @@
+{
+  "name": "npmworkspaces",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "pkg1",
+    "pkg2"
+  ]
+}

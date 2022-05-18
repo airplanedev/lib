@@ -134,14 +134,25 @@ func TestNodeBuilder(t *testing.T) {
 			Options: KindOptions{
 				"shim":       "true",
 				"entrypoint": "pkg2/src/index.ts",
+				"workdir":    examples.Path(t, "typescript/yarnworkspacesobject/pkg2"),
 			},
 		},
 		{
-			Root: "typescript/nodeworkspaces",
+			Root: "typescript/yarnworkspaceswithglob",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "nested/pkg2/src/index.ts",
+				"workdir":    examples.Path(t, "typescript/yarnworkspaceswithglob/nested/pkg2"),
+			},
+		},
+		{
+			Root: "typescript/npmworkspaces",
 			Kind: TaskKindNode,
 			Options: KindOptions{
 				"shim":       "true",
 				"entrypoint": "pkg2/src/index.ts",
+				"workdir":    examples.Path(t, "typescript/npmworkspaces/pkg2"),
 			},
 		},
 		{

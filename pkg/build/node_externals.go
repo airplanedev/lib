@@ -35,6 +35,9 @@ func ExternalPackages(pathPackageJSONs ...string) ([]string, error) {
 		// If we are in a npm/yarn workspace, we want to bundle all packages in the same
 		// workspaces so they are run through esbuild.
 		yarnWorkspacePackages, err := getYarnWorkspacePackages(pathPackageJSON)
+		if err != nil {
+			return nil, err
+		}
 		for _, p := range yarnWorkspacePackages {
 			esmModules = append(esmModules, p)
 		}
@@ -150,7 +153,7 @@ func getJSONKeys(jsonString string) ([]string, error) {
 	keys := make([]string, len(c))
 
 	i := 0
-	for key, _ := range c {
+	for key := range c {
 		keys[i] = key
 		i++
 	}

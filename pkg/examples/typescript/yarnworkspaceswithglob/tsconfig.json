@@ -1,0 +1,6 @@
+{
+  "references": [
+    {"path": "nested/pkg1"},
+    {"path": "nested/pkg2"}
+  ]
+}
