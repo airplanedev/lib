@@ -264,7 +264,7 @@ func GenShimPackageJSON(pathPackageJSON string, isDurable bool) ([]byte, error) 
 
 	if isDurable {
 		// TODO: Make this configurable
-		pjson.Dependencies["temporalio"] = "0.20.2"
+		pjson.Dependencies["temporalio"] = "0.23.0"
 	}
 
 	// Allow users to override any shim dependencies. Given shim code is bundled

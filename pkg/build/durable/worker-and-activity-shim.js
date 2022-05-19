@@ -26,9 +26,26 @@ async function runWorker(params) {
     throw 'AP_NAMESPACE is not set in environment';
   }
 
+  const temporalToken = process.env.AP_TEMPORAL_TOKEN;
+  if (temporalToken === undefined) {
+    throw 'AP_TEMPORAL_TOKEN is not set in environment';
+  }
+
+  // We use TLS when hitting a remote Temporal API (i.e., behind a load balancer),
+  // but not a local one. The easiest way to tell the difference is by
+  // looking at the port.
+  const useTLS = temporalHost.endsWith(':443');
+
+  console.log(
+    `Starting worker with temporal host ${temporalHost}, task queue ${taskQueue}, namespace ${namespace}, useTLS ${useTLS}`
+  );
+
   const connection = await NativeConnection.create({
-    // TODO: Insert a token for auth purposes
     address: temporalHost,
+    headers: {
+      authorization: temporalToken,
+    },
+    tls: useTLS,
   });
 
   // Sinks allow us to log from workflows.
