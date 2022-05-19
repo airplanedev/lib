@@ -26,21 +26,12 @@ const (
 	ConfigSourceDefn   ConfigSource = "defn"
 )
 
-type ScheduleConfig struct {
-	Name        string
-	Description string
-	Slug        string
-	CronExpr    string
-	Params      map[string]interface{}
-}
-
 type TaskConfig struct {
 	TaskID         string
 	TaskRoot       string
 	TaskEntrypoint string
 	Def            definitions.DefinitionInterface
 	Source         ConfigSource
-	Schedules      []ScheduleConfig
 }
 
 func (c TaskConfig) GetSource() ConfigSource {

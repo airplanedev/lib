@@ -487,11 +487,31 @@
         "schedules": {
           "description": "Mapping of slugs to schedules for the task.",
           "type": "object",
+          "patternProperties": {
+            ".*": {
+              "oneOf": [
+                { "type": "string" },
+                {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "cron": { "type": "string" },
+                    "params": {
+                      "type": "object"
+                    }
+                  },
+                  "additionalProperties": false,
+                  "required": ["cron"]
+                }
+              ]
+            }
+          },
           "examples": [{ 
             "run_at_midnight": {
               "name": "Daily Midnight Batch",
               "description": "Runs this task daily at midnight.",
-              "cronExpr": "0 0 * * *",
+              "cron": "0 0 * * *",
               "params": {
                 "param_one": 5,
                 "param_two": "hello"
