@@ -1220,6 +1220,8 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			} else {
 				param.Default = pd.Default
 			}
+		default:
+			return errors.Errorf("unhandled default value: %T", pd.Default)
 		}
 
 		if pd.Required != nil && !*pd.Required {
@@ -1465,6 +1467,8 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 			reflect.Float32, reflect.Float64:
 			p.Default = param.Default
+		default:
+			return errors.Errorf("unhandled default value: %T", param.Default)
 		}
 
 		if param.Constraints.Optional {
