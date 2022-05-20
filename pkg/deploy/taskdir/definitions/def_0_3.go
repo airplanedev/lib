@@ -1212,7 +1212,14 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 			reflect.Float32, reflect.Float64:
-			param.Default = pd.Default
+			if pd.Type == "configvar" {
+				param.Default = map[string]interface{}{
+					"__airplaneType": "configvar",
+					"name":           pd.Default,
+				}
+			} else {
+				param.Default = pd.Default
+			}
 		}
 
 		if pd.Required != nil && !*pd.Required {
@@ -1229,6 +1236,11 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 					param.Constraints.Options[j].Value = map[string]interface{}{
 						"__airplaneType": "configvar",
 						"name":           *od.Config,
+					}
+				} else if pd.Type == "configvar" {
+					param.Constraints.Options[j].Value = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           od.Value,
 					}
 				} else {
 					param.Constraints.Options[j].Value = od.Value
@@ -1448,9 +1460,7 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			if err != nil {
 				return errors.Wrap(err, "unhandled default")
 			}
-			p.Default = map[string]interface{}{
-				"config": configName,
-			}
+			p.Default = configName
 		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 			reflect.Float32, reflect.Float64:
@@ -1474,8 +1484,8 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 						return errors.Wrap(err, "unhandled option")
 					}
 					p.Options[j] = OptionDefinition_0_3{
-						Label:  opt.Label,
-						Config: &configName,
+						Label: opt.Label,
+						Value: configName,
 					}
 				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,

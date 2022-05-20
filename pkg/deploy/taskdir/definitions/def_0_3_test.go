@@ -546,13 +546,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 									Label: "three",
 									Value: 3,
 								},
-								{
-									Label: "config",
-									Value: map[string]interface{}{
-										"__airplaneType": "configvar",
-										"name":           "config_name",
-									},
-								},
 							},
 						},
 					},
@@ -642,10 +635,6 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 								Label: "three",
 								Value: 3,
 							},
-							{
-								Label:  "config",
-								Config: pointers.String("config_name"),
-							},
 						},
 					},
 					{
@@ -655,20 +644,18 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Regex: "foo.*",
 					},
 					{
-						Name: "Config var",
-						Slug: "config_var",
-						Type: "configvar",
-						Default: map[string]interface{}{
-							"config": "API_KEY",
-						},
+						Name:    "Config var",
+						Slug:    "config_var",
+						Type:    "configvar",
+						Default: "API_KEY",
 						Options: []OptionDefinition_0_3{
 							{
-								Label:  "API key",
-								Config: pointers.String("API_KEY"),
+								Label: "API key",
+								Value: "API_KEY",
 							},
 							{
-								Label:  "Other API key",
-								Config: pointers.String("OTHER_API_KEY"),
+								Label: "Other API key",
+								Value: "OTHER_API_KEY",
 							},
 						},
 					},
@@ -1084,6 +1071,23 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 							},
 						},
 					},
+					{
+						// With string values
+						Name:    "Config var",
+						Slug:    "config_var2",
+						Type:    "configvar",
+						Default: "API_KEY",
+						Options: []OptionDefinition_0_3{
+							{
+								Label: "API key",
+								Value: "API_KEY",
+							},
+							{
+								Label: "Other API key",
+								Value: "OTHER_API_KEY",
+							},
+						},
+					},
 				},
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
@@ -1159,6 +1163,33 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					{
 						Name: "Config var",
 						Slug: "config_var",
+						Type: api.TypeConfigVar,
+						Default: map[string]interface{}{
+							"__airplaneType": "configvar",
+							"name":           "API_KEY",
+						},
+						Constraints: api.Constraints{
+							Options: []api.ConstraintOption{
+								{
+									Label: "API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "API_KEY",
+									},
+								},
+								{
+									Label: "Other API key",
+									Value: map[string]interface{}{
+										"__airplaneType": "configvar",
+										"name":           "OTHER_API_KEY",
+									},
+								},
+							},
+						},
+					},
+					{
+						Name: "Config var",
+						Slug: "config_var2",
 						Type: api.TypeConfigVar,
 						Default: map[string]interface{}{
 							"__airplaneType": "configvar",
