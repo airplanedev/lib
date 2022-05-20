@@ -350,3 +350,10 @@ type GetAppRequest struct {
 	ID   string
 	Slug string
 }
+
+type Schedule struct {
+	Name        string                 `json:"name"`
+	Description string                 `json:"description"`
+	CronExpr    string                 `json:"cronExpr"`
+	ParamValues map[string]interface{} `json:"paramValues"`
+}

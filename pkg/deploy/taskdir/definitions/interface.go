@@ -37,6 +37,8 @@ type DefinitionInterface interface {
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
 	SetWorkdir(taskroot, workdir string) error
 
+	GetSchedules() map[string]api.Schedule
+
 	// Entrypoint returns ErrNoEntrypoint if the task kind definition requires no entrypoint. May be
 	// empty. May be absolute or relative; if relative, it is relative to the defn file.
 	Entrypoint() (string, error)

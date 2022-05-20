@@ -43,6 +43,8 @@ type Definition_0_3 struct {
 	Timeout            int               `json:"timeout,omitempty"`
 	Runtime            build.TaskRuntime `json:"runtime,omitempty"`
 
+	Schedules map[string]ScheduleDefinition_0_3 `json:"schedules,omitempty"`
+
 	buildConfig  build.BuildConfig
 	defnFilePath string
 }
@@ -832,6 +834,13 @@ func (o *OptionDefinition_0_3) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+type ScheduleDefinition_0_3 struct {
+	Name        string                 `json:"name,omitempty"`
+	Description string                 `json:"description,omitempty"`
+	CronExpr    string                 `json:"cron"`
+	ParamValues map[string]interface{} `json:"params,omitempty"`
+}
+
 //go:embed schema_0_3.json
 var schemaStr string
 
@@ -1357,12 +1366,26 @@ func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
 	return nil
 }
 
+func (d *Definition_0_3) GetSchedules() map[string]api.Schedule {
+	schedules := make(map[string]api.Schedule)
+	for slug, def := range d.Schedules {
+		schedules[slug] = api.Schedule{
+			Name:        def.Name,
+			Description: def.Description,
+			CronExpr:    def.CronExpr,
+			ParamValues: def.ParamValues,
+		}
+	}
+	return schedules
+}
+
 func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api.Task) (Definition_0_3, error) {
 	d := Definition_0_3{
 		Name:            t.Name,
 		Slug:            t.Slug,
 		Description:     t.Description,
 		RequireRequests: t.ExecuteRules.RequireRequests,
+		Runtime:         t.Runtime,
 		Timeout:         t.Timeout,
 	}
 
