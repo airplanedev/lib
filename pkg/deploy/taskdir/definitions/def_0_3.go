@@ -1393,6 +1393,41 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	return d, nil
 }
 
+type NewDefinitionFromTaskAndTriggers_0_3Request struct {
+	Task     api.Task
+	Triggers []api.Trigger
+}
+
+func NewDefinitionFromTaskAndTriggers_0_3(ctx context.Context, client api.IAPIClient, req NewDefinitionFromTaskAndTriggers_0_3Request) (Definition_0_3, error) {
+	d, err := NewDefinitionFromTask_0_3(ctx, client, req.Task)
+	if err != nil {
+		return d, err
+	}
+
+	schedules := make(map[string]ScheduleDefinition_0_3)
+	for _, trigger := range req.Triggers {
+		if trigger.Kind != api.TriggerKindSchedule || trigger.Slug == nil {
+			// Trigger is not a schedule deployed via code
+			continue
+		}
+		if trigger.ArchivedAt != nil || trigger.DisabledAt != nil {
+			// Trigger is archived or disabled, so don't add to task defn file
+			continue
+		}
+
+		schedules[*trigger.Slug] = ScheduleDefinition_0_3{
+			Name:        trigger.Name,
+			Description: trigger.Description,
+			CronExpr:    trigger.KindConfig.Schedule.CronExpr.String(),
+			ParamValues: trigger.KindConfig.Schedule.ParamValues,
+		}
+	}
+	if len(schedules) > 0 {
+		d.Schedules = schedules
+	}
+	return d, nil
+}
+
 func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
 	if len(t.Parameters) == 0 {
 		return nil
