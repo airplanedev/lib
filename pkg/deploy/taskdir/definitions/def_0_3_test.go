@@ -26,6 +26,15 @@ python:
   entrypoint: hello_world.py
 timeout: 3600
 runtime: durable
+schedules:
+  every_midnight:
+    name: Every Midnight
+    cron: 0 0 * * *
+  no_name_params:
+    cron: 0 0 * * *
+    params:
+      param_one: 5.5
+      param_two: memes
 `)
 
 var fullJSON = []byte(
@@ -47,7 +56,20 @@ var fullJSON = []byte(
 		"entrypoint": "hello_world.py"
 	},
 	"timeout": 3600,
-	"runtime": "durable"
+	"runtime": "durable",
+	"schedules": {
+		"every_midnight": {
+			"name": "Every Midnight",
+			"cron": "0 0 * * *"
+		},
+		"no_name_params": {
+			"cron": "0 0 * * *",
+			"params": {
+				"param_one": 5.5,
+				"param_two": "memes"
+			}
+		}
+	}
 }`)
 
 var yamlWithDefault = []byte(
@@ -104,6 +126,19 @@ var fullDef = Definition_0_3{
 	},
 	Runtime: "durable",
 	Timeout: 3600,
+	Schedules: map[string]ScheduleDefinition_0_3{
+		"every_midnight": {
+			Name:     "Every Midnight",
+			CronExpr: "0 0 * * *",
+		},
+		"no_name_params": {
+			CronExpr: "0 0 * * *",
+			ParamValues: map[string]interface{}{
+				"param_one": 5.5,
+				"param_two": "memes",
+			},
+		},
+	},
 }
 
 var defWithDefault = Definition_0_3{
@@ -125,7 +160,7 @@ var defWithDefault = Definition_0_3{
 	Timeout: 3600,
 }
 
-func TestDefinitionSerialization_0_3(t *testing.T) {
+func TestDefinitionMarshal_0_3(t *testing.T) {
 	// marshalling tests
 	for _, test := range []struct {
 		name     string
@@ -213,8 +248,9 @@ timeout: 300
 			assert.Equal(test.expected, bytestr)
 		})
 	}
+}
 
-	// unmarshalling tests
+func TestDefinitionUnmarshal_0_3(t *testing.T) {
 	for _, test := range []struct {
 		name     string
 		format   DefFormat
@@ -1132,4 +1168,33 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			assert.Equal(test.request, req)
 		})
 	}
+}
+
+func TestDefinitionGetSchedules_0_3(t *testing.T) {
+	require := require.New(t)
+
+	def := Definition_0_3{
+		Schedules: map[string]ScheduleDefinition_0_3{
+			"foo": {
+				Name:        "Foo",
+				Description: "Does foo",
+				CronExpr:    "0 0 * * *",
+				ParamValues: map[string]interface{}{
+					"param_one": 5.5,
+				},
+			},
+		},
+	}
+
+	schedules := def.GetSchedules()
+	require.Len(schedules, 1)
+	require.Contains(schedules, "foo")
+
+	scheduleDef := schedules["foo"]
+	require.Equal(scheduleDef.Name, "Foo")
+	require.Equal(scheduleDef.Description, "Does foo")
+	require.Equal(scheduleDef.CronExpr, "0 0 * * *")
+	require.Len(scheduleDef.ParamValues, 1)
+	require.Contains(scheduleDef.ParamValues, "param_one")
+	require.Equal(scheduleDef.ParamValues["param_one"], 5.5)
 }
