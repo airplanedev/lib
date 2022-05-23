@@ -1,12 +1,10 @@
 {
   "name": "airplane",
   "private": true,
-  "workspaces": {
-    "packages": [
-      "lib",
-      "examples/*"
-    ]
-  },
+  "workspaces": [
+    "lib",
+    "examples/*"
+  ],
   "devDependencies": {
     "react": "18.1.0"
   }
