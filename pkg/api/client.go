@@ -43,6 +43,7 @@ type Task struct {
 	Permissions                Permissions        `json:"permissions" yaml:"-"`
 	ExecuteRules               ExecuteRules       `json:"executeRules" yaml:"-"`
 	Timeout                    int                `json:"timeout" yaml:"timeout"`
+	Source                     *TaskSource        `json:"source" yaml:"source"`
 	IsArchived                 bool               `json:"isArchived" yaml:"isArchived"`
 	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
 }
@@ -168,6 +169,15 @@ type ResourceRequests map[string]string
 type Resources map[string]string
 
 type TaskEnv map[string]EnvVarValue
+
+type TaskSource string
+
+const (
+	TaskSourceCLI          TaskSource = "cli"
+	TaskSourceWeb          TaskSource = "web"
+	TaskSourceGithub       TaskSource = "github"
+	TaskSourceGithubAction TaskSource = "githubAction"
+)
 
 type EnvVarValue struct {
 	Value  *string `json:"value,omitempty" yaml:"value,omitempty"`
