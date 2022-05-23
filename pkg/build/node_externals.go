@@ -144,6 +144,10 @@ func hasWorkspaces(pathPackageJSON string) (bool, error) {
 	return len(pkg.Workspaces.workspaces) > 0, nil
 }
 
+type yarnWorkspaceInfoEntry struct {
+	WorkspaceDependencies []string `json:"workspaceDependencies"`
+}
+
 func getYarnWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
 	cmd := exec.Command("yarn", "workspaces", "info")
 	cmd.Dir = filepath.Dir(pathPackageJSON)
@@ -168,31 +172,22 @@ func getYarnWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
 	//   }
 	// }
 	// Done in 0.02s.
-	//
-	// We want to grab the keys of the JSON object.
 	r := regexp.MustCompile(`{[\S\s]+}`)
 	yarnWorkspaceJSON := r.FindString(string(out))
 	if yarnWorkspaceJSON == "" {
-		return nil, errors.New("empty yarn workspace info")
+		return nil, errors.New(fmt.Sprintf("empty yarn workspace info %s", string(out)))
 	}
-	keys, err := getJSONKeys(yarnWorkspaceJSON)
+	var yarnInfo map[string]yarnWorkspaceInfoEntry
+	err = json.Unmarshal([]byte(yarnWorkspaceJSON), &yarnInfo)
 	if err != nil {
-		return nil, errors.Wrap(err, "output of `yarn workspace info` is not JSON")
-	}
-	return keys, nil
-}
-
-func getJSONKeys(jsonString string) (map[string]bool, error) {
-	c := make(map[string]json.RawMessage)
-	if err := json.Unmarshal([]byte(jsonString), &c); err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "unmarshalling yarn workspace info %s", yarnWorkspaceJSON)
 	}
 
-	keys := make(map[string]bool, len(c))
-
-	for key := range c {
-		keys[key] = true
+	packages := make(map[string]bool)
+	for _, entries := range yarnInfo {
+		for _, dep := range entries.WorkspaceDependencies {
+			packages[dep] = true
+		}
 	}
-
-	return keys, nil
+	return packages, nil
 }

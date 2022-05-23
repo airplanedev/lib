@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "react": "18.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "7.18.0"
+  },
+  "optionalDependencies": {
+    "react-table": "7.8.0"
+  }
+}

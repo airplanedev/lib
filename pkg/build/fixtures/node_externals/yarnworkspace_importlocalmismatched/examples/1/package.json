@@ -1,0 +1,10 @@
+{
+  "name": "example1",
+  "version": "0.0.0",
+  "dependencies": {
+    "lib": "1.0.0"
+  },
+  "optionalDependencies": {
+    "react-table": "7.8.0"
+  }
+}
