@@ -14,10 +14,10 @@ import (
 	"github.com/pkg/errors"
 )
 
-var esmModules = []string{
-	"node-fetch",
+var esmModules = map[string]bool{
+	"node-fetch": true,
 	// airplane>=0.2.0 depends on node-fetch
-	"airplane",
+	"airplane": true,
 }
 
 // ExternalPackages reads package.json and returns all dependencies and dev dependencies.
@@ -51,15 +51,13 @@ func ExternalPackages(rootPackageJSON string) ([]string, error) {
 			continue
 		}
 
+		var yarnWorkspacePackages map[string]bool
 		if usesWorkspaces {
 			// If we are in a npm/yarn workspace, we want to bundle all packages in the same
 			// workspaces so they are run through esbuild.
-			yarnWorkspacePackages, err := getYarnWorkspacePackages(pathPackageJSON)
+			yarnWorkspacePackages, err = getYarnWorkspacePackages(pathPackageJSON)
 			if err != nil {
 				return nil, err
-			}
-			for _, p := range yarnWorkspacePackages {
-				esmModules = append(esmModules, p)
 			}
 		}
 
@@ -72,7 +70,9 @@ func ExternalPackages(rootPackageJSON string) ([]string, error) {
 			// need to be bundled by esbuild so that esbuild can convert them to CommonJS.
 			// As long as these modules don't happen to pull in any optional modules, we should be OK.
 			// This is a bandaid until we figure out how to handle ESM without bundling.
-			if !contains(esmModules, dep) {
+			// Also don't mark local yarn workspace packages as external so that they get bundled by esbuild
+			// and converted to CommonJS.
+			if !esmModules[dep] && !yarnWorkspacePackages[dep] {
 				deps = append(deps, dep)
 			}
 		}
@@ -116,16 +116,6 @@ func ListDependencies(pathPackageJSON string) ([]string, error) {
 	return deps, nil
 }
 
-// contains returns true if `list` includes `needle`.
-func contains(list []string, needle string) bool {
-	for _, elem := range list {
-		if elem == needle {
-			return true
-		}
-	}
-	return false
-}
-
 func findNestedPackageJSONs(dir string) ([]string, error) {
 	var pathPackageJSONs []string
 	err := filepath.WalkDir(dir,
@@ -154,7 +144,7 @@ func hasWorkspaces(pathPackageJSON string) (bool, error) {
 	return len(pkg.Workspaces.workspaces) > 0, nil
 }
 
-func getYarnWorkspacePackages(pathPackageJSON string) ([]string, error) {
+func getYarnWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
 	cmd := exec.Command("yarn", "workspaces", "info")
 	cmd.Dir = filepath.Dir(pathPackageJSON)
 	out, err := cmd.CombinedOutput()
@@ -192,18 +182,16 @@ func getYarnWorkspacePackages(pathPackageJSON string) ([]string, error) {
 	return keys, nil
 }
 
-func getJSONKeys(jsonString string) ([]string, error) {
+func getJSONKeys(jsonString string) (map[string]bool, error) {
 	c := make(map[string]json.RawMessage)
 	if err := json.Unmarshal([]byte(jsonString), &c); err != nil {
 		return nil, err
 	}
 
-	keys := make([]string, len(c))
+	keys := make(map[string]bool, len(c))
 
-	i := 0
 	for key := range c {
-		keys[i] = key
-		i++
+		keys[key] = true
 	}
 
 	return keys, nil
