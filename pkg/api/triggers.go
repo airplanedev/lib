@@ -5,10 +5,6 @@ import (
 	"time"
 )
 
-type ListTriggersResponse struct {
-	Triggers []Trigger `json:"triggers"`
-}
-
 type Trigger struct {
 	Name        string            `json:"name"`
 	Description string            `json:"description"`
