@@ -1390,22 +1390,8 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		d.AllowSelfApprovals = &v
 	}
 
-	return d, nil
-}
-
-type NewDefinitionFromTaskAndTriggers_0_3Request struct {
-	Task     api.Task
-	Triggers []api.Trigger
-}
-
-func NewDefinitionFromTaskAndTriggers_0_3(ctx context.Context, client api.IAPIClient, req NewDefinitionFromTaskAndTriggers_0_3Request) (Definition_0_3, error) {
-	d, err := NewDefinitionFromTask_0_3(ctx, client, req.Task)
-	if err != nil {
-		return d, err
-	}
-
 	schedules := make(map[string]ScheduleDefinition_0_3)
-	for _, trigger := range req.Triggers {
+	for _, trigger := range t.Triggers {
 		if trigger.Kind != api.TriggerKindSchedule || trigger.Slug == nil {
 			// Trigger is not a schedule deployed via code
 			continue
@@ -1425,6 +1411,7 @@ func NewDefinitionFromTaskAndTriggers_0_3(ctx context.Context, client api.IAPICl
 	if len(schedules) > 0 {
 		d.Schedules = schedules
 	}
+
 	return d, nil
 }
 
