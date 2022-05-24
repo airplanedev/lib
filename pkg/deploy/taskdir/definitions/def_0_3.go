@@ -1348,6 +1348,10 @@ func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
 }
 
 func (d *Definition_0_3) GetSchedules() map[string]api.Schedule {
+	if len(d.Schedules) == 0 {
+		return nil
+	}
+
 	schedules := make(map[string]api.Schedule)
 	for slug, def := range d.Schedules {
 		schedules[slug] = api.Schedule{
