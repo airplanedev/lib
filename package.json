@@ -5,7 +5,7 @@
     "root": ".."
   },
   "devDependencies": {
-    "@types/node": "17.0.8"
+    "@types/node": "17.0.35"
   },
   "dependencies": {
     "airplane": "0.1.2",
