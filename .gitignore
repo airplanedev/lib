@@ -12,6 +12,15 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
+
+# Snyk
+.dccache
 
 node_modules/
+
+# IntelliJ editors
+.idea/
+
+# VSCode editors
+.vscode/*

@@ -14,8 +14,26 @@ import (
 	"github.com/pkg/errors"
 )
 
+type templateParams struct {
+	Workdir                          string
+	Base                             string
+	HasPackageJSON                   bool
+	UsesWorkspaces                   bool
+	InlineShim                       string
+	InlineShimPackageJSON            string
+	InlineWorkflowBundlerScript      string
+	InlineWorkflowInterceptorsScript string
+	InlineWorkflowShimScript         string
+	IsDurable                        bool
+	NodeVersion                      string
+	ExternalFlags                    string
+	InstallCommand                   string
+	PostInstallCommand               string
+	Args                             string
+}
+
 // node creates a dockerfile for Node (typescript/javascript).
-func node(root string, options KindOptions) (string, error) {
+func node(root string, options KindOptions, buildArgs []string) (string, error) {
 	var err error
 
 	// For backwards compatibility, continue to build old Node tasks
@@ -42,6 +60,21 @@ func node(root string, options KindOptions) (string, error) {
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
 
+	runtime, ok := options["runtime"]
+	var isDurable bool
+
+	if ok {
+		// Depending on how the options were serialized, the runtime can be
+		// either a string or TaskRuntime; handle both.
+		switch v := runtime.(type) {
+		case string:
+			isDurable = v == string(TaskRuntimeDurable)
+		case TaskRuntime:
+			isDurable = v == TaskRuntimeDurable
+		default:
+		}
+	}
+
 	var pkg pkgJSON
 	if hasPackageJSON {
 		// Check to see if the package.json uses yarn/npm workspaces.
@@ -58,18 +91,12 @@ func node(root string, options KindOptions) (string, error) {
 		}
 	}
 
-	cfg := struct {
-		Workdir               string
-		Base                  string
-		HasPackageJSON        bool
-		UsesWorkspaces        bool
-		InlineShim            string
-		InlineShimPackageJSON string
-		NodeVersion           string
-		ExternalFlags         string
-		InstallCommand        string
-		PostInstallCommand    string
-	}{
+	for i, a := range buildArgs {
+		buildArgs[i] = fmt.Sprintf("ARG %s", a)
+	}
+	argsCommand := strings.Join(buildArgs, "\n")
+
+	cfg := templateParams{
 		Workdir:        workdir,
 		HasPackageJSON: hasPackageJSON,
 		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
@@ -77,6 +104,8 @@ func node(root string, options KindOptions) (string, error) {
 		// https://esbuild.github.io/api/#target
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
+		Args:               argsCommand,
+		IsDurable:          isDurable,
 	}
 
 	// Workaround to get esbuild to not bundle dependencies.
@@ -90,6 +119,13 @@ func node(root string, options KindOptions) (string, error) {
 		for _, dep := range deps {
 			flags = append(flags, fmt.Sprintf("--external:%s", dep))
 		}
+		if isDurable {
+			// Even if these are imported, we need to mark the root packages
+			// as external for esbuild to work properly. Esbuild doesn't
+			// care about repeats, so no need to dedupe.
+			flags = append(flags, "--external:@temporalio", "--external:@swc")
+		}
+
 		cfg.ExternalFlags = strings.Join(flags, " ")
 	}
 
@@ -102,17 +138,29 @@ func node(root string, options KindOptions) (string, error) {
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON()
+	pjson, err := GenShimPackageJSON(pathPackageJSON, isDurable)
 	if err != nil {
 		return "", err
 	}
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
-	shim, err := NodeShim(entrypoint)
-	if err != nil {
-		return "", err
+	if isDurable {
+		cfg.InlineShim = inlineString(workerAndActivityShim)
+		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
+		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
+
+		workflowShim, err := TemplateEntrypoint(workflowShimScript, entrypoint)
+		if err != nil {
+			return "", err
+		}
+		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
+	} else {
+		shim, err := TemplatedNodeShim(entrypoint)
+		if err != nil {
+			return "", err
+		}
+		cfg.InlineShim = inlineString(shim)
 	}
-	cfg.InlineShim = inlineString(shim)
 
 	installCommand := "npm install --production"
 	if pkg.Settings.InstallCommand != "" {
@@ -152,8 +200,8 @@ func node(root string, options KindOptions) (string, error) {
 		# postinstall scripts. We run as root with --unsafe-perm instead, skipping
 		# that lookup. Possibly could fix by building for linux/arm on m1 instead
 		# of always building for linux/amd64.
-		RUN npm install -g typescript@4.2 && \
-			npm install -g esbuild@0.12 --unsafe-perm
+		RUN npm install -g esbuild@0.12 --unsafe-perm
+		
 		RUN mkdir -p /airplane/.airplane && \
 			cd /airplane/.airplane && \
 			{{.InlineShimPackageJSON}} > package.json && \
@@ -169,6 +217,8 @@ func node(root string, options KindOptions) (string, error) {
 		COPY . /airplane
 		{{end}}
 
+		{{.Args}}
+
 		RUN {{.InstallCommand}}
 
 		{{if not .UsesWorkspaces}}
@@ -178,28 +228,54 @@ func node(root string, options KindOptions) (string, error) {
 		{{if .PostInstallCommand}}
 		RUN {{.PostInstallCommand}}
 		{{end}}
-		
+
+		{{if .IsDurable}}
+		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
+		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
+		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js
+		RUN node /airplane/.airplane/workflow-bundler.js
+		{{end}}
+
 		RUN {{.InlineShim}} > /airplane/.airplane/shim.js && \
 			esbuild /airplane/.airplane/shim.js \
 				--bundle \
-				--external:airplane \
 				--platform=node {{.ExternalFlags}} \
 				--target=node{{.NodeVersion}} \
 				--outfile=/airplane/.airplane/dist/shim.js
+
 		ENTRYPOINT ["node", "/airplane/.airplane/dist/shim.js"]
 	`), cfg)
 }
 
-func GenShimPackageJSON() ([]byte, error) {
-	b, err := json.Marshal(struct {
+func GenShimPackageJSON(pathPackageJSON string, isDurable bool) ([]byte, error) {
+	deps, err := ListDependencies(pathPackageJSON)
+	if err != nil {
+		return nil, err
+	}
+
+	pjson := struct {
 		Dependencies map[string]string `json:"dependencies"`
+		Type         string            `json:"type,omitempty"`
 	}{
 		Dependencies: map[string]string{
-			"airplane":    "~0.1.2",
-			"@types/node": "^16",
+			"airplane": "~0.1.2",
 		},
-	})
-	return b, errors.Wrap(err, "generating shim dependencies")
+	}
+
+	if isDurable {
+		// TODO: Make this configurable
+		pjson.Dependencies["temporalio"] = "0.23.0"
+	}
+
+	// Allow users to override any shim dependencies. Given shim code is bundled
+	// with user code, we cannot use separate versions of these dependencies so
+	// default to whichever version the user requests.
+	for _, dep := range deps {
+		delete(pjson.Dependencies, dep)
+	}
+
+	b, err := json.Marshal(pjson)
+	return b, errors.Wrap(err, "marshalling shim dependencies")
 }
 
 func GetNodeVersion(opts KindOptions) string {
@@ -218,7 +294,23 @@ func GetNodeVersion(opts KindOptions) string {
 //go:embed node-shim.js
 var nodeShim string
 
-func NodeShim(entrypoint string) (string, error) {
+//go:embed durable/worker-and-activity-shim.js
+var workerAndActivityShim string
+
+//go:embed durable/workflow-bundler.js
+var workflowBundlerScript string
+
+//go:embed durable/workflow-interceptors.js
+var workflowInterceptorsScript string
+
+//go:embed durable/workflow-shim.js
+var workflowShimScript string
+
+func TemplatedNodeShim(entrypoint string) (string, error) {
+	return TemplateEntrypoint(nodeShim, entrypoint)
+}
+
+func TemplateEntrypoint(script string, entrypoint string) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept
 	// import paths with `.ts` endings. `.js` endings are fine.
 	entrypoint = strings.TrimSuffix(entrypoint, ".ts")
@@ -227,7 +319,7 @@ func NodeShim(entrypoint string) (string, error) {
 	// Escape for embedding into a string
 	entrypoint = backslashEscape(entrypoint, `"`)
 
-	shim, err := applyTemplate(nodeShim, struct {
+	shim, err := applyTemplate(script, struct {
 		Entrypoint string
 	}{
 		Entrypoint: entrypoint,

@@ -71,10 +71,12 @@ acorn@^8.4.1:
   resolved "https://registry.yarnpkg.com/acorn/-/acorn-8.7.0.tgz#90951fde0f8f09df93549481e5fc141445b791cf"
   integrity sha512-V/LGr1APy+PXIwKebEWrkZPwoeoF+w1jiOBUmuxuiUIaOHtob8Qc9BTrYo7VuI5fR8tqsy+buA2WFooR5olqvQ==
 
-airplane@^0.0.5:
-  version "0.0.5"
-  resolved "https://registry.yarnpkg.com/airplane/-/airplane-0.0.5.tgz#01888b9ee80869dd66e12933e4a783c2c141a9fd"
-  integrity sha512-HPPAoB+IjdzQQSuW66Mq5BgqKZevrgJJpiUj8TXtc8MBBlg1rZTaNgYr5h9fneSZ4wr+yS8QC8T4sTErLsT/hQ==
+airplane@0.1.2:
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/airplane/-/airplane-0.1.2.tgz#56a16c70e9550e52f658186bce89f2ffed93d5b6"
+  integrity sha512-X37WLeGZSZoMP8Zmy3pVa87vQuShEdKoUyLXVcwTy8YBBv+udYFL0yqHbkuN1q0uXIJcRRd8Sf4qmFPHbrTLBA==
+  dependencies:
+    uuid "^8.3.0"
 
 arg@^4.1.0:
   version "4.1.3"
@@ -130,6 +132,11 @@ typescript@^4.5.4:
   version "4.5.4"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.4.tgz#a17d3a0263bf5c8723b9c52f43c5084edf13c2e8"
   integrity sha512-VgYs2A2QIRuGphtzFV7aQJduJ2gyfTljngLzjpfW9FoYZF6xuw1W0vW9ghCKLfcWrCFxK81CSGRAvS1pn4fIUg==
+
+uuid@^8.3.0:
+  version "8.3.2"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
+  integrity sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==
 
 yn@3.1.1:
   version "3.1.1"

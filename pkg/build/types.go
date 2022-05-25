@@ -17,9 +17,17 @@ const (
 	TaskKindNode       TaskKind = "node"
 	TaskKindPython     TaskKind = "python"
 	TaskKindShell      TaskKind = "shell"
+	TaskKindApp        TaskKind = "app"
 
 	TaskKindSQL  TaskKind = "sql"
 	TaskKindREST TaskKind = "rest"
+)
+
+type TaskRuntime string
+
+const (
+	TaskRuntimeStandard TaskRuntime = ""
+	TaskRuntimeDurable  TaskRuntime = "durable"
 )
 
 // Value represents a value.

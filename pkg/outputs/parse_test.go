@@ -14,6 +14,7 @@ func TestParseOutput(tt *testing.T) {
 		log           string
 		expectedName  string
 		expectedValue interface{}
+		opts          ParseOptions
 	}{
 		{
 			name:          "default no colon",
@@ -132,7 +133,7 @@ func TestParseOutput(tt *testing.T) {
 	} {
 		tt.Run(test.name, func(t *testing.T) {
 			m := make(map[string]*strings.Builder)
-			output, err := Parse(m, test.log)
+			output, err := Parse(m, test.log, test.opts)
 			require.NoError(t, err)
 			require.Equal(t, test.expectedName, output.Name)
 			require.Equal(t, "", output.Command)
@@ -148,6 +149,7 @@ func TestParseOutputV2(tt *testing.T) {
 		log              string
 		expectedJsonPath string
 		expectedValue    interface{}
+		opts             ParseOptions
 	}{
 		{
 			name:             "default no colon",
@@ -194,11 +196,23 @@ func TestParseOutputV2(tt *testing.T) {
 				SetAndReturn("a", true).
 				SetAndReturn("\"] ", float64(3)),
 		},
+		{
+			name:             "json test with output limit",
+			log:              `${COMMAND_PLACEHOLDER}:["json[\""] {"b":[],"a":true,"\"] ":3}`,
+			expectedJsonPath: `["json[\""]`,
+			expectedValue: ojson.NewObject().
+				SetAndReturn("b", []interface{}{}).
+				SetAndReturn("a", true).
+				SetAndReturn("\"] ", float64(3)),
+			opts: ParseOptions{
+				OutputLineMaxBytes: 100,
+			},
+		},
 	} {
 		tt.Run(test.name+" set", func(t *testing.T) {
 			logText := strings.Replace(test.log, "${COMMAND_PLACEHOLDER}", "airplane_output_set", 1)
 			m := make(map[string]*strings.Builder)
-			output, err := Parse(m, logText)
+			output, err := Parse(m, logText, test.opts)
 			require.NoError(t, err)
 			require.Equal(t, test.expectedJsonPath, output.JsonPath)
 			require.Equal(t, "set", output.Command)
@@ -209,7 +223,7 @@ func TestParseOutputV2(tt *testing.T) {
 		tt.Run(test.name+" append", func(t *testing.T) {
 			logText := strings.Replace(test.log, "${COMMAND_PLACEHOLDER}", "airplane_output_append", 1)
 			m := make(map[string]*strings.Builder)
-			output, err := Parse(m, logText)
+			output, err := Parse(m, logText, test.opts)
 			require.NoError(t, err)
 			require.Equal(t, test.expectedJsonPath, output.JsonPath)
 			require.Equal(t, "append", output.Command)
@@ -224,6 +238,7 @@ func TestParseOutputChunks(tt *testing.T) {
 		name    string
 		logs    []string
 		outputs []ParsedLine
+		opts    ParseOptions
 	}{
 		{
 			name: "simple chunk",
@@ -261,13 +276,16 @@ func TestParseOutputChunks(tt *testing.T) {
 					Value:    ojson.Value{V: []interface{}{"ghjkl"}},
 				},
 			},
+			opts: ParseOptions{
+				OutputLineMaxBytes: 100,
+			},
 		},
 	} {
 		tt.Run(test.name, func(t *testing.T) {
 			m := make(map[string]*strings.Builder)
 			var outputs []ParsedLine
 			for _, logText := range test.logs {
-				output, err := Parse(m, logText)
+				output, err := Parse(m, logText, test.opts)
 				require.NoError(t, err)
 				if output != nil {
 					outputs = append(outputs, *output)
@@ -279,6 +297,50 @@ func TestParseOutputChunks(tt *testing.T) {
 				require.Equal(t, test.outputs[i].Command, outputs[i].Command)
 				require.Equal(t, test.outputs[i].JsonPath, outputs[i].JsonPath)
 				require.Equal(t, test.outputs[i].Value, outputs[i].Value)
+			}
+		})
+	}
+}
+
+func TestLongOutput(tt *testing.T) {
+	for _, test := range []struct {
+		name string
+		logs []string
+	}{
+		{
+			name: "output chunks",
+			logs: []string{
+				`airplane_chunk:asdf airplane_output:asdf `,
+				`airplane_chunk:asdf hello world`,
+				`airplane_chunk_end:asdf`,
+			},
+		},
+		{
+			name: "output set",
+			logs: []string{
+				`airplane_output_set "abcdefghijklmnopqrstuvwxyz"`,
+			},
+		},
+		{
+			name: "output append",
+			logs: []string{
+				`airplane_output_append "abcdefghijklmnopqrstuvwxyz"`,
+			},
+		},
+	} {
+		tt.Run(test.name, func(t *testing.T) {
+			require := require.New(t)
+			m := make(map[string]*strings.Builder)
+			for i, logText := range test.logs {
+				output, err := Parse(m, logText, ParseOptions{
+					OutputLineMaxBytes: 10,
+				})
+				require.Nil(output)
+				if i == len(test.logs)-1 {
+					require.Equal(err, ErrOutputLineTooLong)
+				} else {
+					require.NoError(err)
+				}
 			}
 		})
 	}

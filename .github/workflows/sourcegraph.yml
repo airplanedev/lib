@@ -7,7 +7,7 @@ jobs:
     # this line will prevent forks of this repo from attempting to upload lsif indexes
     if: github.repository == 'airplanedev/lib'
     runs-on: ubuntu-latest
-    container: sourcegraph/lsif-go:v1.7.5
+    container: sourcegraph/lsif-go:v1.7.7
     steps:
       - uses: actions/checkout@v3
       - name: Generate LSIF data

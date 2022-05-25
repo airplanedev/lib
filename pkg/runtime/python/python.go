@@ -15,7 +15,6 @@ import (
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/airplanedev/lib/pkg/build"
-
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/utils/logger"
@@ -191,4 +190,9 @@ func (r Runtime) FormatComment(s string) string {
 	}
 
 	return strings.Join(lines, "\n")
+}
+
+// SupportsLocalExecution implementation.
+func (r Runtime) SupportsLocalExecution() bool {
+	return true
 }

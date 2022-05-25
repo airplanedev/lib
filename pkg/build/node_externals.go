@@ -8,6 +8,12 @@ import (
 	"github.com/pkg/errors"
 )
 
+var esmModules = []string{
+	"node-fetch",
+	// airplane>=0.2.0 depends on node-fetch
+	"airplane",
+}
+
 // ExternalPackages reads package.json and returns all dependencies and dev dependencies.
 // This is used as a bit of a workaround for esbuild - we're using esbuild to transform code but
 // don't actually want it to bundle. We hit issues when it tries to bundle optional packages
@@ -18,9 +24,31 @@ import (
 func ExternalPackages(pathPackageJSON string) ([]string, error) {
 	var deps []string
 
+	allDeps, err := ListDependencies(pathPackageJSON)
+	if err != nil {
+		return nil, err
+	}
+	for _, dep := range allDeps {
+		// Mark all dependencies as external, except for known ESM-only deps. These deps
+		// need to be bundled by esbuild so that esbuild can convert them to CommonJS.
+		// As long as these modules don't happen to pull in any optional modules, we should be OK.
+		// This is a bandaid until we figure out how to handle ESM without bundling.
+		if !contains(esmModules, dep) {
+			deps = append(deps, dep)
+		}
+	}
+
+	return deps, nil
+}
+
+// ListDependencies lists all dependencies (including dev and optional) in a `package.json` file.
+func ListDependencies(pathPackageJSON string) ([]string, error) {
+	var deps []string
+
 	f, err := os.Open(pathPackageJSON)
 	if err != nil {
-		return nil, errors.Wrap(err, "opening package.json")
+		// There is no package.json (or we can't open it). Treat as having no dependencies.
+		return []string{}, nil
 	}
 	defer f.Close()
 	b, err := ioutil.ReadAll(f)
@@ -37,29 +65,23 @@ func ExternalPackages(pathPackageJSON string) ([]string, error) {
 	}
 
 	for k := range d.Dependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	for k := range d.DevDependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	for k := range d.OptionalDependencies {
-		deps = appendDep(deps, k)
+		deps = append(deps, k)
 	}
 	return deps, nil
 }
 
-var esmModules = []string{
-	"node-fetch",
-}
-
-func appendDep(deps []string, dep string) []string {
-	// For known ESM modules, do not mark as external and use esbuild to bundle.
-	// As long as these modules don't happen to pull in any optional modules, we should be OK.
-	// This is a bandaid until we figure out how to handle ESM without bundling.
-	for _, m := range esmModules {
-		if m == dep {
-			return deps
+// contains returns true if `list` includes `needle`.
+func contains(list []string, needle string) bool {
+	for _, elem := range list {
+		if elem == needle {
+			return true
 		}
 	}
-	return append(deps, dep)
+	return false
 }

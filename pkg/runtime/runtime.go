@@ -13,6 +13,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sort"
 
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/utils/logger"
@@ -78,6 +79,10 @@ type Interface interface {
 	// If running the script locally is not supported the method returns
 	// an `ErrNotImplemented`.
 	PrepareRun(ctx context.Context, logger logger.Logger, opts PrepareRunOptions) (rexprs []string, closer io.Closer, err error)
+
+	// SupportsLocalExecution returns true if local execution is supported.
+	// This is expected to match whether PrepareRun returns `ErrNotImplemented`.
+	SupportsLocalExecution() bool
 }
 
 type PrepareRunOptions struct {
@@ -133,14 +138,17 @@ func Lookup(path string, kind build.TaskKind) (Interface, error) {
 	return possible[0], nil
 }
 
-// SuggestExt returns the default extension for a given TaskKind, if any.
-func SuggestExt(kind build.TaskKind) string {
+// SuggestExts returns a list of extensions for a given TaskKind. May be empty.
+func SuggestExts(kind build.TaskKind) []string {
+	exts := []string{}
 	for ext, runtime := range runtimes {
 		if runtime.Kind() == kind {
-			return ext
+			exts = append(exts, ext)
 		}
 	}
-	return ""
+	// Sort, so the return value is deterministic.
+	sort.Strings(exts)
+	return exts
 }
 
 func SuggestKind(ext string) (build.TaskKind, error) {

@@ -15,7 +15,6 @@ import (
 	"time"
 
 	"github.com/airplanedev/lib/pkg/build"
-
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/utils/logger"
@@ -165,7 +164,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "entrypoint is not within the task root")
 	}
-	shim, err := build.NodeShim(entrypoint)
+	shim, err := build.TemplatedNodeShim(entrypoint)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -175,7 +174,8 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	}
 
 	// Install the dependencies we need for our shim file:
-	pjson, err := build.GenShimPackageJSON()
+	pathPackageJSON := filepath.Join(root, "package.json")
+	pjson, err := build.GenShimPackageJSON(pathPackageJSON, false)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -238,7 +238,16 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 		return nil, nil, errors.Wrap(err, "serializing param values")
 	}
 
+	if len(res.OutputFiles) == 0 {
+		return nil, nil, errors.New("esbuild failed: see logs")
+	}
+
 	return []string{"node", res.OutputFiles[0].Path, string(pv)}, closer, nil
+}
+
+// SupportsLocalExecution implementation.
+func (r Runtime) SupportsLocalExecution() bool {
+	return true
 }
 
 // checkNodeVersion compares the major version of the currently installed

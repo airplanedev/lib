@@ -26,6 +26,14 @@ func TestNodeBuilder(t *testing.T) {
 			},
 		},
 		{
+			Root: "typescript/airplaneoverride",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
+		{
 			Root: "typescript/npm",
 			Kind: TaskKindNode,
 			Options: KindOptions{
@@ -148,6 +156,9 @@ func TestNodeBuilder(t *testing.T) {
 				"shim":       "true",
 				"entrypoint": "main.ts",
 			},
+			BuildArgs: map[string]string{
+				"IS_PRODUCTION": "false",
+			},
 		},
 		{
 			Root: "typescript/custompostinstall",
@@ -164,6 +175,25 @@ func TestNodeBuilder(t *testing.T) {
 				"shim":       "true",
 				"entrypoint": "main.ts",
 			},
+		},
+	}
+
+	RunTests(t, ctx, tests)
+}
+
+func TestNodeDurableBuilder(t *testing.T) {
+	ctx := context.Background()
+
+	tests := []Test{
+		{
+			Root: "javascript/durable",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "task.js",
+				"runtime":    TaskRuntimeDurable,
+			},
+			SkipRun: true,
 		},
 	}
 

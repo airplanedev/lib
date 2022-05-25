@@ -13,6 +13,7 @@ import (
 	_ "github.com/airplanedev/lib/pkg/runtime/sql"
 	_ "github.com/airplanedev/lib/pkg/runtime/typescript"
 	"github.com/airplanedev/lib/pkg/utils/logger"
+	"github.com/airplanedev/lib/pkg/utils/pathcase"
 	"github.com/pkg/errors"
 )
 
@@ -45,11 +46,15 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 			return nil, errors.Wrap(err, "unable to get task")
 		}
 
-		sd.Logger.Warning(`Task with slug %s does not exist, skipping deploy.`, slug)
+		sd.Logger.Warning(`Task with slug %s does not exist, skipping deployment.`, slug)
+		return nil, nil
+	}
+	if task.IsArchived {
+		sd.Logger.Warning(`Task with slug %s is archived, skipping deployment.`, slug)
 		return nil, nil
 	}
 
-	def, err := definitions.NewDefinitionFromTask(task)
+	def, err := definitions.NewDefinitionFromTask(ctx, sd.Client, task)
 	if err != nil {
 		return nil, err
 	}
@@ -68,25 +73,35 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 	if err != nil {
 		return nil, err
 	}
-	if err := def.SetEntrypoint(taskroot, absFile); err != nil {
+
+	// Entrypoint needs to be relative to the taskroot.
+	absEntrypoint, err := pathcase.ActualFilename(absFile)
+	if err != nil {
 		return nil, err
 	}
+	ep, err := filepath.Rel(taskroot, absEntrypoint)
+	if err != nil {
+		return nil, err
+	}
+	def.SetBuildConfig("entrypoint", ep)
 
 	wd, err := r.Workdir(absFile)
 	if err != nil {
 		return nil, err
 	}
-	def.SetWorkdir(taskroot, wd)
+	if err := def.SetWorkdir(taskroot, wd); err != nil {
+		return nil, err
+	}
 
 	return &TaskConfig{
 		TaskID:         task.ID,
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
-		Def:            &def,
-		Source:         sd.TaskConfigSource(),
+		Def:            def,
+		Source:         sd.ConfigSource(),
 	}, nil
 }
 
-func (sd *ScriptDiscoverer) TaskConfigSource() TaskConfigSource {
-	return TaskConfigSourceScript
+func (sd *ScriptDiscoverer) ConfigSource() ConfigSource {
+	return ConfigSourceScript
 }

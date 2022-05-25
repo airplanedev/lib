@@ -5,6 +5,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
+	"github.com/pkg/errors"
 )
 
 type DefinitionInterface interface {
@@ -17,10 +18,38 @@ type DefinitionInterface interface {
 	// excluded from GetBuildConfig; used to mask values that exist in KindOptions.
 	SetBuildConfig(key string, value interface{})
 
+	// SetAbsoluteEntrypoint sets the absolute entrypoint for this definition. Does not change the
+	// result of calling Entrypoint(). Returns ErrNoEntrypoint if the task kind definition requires
+	// no entrypoint.
+	SetAbsoluteEntrypoint(string) error
+
+	// GetAbsoluteEntrypoint gets the absolute entrypoint for this definition. Returns
+	// ErrNoEntrypoint if the task kind definition requires no entrypoint. If SetAbsoluteEntrypoint
+	// has not been set, returns ErrNoAbsoluteEntrypoint.
+	GetAbsoluteEntrypoint() (string, error)
+
 	GetKindAndOptions() (build.TaskKind, build.KindOptions, error)
 	GetEnv() (api.TaskEnv, error)
+	GetConfigAttachments() ([]api.ConfigAttachment, error)
 	GetSlug() string
 	GetName() string
 	UpgradeJST() error
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
+	SetWorkdir(taskroot, workdir string) error
+
+	GetSchedules() map[string]api.Schedule
+
+	// Entrypoint returns ErrNoEntrypoint if the task kind definition requires no entrypoint. May be
+	// empty. May be absolute or relative; if relative, it is relative to the defn file.
+	Entrypoint() (string, error)
+
+	// GetDefnFilePath returns the absolute path to the file that configured this definition, if one exists.
+	GetDefnFilePath() string
+	SetDefnFilePath(filePath string)
+
+	// Marshal returns a serialized version of the definition in the given format.
+	Marshal(format DefFormat) ([]byte, error)
 }
+
+var ErrNoEntrypoint = errors.New("No entrypoint")
+var ErrNoAbsoluteEntrypoint = errors.New("No absolute entrypoint")

@@ -3,7 +3,6 @@ package build
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"path/filepath"
 	"strings"
@@ -25,6 +24,8 @@ type Test struct {
 	Kind        TaskKind
 	Options     KindOptions
 	ParamValues Values
+	BuildArgs   map[string]string
+	SkipRun     bool
 	// SearchString is a string to look for in the example's output
 	// to validate that the task completed successfully. If not set,
 	// defaults to a random value which is passed into the example
@@ -52,9 +53,10 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 			require := require.New(t)
 
 			b, err := New(LocalConfig{
-				Root:    examples.Path(t, test.Root),
-				Builder: string(test.Kind),
-				Options: test.Options,
+				Root:      examples.Path(t, test.Root),
+				Builder:   string(test.Kind),
+				Options:   test.Options,
+				BuildArgs: test.BuildArgs,
 			})
 			require.NoError(err)
 			t.Cleanup(func() {
@@ -77,9 +79,11 @@ func RunTests(tt *testing.T, ctx context.Context, tests []Test) {
 				test.ParamValues["id"] = test.SearchString
 			}
 
-			// Run the produced docker image:
-			out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
-			require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			if !test.SkipRun {
+				// Run the produced docker image:
+				out := runTask(t, ctx, b.client, resp.ImageURL, test.ParamValues)
+				require.True(strings.Contains(string(out), test.SearchString), "unable to find %q in output:\n%s", test.SearchString, string(out))
+			}
 		})
 	}
 }
@@ -122,7 +126,6 @@ func runTask(t *testing.T, ctx context.Context, dclient *client.Client, image st
 		AppendNewline: true,
 	}))
 	require.NoError(err)
-	fmt.Print(string(logs))
 
 	select {
 	case result := <-resultC:
