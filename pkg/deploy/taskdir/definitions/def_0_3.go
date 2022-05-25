@@ -1195,33 +1195,35 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			return errors.Errorf("unknown parameter type: %s", pd.Type)
 		}
 
-		switch reflect.ValueOf(pd.Default).Kind() {
-		case reflect.Map:
-			m, ok := pd.Default.(map[string]interface{})
-			if !ok {
-				return errors.Errorf("unhandled default: %v", pd.Default)
-			}
-			if configName, ok := m["config"]; !ok {
-				return errors.Errorf("unhandled default: %v", pd.Default)
-			} else {
-				param.Default = map[string]interface{}{
-					"__airplaneType": "configvar",
-					"name":           configName,
+		if pd.Default != nil {
+			switch reflect.ValueOf(pd.Default).Kind() {
+			case reflect.Map:
+				m, ok := pd.Default.(map[string]interface{})
+				if !ok {
+					return errors.Errorf("unhandled default: %v", pd.Default)
 				}
-			}
-		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-			reflect.Float32, reflect.Float64:
-			if pd.Type == "configvar" {
-				param.Default = map[string]interface{}{
-					"__airplaneType": "configvar",
-					"name":           pd.Default,
+				if configName, ok := m["config"]; !ok {
+					return errors.Errorf("unhandled default: %v", pd.Default)
+				} else {
+					param.Default = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           configName,
+					}
 				}
-			} else {
-				param.Default = pd.Default
+			case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+				reflect.Float32, reflect.Float64:
+				if pd.Type == "configvar" {
+					param.Default = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           pd.Default,
+					}
+				} else {
+					param.Default = pd.Default
+				}
+			default:
+				return errors.Errorf("unsupported type for default value: %T", pd.Default)
 			}
-		default:
-			return errors.Errorf("unhandled default value: %T", pd.Default)
 		}
 
 		if pd.Required != nil && !*pd.Required {
@@ -1482,19 +1484,21 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			return errors.Errorf("unknown parameter type: %s", param.Type)
 		}
 
-		switch k := reflect.ValueOf(param.Default).Kind(); k {
-		case reflect.Map:
-			configName, err := extractConfigVarValue(param.Default)
-			if err != nil {
-				return errors.Wrap(err, "unhandled default")
+		if param.Default != nil {
+			switch k := reflect.ValueOf(param.Default).Kind(); k {
+			case reflect.Map:
+				configName, err := extractConfigVarValue(param.Default)
+				if err != nil {
+					return errors.Wrap(err, "unhandled default")
+				}
+				p.Default = configName
+			case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+				reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+				reflect.Float32, reflect.Float64:
+				p.Default = param.Default
+			default:
+				return errors.Errorf("unsupported type for default value: %T", param.Default)
 			}
-			p.Default = configName
-		case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-			reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-			reflect.Float32, reflect.Float64:
-			p.Default = param.Default
-		default:
-			return errors.Errorf("unhandled default value: %T", param.Default)
 		}
 
 		if param.Constraints.Optional {
