@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestScanForErrorsNodeESM(tt *testing.T) {
+func TestScanForErrorNodeESM(tt *testing.T) {
 	for _, test := range []struct {
 		name   string
 		log    string
@@ -50,7 +50,7 @@ func TestScanForErrorsNodeESM(tt *testing.T) {
 		},
 	} {
 		tt.Run(test.name, func(t *testing.T) {
-			module, ok := hasNodeESMError(test.log)
+			module, ok := ScanForErrorNodeESM(test.log)
 			require.Equal(t, test.ok, ok)
 			if test.ok {
 				require.Equal(t, test.module, module)
