@@ -45,6 +45,7 @@ type Task struct {
 	Timeout                    int                `json:"timeout" yaml:"timeout"`
 	IsArchived                 bool               `json:"isArchived" yaml:"isArchived"`
 	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
+	Triggers                   []Trigger          `json:"triggers" yaml:"-"`
 }
 
 type GetTaskRequest struct {

@@ -3,6 +3,7 @@ package definitions
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/api/mock"
@@ -293,6 +294,15 @@ func TestDefinitionUnmarshal_0_3(t *testing.T) {
 }
 
 func TestTaskToDefinition_0_3(t *testing.T) {
+	exampleCron := api.CronExpr{
+		Minute:     "0",
+		Hour:       "0",
+		DayOfMonth: "1",
+		Month:      "*",
+		DayOfWeek:  "*",
+	}
+	exampleTime := time.Date(1996, time.May, 3, 0, 0, 0, 0, time.UTC)
+
 	for _, test := range []struct {
 		name       string
 		task       api.Task
@@ -770,6 +780,111 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Body:     "",
 					FormData: map[string]interface{}{},
 					Configs:  []string{"CONFIG_NAME_1", "CONFIG_NAME_2"},
+				},
+			},
+		},
+		{
+			name: "python task",
+			task: api.Task{
+				Name:        "Python Task",
+				Slug:        "python_task",
+				Description: "A task for testing",
+				Arguments:   []string{"{{JSON.stringify(params)}}"},
+				Kind:        build.TaskKindPython,
+				KindOptions: build.KindOptions{
+					"entrypoint": "main.py",
+				},
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
+				Triggers: []api.Trigger{
+					{
+						Name:        "disabled trigger",
+						Description: "disabled trigger",
+						Slug:        pointers.String("disabled_trigger"),
+						Kind:        api.TriggerKindSchedule,
+						KindConfig: api.TriggerKindConfig{
+							Schedule: &api.TriggerKindConfigSchedule{
+								CronExpr: exampleCron,
+							},
+						},
+						DisabledAt: &exampleTime,
+					},
+					{
+						Name:        "archived trigger",
+						Description: "archived trigger",
+						Slug:        pointers.String("archived_trigger"),
+						Kind:        api.TriggerKindSchedule,
+						KindConfig: api.TriggerKindConfig{
+							Schedule: &api.TriggerKindConfigSchedule{
+								CronExpr: exampleCron,
+							},
+						},
+						ArchivedAt: &exampleTime,
+					},
+					{
+						Name:        "form trigger",
+						Description: "form trigger",
+						Kind:        api.TriggerKindForm,
+						KindConfig: api.TriggerKindConfig{
+							Form: &api.TriggerKindConfigForm{},
+						},
+					},
+					{
+						Name:        "no slug",
+						Description: "no slug",
+						Kind:        api.TriggerKindSchedule,
+						KindConfig: api.TriggerKindConfig{
+							Schedule: &api.TriggerKindConfigSchedule{
+								CronExpr: exampleCron,
+							},
+						},
+					},
+					{
+						Name:        "good schedule",
+						Description: "good schedule",
+						Slug:        pointers.String("good_schedule"),
+						Kind:        api.TriggerKindSchedule,
+						KindConfig: api.TriggerKindConfig{
+							Schedule: &api.TriggerKindConfigSchedule{
+								ParamValues: map[string]interface{}{
+									"example_param": "hello",
+								},
+								CronExpr: exampleCron,
+							},
+						},
+					},
+				},
+			},
+			definition: Definition_0_3{
+				Name:        "Python Task",
+				Slug:        "python_task",
+				Description: "A task for testing",
+				Python: &PythonDefinition_0_3{
+					Entrypoint: "main.py",
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
+				},
+				Schedules: map[string]ScheduleDefinition_0_3{
+					"good_schedule": {
+						Name:        "good schedule",
+						Description: "good schedule",
+						CronExpr:    exampleCron.String(),
+						ParamValues: map[string]interface{}{
+							"example_param": "hello",
+						},
+					},
 				},
 			},
 		},

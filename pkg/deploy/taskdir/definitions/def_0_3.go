@@ -1381,6 +1381,10 @@ func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
 }
 
 func (d *Definition_0_3) GetSchedules() map[string]api.Schedule {
+	if len(d.Schedules) == 0 {
+		return nil
+	}
+
 	schedules := make(map[string]api.Schedule)
 	for slug, def := range d.Schedules {
 		schedules[slug] = api.Schedule{
@@ -1421,6 +1425,28 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	if t.ExecuteRules.DisallowSelfApprove {
 		v := false
 		d.AllowSelfApprovals = &v
+	}
+
+	schedules := make(map[string]ScheduleDefinition_0_3)
+	for _, trigger := range t.Triggers {
+		if trigger.Kind != api.TriggerKindSchedule || trigger.Slug == nil {
+			// Trigger is not a schedule deployed via code
+			continue
+		}
+		if trigger.ArchivedAt != nil || trigger.DisabledAt != nil {
+			// Trigger is archived or disabled, so don't add to task defn file
+			continue
+		}
+
+		schedules[*trigger.Slug] = ScheduleDefinition_0_3{
+			Name:        trigger.Name,
+			Description: trigger.Description,
+			CronExpr:    trigger.KindConfig.Schedule.CronExpr.String(),
+			ParamValues: trigger.KindConfig.Schedule.ParamValues,
+		}
+	}
+	if len(schedules) > 0 {
+		d.Schedules = schedules
 	}
 
 	return d, nil
