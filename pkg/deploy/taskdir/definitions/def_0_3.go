@@ -1263,18 +1263,6 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 }
 
 func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	resourcesByName := map[string]api.Resource{}
-	if d.SQL != nil || d.REST != nil {
-		// Remap resources from ref -> name to ref -> id.
-		resp, err := client.ListResources(ctx)
-		if err != nil {
-			return errors.Wrap(err, "fetching resources")
-		}
-		for _, resource := range resp.Resources {
-			resourcesByName[resource.Name] = resource
-		}
-	}
-
 	kind, options, err := d.GetKindAndOptions()
 	if err != nil {
 		return err
