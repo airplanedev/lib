@@ -37,11 +37,11 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Constraints        map[string]string `json:"constraints,omitempty"`
-	RequireRequests    bool              `json:"requireRequests,omitempty"`
-	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
-	Timeout            int               `json:"timeout,omitempty"`
-	Runtime            build.TaskRuntime `json:"runtime,omitempty"`
+	Constraints        map[string]string            `json:"constraints,omitempty"`
+	RequireRequests    bool                         `json:"requireRequests,omitempty"`
+	AllowSelfApprovals DefaultTrueDefinition_0_3    `json:"allowSelfApprovals,omitempty"`
+	Timeout            int                          `json:"timeout,omitempty"`
+	Runtime            build.TaskRuntime            `json:"runtime,omitempty"`
 
 	Schedules map[string]ScheduleDefinition_0_3 `json:"schedules,omitempty"`
 
@@ -795,14 +795,14 @@ func (d *RESTDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
 }
 
 type ParameterDefinition_0_3 struct {
-	Name        string                 `json:"name"`
-	Slug        string                 `json:"slug"`
-	Type        string                 `json:"type"`
-	Description string                 `json:"description,omitempty"`
-	Default     interface{}            `json:"default,omitempty"`
-	Required    *bool                  `json:"required,omitempty"`
-	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
-	Regex       string                 `json:"regex,omitempty"`
+	Name        string                    `json:"name"`
+	Slug        string                    `json:"slug"`
+	Type        string                    `json:"type"`
+	Description string                    `json:"description,omitempty"`
+	Default     interface{}               `json:"default,omitempty"`
+	Required    DefaultTrueDefinition_0_3 `json:"required,omitempty"`
+	Options     []OptionDefinition_0_3    `json:"options,omitempty"`
+	Regex       string                    `json:"regex,omitempty"`
 }
 
 type OptionDefinition_0_3 struct {
@@ -930,7 +930,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		len(d.Parameters) > 0 ||
 		len(d.Constraints) > 0 ||
 		d.RequireRequests ||
-		(d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals) ||
+		!d.AllowSelfApprovals.IsZero() ||
 		d.Timeout > 0 {
 		return d.Marshal(format)
 	}
@@ -1157,12 +1157,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		}
 	}
 
-	if d.AllowSelfApprovals != nil {
-		disallow := !*d.AllowSelfApprovals
-		req.ExecuteRules.DisallowSelfApprove = &disallow
-	} else {
-		req.ExecuteRules.DisallowSelfApprove = pointers.Bool(false)
-	}
+	req.ExecuteRules.DisallowSelfApprove = pointers.Bool(!d.AllowSelfApprovals.Value())
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
@@ -1231,7 +1226,7 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			}
 		}
 
-		if pd.Required != nil && !*pd.Required {
+		if !pd.Required.Value() {
 			param.Constraints.Optional = true
 		}
 
@@ -1417,10 +1412,7 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		}
 	}
 
-	if t.ExecuteRules.DisallowSelfApprove {
-		v := false
-		d.AllowSelfApprovals = &v
-	}
+	d.AllowSelfApprovals.value = pointers.Bool(!t.ExecuteRules.DisallowSelfApprove)
 
 	schedules := make(map[string]ScheduleDefinition_0_3)
 	for _, trigger := range t.Triggers {
@@ -1501,10 +1493,7 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			}
 		}
 
-		if param.Constraints.Optional {
-			v := false
-			p.Required = &v
-		}
+		p.Required.value = pointers.Bool(!param.Constraints.Optional)
 
 		p.Regex = param.Constraints.Regex
 
@@ -1627,6 +1616,39 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
+}
+
+type DefaultTrueDefinition_0_3 struct {
+	value *bool
+}
+
+var _ yaml.IsZeroer = &DefaultTrueDefinition_0_3{}
+var _ json.Unmarshaler = &DefaultTrueDefinition_0_3{}
+var _ json.Marshaler = &DefaultTrueDefinition_0_3{}
+
+func (d DefaultTrueDefinition_0_3) Value() bool {
+	if d.value == nil {
+		return true
+	} else {
+		return *d.value
+	}
+}
+
+func (d *DefaultTrueDefinition_0_3) UnmarshalJSON(b []byte) error {
+	var v bool
+	if err := json.Unmarshal(b, &v); err != nil {
+		return err
+	}
+	d.value = &v
+	return nil
+}
+
+func (d *DefaultTrueDefinition_0_3) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Value())
+}
+
+func (d *DefaultTrueDefinition_0_3) IsZero() bool {
+	return d.Value() == true
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
