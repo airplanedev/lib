@@ -485,7 +485,7 @@
           "default": ""
         },
         "schedules": {
-          "description": "Map of schedules that are to be deployed with this task. The key corresponds to a unique schedule across deploys.",
+          "description": "A map of schedules that are to be deployed with this task. The key corresponds to a unique schedule across deploys.",
           "type": "object",
           "patternProperties": {
             "^[a-z0-9_]{1,50}$": {
@@ -493,11 +493,11 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "Name of the schedule"
+                  "description": "The name of the schedule"
                 },
                 "description": {
                   "type": "string",
-                  "description": "Description of the schedule"
+                  "description": "The description of the schedule"
                 },
                 "cron": {
                   "type": "string",
