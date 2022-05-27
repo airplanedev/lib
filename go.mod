@@ -10,7 +10,7 @@ require (
 	github.com/alessio/shellescape v1.4.1
 	github.com/aymerick/raymond v2.0.2+incompatible
 	github.com/blang/semver/v4 v4.0.0
-	github.com/evanw/esbuild v0.14.39
+	github.com/evanw/esbuild v0.14.40
 	github.com/flynn/go-shlex v0.0.0-20150515145356-3f9db97f8568
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/goccy/go-yaml v1.9.5
@@ -90,5 +90,5 @@ require (
 	github.com/moby/sys/mount v0.3.0 // indirect
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/segmentio/ksuid v1.0.4
-	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
+	gopkg.in/yaml.v3 v3.0.0
 )
