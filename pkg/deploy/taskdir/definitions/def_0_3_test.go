@@ -33,7 +33,7 @@ schedules:
     cron: 0 0 * * *
   no_name_params:
     cron: 0 0 * * *
-    params:
+    parameters:
       param_one: 5.5
       param_two: memes
 `)
@@ -65,7 +65,7 @@ var fullJSON = []byte(
 		},
 		"no_name_params": {
 			"cron": "0 0 * * *",
-			"params": {
+			"parameters": {
 				"param_one": 5.5,
 				"param_two": "memes"
 			}
