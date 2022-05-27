@@ -1635,6 +1635,10 @@ var _ yaml.IsZeroer = &DefaultTrueDefinition_0_3{}
 var _ json.Unmarshaler = &DefaultTrueDefinition_0_3{}
 var _ json.Marshaler = &DefaultTrueDefinition_0_3{}
 
+func NewDefaultTrueDefinition_0_3(value bool) DefaultTrueDefinition_0_3 {
+	return DefaultTrueDefinition_0_3{&value}
+}
+
 func (d DefaultTrueDefinition_0_3) Value() bool {
 	if d.value == nil {
 		return true
