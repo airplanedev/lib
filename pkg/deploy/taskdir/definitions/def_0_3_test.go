@@ -119,7 +119,7 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    pointers.Bool(true),
+			Required:    DefaultTrueDefinition_0_3{pointers.Bool(true)},
 		},
 	},
 	Python: &PythonDefinition_0_3{
@@ -344,6 +344,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -381,6 +382,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -416,6 +418,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -453,6 +456,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -503,6 +507,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					FormData: map[string]interface{}{},
 					Configs:  []string{},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -610,23 +615,26 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Slug:        "required_boolean",
 						Type:        "boolean",
 						Description: "A required boolean.",
+						Required:    DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 					{
-						Name:    "Short text",
-						Slug:    "short_text",
-						Type:    "shorttext",
-						Default: "foobar",
+						Name:     "Short text",
+						Slug:     "short_text",
+						Type:     "shorttext",
+						Default:  "foobar",
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 					{
-						Name: "SQL",
-						Slug: "sql",
-						Type: "sql",
+						Name:     "SQL",
+						Slug:     "sql",
+						Type:     "sql",
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 					{
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: pointers.Bool(false),
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(false)},
 					},
 					{
 						Name: "Options",
@@ -646,12 +654,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 								Value: 3,
 							},
 						},
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 					{
-						Name:  "Regex",
-						Slug:  "regex",
-						Type:  "shorttext",
-						Regex: "foo.*",
+						Name:     "Regex",
+						Slug:     "regex",
+						Type:     "shorttext",
+						Regex:    "foo.*",
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 					{
 						Name:    "Config var",
@@ -668,11 +678,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 								Value: "OTHER_API_KEY",
 							},
 						},
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 					},
 				},
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -697,7 +709,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: pointers.Bool(false),
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(false)},
 			},
 		},
 		{
@@ -722,7 +734,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
-				AllowSelfApprovals: nil,
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -781,6 +793,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					FormData: map[string]interface{}{},
 					Configs:  []string{"CONFIG_NAME_1", "CONFIG_NAME_2"},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 		{
@@ -886,6 +899,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
 			},
 		},
 	} {
@@ -1064,7 +1078,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: pointers.Bool(false),
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(false)},
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -1092,7 +1106,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
-				AllowSelfApprovals: nil,
+				AllowSelfApprovals: DefaultTrueDefinition_0_3{nil},
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -1137,7 +1151,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: pointers.Bool(false),
+						Required: DefaultTrueDefinition_0_3{pointers.Bool(false)},
 					},
 					{
 						Name: "Options",
