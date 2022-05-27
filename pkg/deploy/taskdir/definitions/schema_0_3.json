@@ -503,7 +503,7 @@
                   "type": "string",
                   "description": "The cron string in crontab format"
                 },
-                "parameters": {
+                "paramValues": {
                   "type": "object",
                   "description": "A map of parameter slugs to values to be passed to the task each run"
                 }
@@ -517,7 +517,7 @@
               "name": "Daily Midnight Batch",
               "description": "Runs this task daily at midnight.",
               "cron": "0 0 * * *",
-              "parameters": {
+              "paramValues": {
                 "param_one": 5,
                 "param_two": "hello"
               }
