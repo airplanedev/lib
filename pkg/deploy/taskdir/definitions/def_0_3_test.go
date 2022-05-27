@@ -947,6 +947,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -973,6 +974,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -997,6 +999,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -1023,6 +1026,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -1060,6 +1064,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 			resources: []api.Resource{
 				{
@@ -1094,6 +1099,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(true),
 					RequireRequests:     pointers.Bool(true),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -1122,6 +1128,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -1353,6 +1360,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 		},
 		{
@@ -1398,6 +1406,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					DisallowSelfApprove: pointers.Bool(false),
 					RequireRequests:     pointers.Bool(false),
 				},
+				Timeout: 3600,
 			},
 			resources: []api.Resource{
 				{
