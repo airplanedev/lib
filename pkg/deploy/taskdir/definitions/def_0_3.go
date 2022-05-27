@@ -40,7 +40,7 @@ type Definition_0_3 struct {
 	Constraints        map[string]string            `json:"constraints,omitempty"`
 	RequireRequests    bool                         `json:"requireRequests,omitempty"`
 	AllowSelfApprovals DefaultTrueDefinition_0_3    `json:"allowSelfApprovals,omitempty"`
-	Timeout            int                          `json:"timeout,omitempty"`
+	Timeout            DefaultTimeoutDefinition_0_3 `json:"timeout,omitempty"`
 	Runtime            build.TaskRuntime            `json:"runtime,omitempty"`
 
 	Schedules map[string]ScheduleDefinition_0_3 `json:"schedules,omitempty"`
@@ -902,7 +902,9 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 	switch format {
 	case DefFormatYAML:
-		buf, err := yaml.MarshalWithOptions(d, yaml.UseLiteralStyleIfMultiline(true))
+		buf, err := yaml.MarshalWithOptions(d,
+			yaml.UseJSONMarshaler(),
+			yaml.UseLiteralStyleIfMultiline(true))
 		if err != nil {
 			return nil, err
 		}
@@ -931,7 +933,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		len(d.Constraints) > 0 ||
 		d.RequireRequests ||
 		!d.AllowSelfApprovals.IsZero() ||
-		d.Timeout > 0 {
+		!d.Timeout.IsZero() {
 		return d.Marshal(format)
 	}
 
@@ -1133,7 +1135,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Slug:        d.Slug,
 		Name:        d.Name,
 		Description: d.Description,
-		Timeout:     d.Timeout,
+		Timeout:     d.Timeout.Value(),
 		Runtime:     d.Runtime,
 		ExecuteRules: api.UpdateExecuteRulesRequest{
 			RequireRequests: &d.RequireRequests,
@@ -1394,7 +1396,6 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		Description:     t.Description,
 		RequireRequests: t.ExecuteRules.RequireRequests,
 		Runtime:         t.Runtime,
-		Timeout:         t.Timeout,
 	}
 
 	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
@@ -1413,6 +1414,7 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 	}
 
 	d.AllowSelfApprovals.value = pointers.Bool(!t.ExecuteRules.DisallowSelfApprove)
+	d.Timeout.value = t.Timeout
 
 	schedules := make(map[string]ScheduleDefinition_0_3)
 	for _, trigger := range t.Triggers {
@@ -1643,12 +1645,41 @@ func (d *DefaultTrueDefinition_0_3) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (d *DefaultTrueDefinition_0_3) MarshalJSON() ([]byte, error) {
+func (d DefaultTrueDefinition_0_3) MarshalJSON() ([]byte, error) {
 	return json.Marshal(d.Value())
 }
 
-func (d *DefaultTrueDefinition_0_3) IsZero() bool {
+func (d DefaultTrueDefinition_0_3) IsZero() bool {
 	return d.Value() == true
+}
+
+type DefaultTimeoutDefinition_0_3 struct {
+	value int
+}
+
+var _ yaml.IsZeroer = &DefaultTimeoutDefinition_0_3{}
+var _ json.Unmarshaler = &DefaultTimeoutDefinition_0_3{}
+var _ json.Marshaler = &DefaultTimeoutDefinition_0_3{}
+
+func (d DefaultTimeoutDefinition_0_3) Value() int {
+	if d.value == 0 {
+		return 3600
+	} else {
+		return d.value
+	}
+}
+
+func (d *DefaultTimeoutDefinition_0_3) UnmarshalJSON(b []byte) error {
+	ret := json.Unmarshal(b, &d.value)
+	return ret
+}
+
+func (d DefaultTimeoutDefinition_0_3) MarshalJSON() ([]byte, error) {
+	return json.Marshal(d.Value())
+}
+
+func (d DefaultTimeoutDefinition_0_3) IsZero() bool {
+	return d.Value() == 3600
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
