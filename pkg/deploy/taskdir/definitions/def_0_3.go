@@ -911,11 +911,18 @@ func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 		return buf, nil
 
 	case DefFormatJSON:
-		buf, err := json.MarshalIndent(d, "", "\t")
+		buf, err := yaml.MarshalWithOptions(d,
+			yaml.UseJSONMarshaler(),
+			yaml.JSON())
 		if err != nil {
 			return nil, err
 		}
-		return buf, nil
+		// `yaml.Marshal` doesn't allow configuring JSON indentation, so do it after the fact.
+		var out bytes.Buffer
+		if err := json.Indent(&out, buf, "", "\t"); err != nil {
+			return nil, err
+		}
+		return out.Bytes(), nil
 
 	default:
 		return nil, errors.Errorf("unknown format: %s", format)
