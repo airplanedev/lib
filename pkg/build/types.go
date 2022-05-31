@@ -10,14 +10,11 @@ type BuildConfig map[string]interface{}
 type TaskKind string
 
 const (
-	TaskKindDeno       TaskKind = "deno"
-	TaskKindDockerfile TaskKind = "dockerfile"
-	TaskKindGo         TaskKind = "go"
-	TaskKindImage      TaskKind = "image"
-	TaskKindNode       TaskKind = "node"
-	TaskKindPython     TaskKind = "python"
-	TaskKindShell      TaskKind = "shell"
-	TaskKindApp        TaskKind = "app"
+	TaskKindImage  TaskKind = "image"
+	TaskKindNode   TaskKind = "node"
+	TaskKindPython TaskKind = "python"
+	TaskKindShell  TaskKind = "shell"
+	TaskKindApp    TaskKind = "app"
 
 	TaskKindSQL  TaskKind = "sql"
 	TaskKindREST TaskKind = "rest"

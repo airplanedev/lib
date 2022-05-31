@@ -297,14 +297,11 @@ func SanitizeTaskID(s string) string {
 type Name string
 
 const (
-	NameGo         Name = "go"
-	NameDeno       Name = "deno"
-	NameImage      Name = "image"
-	NamePython     Name = "python"
-	NameNode       Name = "node"
-	NameDockerfile Name = "dockerfile"
-	NameShell      Name = "shell"
-	NameApp        Name = "app"
+	NameImage  Name = "image"
+	NamePython Name = "python"
+	NameNode   Name = "node"
+	NameShell  Name = "shell"
+	NameApp    Name = "app"
 
 	NameSQL  Name = "sql"
 	NameREST Name = "rest"
@@ -312,7 +309,7 @@ const (
 
 func NeedsBuilding(kind TaskKind) (bool, error) {
 	switch Name(kind) {
-	case NameGo, NameDeno, NamePython, NameNode, NameDockerfile, NameShell:
+	case NamePython, NameNode, NameShell:
 		return true, nil
 	case NameImage, NameSQL, NameREST:
 		return false, nil
@@ -323,16 +320,10 @@ func NeedsBuilding(kind TaskKind) (bool, error) {
 
 func BuildDockerfile(c DockerfileConfig) (string, error) {
 	switch Name(c.Builder) {
-	case NameGo:
-		return golang(c.Root, c.Options)
-	case NameDeno:
-		return deno(c.Root, c.Options)
 	case NamePython:
 		return python(c.Root, c.Options, c.BuildArgKeys)
 	case NameNode:
 		return node(c.Root, c.Options, c.BuildArgKeys)
-	case NameDockerfile:
-		return dockerfile(c.Root, c.Options)
 	case NameShell:
 		return shell(c.Root, c.Options)
 	case NameApp:

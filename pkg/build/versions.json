@@ -26,20 +26,6 @@
       "digest": "sha256:1e4125d5067c069a665f87b26d36802b50b91eebb80cfae7c93c4e5fe5ce014d"
     }
   },
-  "deno": {
-    "1": {
-      "image": "registry.hub.docker.com/denoland/deno",
-      "tag": "debian-1.17.2",
-      "digest": "sha256:dd860caa958a741f32e6bcf09122a792555a49c264a968c57abfd7180805e49d"
-    }
-  },
-  "go": {
-    "1": {
-      "image": "registry.hub.docker.com/library/golang",
-      "tag": "1.16.3-buster",
-      "digest": "sha256:b5bfb6c692cd36c24ff3d828e4bea3064569db3beeb38d57209a0c21d5ca1c82"
-    }
-  },
   "python": {
     "3": {
       "image": "registry.hub.docker.com/library/python",
