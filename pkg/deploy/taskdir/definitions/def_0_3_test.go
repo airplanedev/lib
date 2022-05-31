@@ -92,7 +92,7 @@ schedules:
     cron: 0 0 * * *
   no_name_params:
     cron: 0 0 * * *
-    params:
+    paramValues:
       param_one: 5.5
       param_two: memes
 `)
@@ -122,7 +122,7 @@ var jsonWithDefault = []byte(
 		},
 		"no_name_params": {
 			"cron": "0 0 * * *",
-			"params": {
+			"paramValues": {
 				"param_one": 5.5,
 				"param_two": "memes"
 			}
