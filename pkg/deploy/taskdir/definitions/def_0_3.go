@@ -838,7 +838,7 @@ type ScheduleDefinition_0_3 struct {
 	Name        string                 `json:"name,omitempty"`
 	Description string                 `json:"description,omitempty"`
 	CronExpr    string                 `json:"cron"`
-	ParamValues map[string]interface{} `json:"params,omitempty"`
+	ParamValues map[string]interface{} `json:"paramValues,omitempty"`
 }
 
 //go:embed schema_0_3.json
