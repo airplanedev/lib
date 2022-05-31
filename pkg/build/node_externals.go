@@ -154,8 +154,12 @@ func getWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
 	cmd.Dir = filepath.Dir(pathPackageJSON)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, errors.Wrapf(err, "reading yarn/npm workspaces: %s Do you have yarn installed?", string(out))
+		if len(out) > 0 {
+			return nil, errors.Wrap(err, string(out))
+		}
+		return nil, errors.Wrap(err, "reading yarn/npm workspaces: Do you have yarn installed?")
 	}
+
 	// out will be something like:
 	// yarn workspaces v1.22.17
 	// {
