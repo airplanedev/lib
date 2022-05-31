@@ -34,11 +34,11 @@ func ExternalPackages(rootPackageJSON string) ([]string, error) {
 	}
 	pathPackageJSONs := []string{rootPackageJSON}
 	if usesWorkspaces {
-		nestedPackageJSONs, err := findNestedPackageJSONs(filepath.Dir(rootPackageJSON))
+		workspacePackageJSONs, err := findWorkspacePackageJSONs(filepath.Dir(rootPackageJSON))
 		if err != nil {
 			return nil, err
 		}
-		for _, j := range nestedPackageJSONs {
+		for _, j := range workspacePackageJSONs {
 			if j != rootPackageJSON {
 				pathPackageJSONs = append(pathPackageJSONs, j)
 			}
@@ -112,7 +112,10 @@ func ListDependencies(pathPackageJSON string) ([]string, error) {
 	return deps, nil
 }
 
-func findNestedPackageJSONs(dir string) ([]string, error) {
+// findWorkspacePackageJSONs finds all package.jsons in a workspace. We are assuming that all nested package.jsons are
+// part of the workspace. A better solution would involve looking at the workspace tree
+// and pulling workspaces from it - this is a shortcut.
+func findWorkspacePackageJSONs(dir string) ([]string, error) {
 	var pathPackageJSONs []string
 	err := filepath.WalkDir(dir,
 		func(path string, di fs.DirEntry, err error) error {
