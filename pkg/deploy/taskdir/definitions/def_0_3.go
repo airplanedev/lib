@@ -26,13 +26,10 @@ type Definition_0_3 struct {
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
 
-	Deno       *DenoDefinition_0_3       `json:"deno,omitempty"`
-	Dockerfile *DockerfileDefinition_0_3 `json:"dockerfile,omitempty"`
-	Go         *GoDefinition_0_3         `json:"go,omitempty"`
-	Image      *ImageDefinition_0_3      `json:"docker,omitempty"`
-	Node       *NodeDefinition_0_3       `json:"node,omitempty"`
-	Python     *PythonDefinition_0_3     `json:"python,omitempty"`
-	Shell      *ShellDefinition_0_3      `json:"shell,omitempty"`
+	Image  *ImageDefinition_0_3  `json:"docker,omitempty"`
+	Node   *NodeDefinition_0_3   `json:"node,omitempty"`
+	Python *PythonDefinition_0_3 `json:"python,omitempty"`
+	Shell  *ShellDefinition_0_3  `json:"shell,omitempty"`
 
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
@@ -125,182 +122,6 @@ func (d *ImageDefinition_0_3) getEnv() (api.TaskEnv, error) {
 }
 
 func (d *ImageDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
-	return []api.ConfigAttachment{}
-}
-
-var _ taskKind_0_3 = &DenoDefinition_0_3{}
-
-type DenoDefinition_0_3 struct {
-	Entrypoint string      `json:"entrypoint"`
-	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
-
-	absoluteEntrypoint string `json:"-"`
-}
-
-func (d *DenoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Env = d.EnvVars
-	return nil
-}
-
-func (d *DenoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	if v, ok := t.KindOptions["entrypoint"]; ok {
-		if sv, ok := v.(string); ok {
-			d.Entrypoint = sv
-		} else {
-			return errors.Errorf("expected string entrypoint, got %T instead", v)
-		}
-	}
-	d.EnvVars = t.Env
-	return nil
-}
-
-func (d *DenoDefinition_0_3) setEntrypoint(entrypoint string) error {
-	d.Entrypoint = entrypoint
-	return nil
-}
-
-func (d *DenoDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
-	d.absoluteEntrypoint = entrypoint
-	return nil
-}
-
-func (d *DenoDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
-	if d.absoluteEntrypoint == "" {
-		return "", ErrNoAbsoluteEntrypoint
-	}
-	return d.absoluteEntrypoint, nil
-}
-
-func (d *DenoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
-	return build.KindOptions{
-		"entrypoint": d.Entrypoint,
-	}, nil
-}
-
-func (d *DenoDefinition_0_3) getEntrypoint() (string, error) {
-	return d.Entrypoint, nil
-}
-
-func (d *DenoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.EnvVars, nil
-}
-
-func (d *DenoDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
-	return []api.ConfigAttachment{}
-}
-
-var _ taskKind_0_3 = &DockerfileDefinition_0_3{}
-
-type DockerfileDefinition_0_3 struct {
-	Dockerfile string      `json:"dockerfile"`
-	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
-}
-
-func (d *DockerfileDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Env = d.EnvVars
-	return nil
-}
-
-func (d *DockerfileDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	if v, ok := t.KindOptions["dockerfile"]; ok {
-		if sv, ok := v.(string); ok {
-			d.Dockerfile = sv
-		} else {
-			return errors.Errorf("expected string dockerfile, got %T instead", v)
-		}
-	}
-	d.EnvVars = t.Env
-	return nil
-}
-
-func (d *DockerfileDefinition_0_3) setEntrypoint(entrypoint string) error {
-	return ErrNoEntrypoint
-}
-
-func (d *DockerfileDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
-	return ErrNoEntrypoint
-}
-
-func (d *DockerfileDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
-	return "", ErrNoEntrypoint
-}
-
-func (d *DockerfileDefinition_0_3) getKindOptions() (build.KindOptions, error) {
-	return build.KindOptions{
-		"dockerfile": d.Dockerfile,
-	}, nil
-}
-
-func (d *DockerfileDefinition_0_3) getEntrypoint() (string, error) {
-	return "", ErrNoEntrypoint
-}
-
-func (d *DockerfileDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.EnvVars, nil
-}
-
-func (d *DockerfileDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
-	return []api.ConfigAttachment{}
-}
-
-var _ taskKind_0_3 = &GoDefinition_0_3{}
-
-type GoDefinition_0_3 struct {
-	Entrypoint string      `json:"entrypoint"`
-	EnvVars    api.TaskEnv `json:"envVars,omitempty"`
-
-	absoluteEntrypoint string `json:"-"`
-}
-
-func (d *GoDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	req.Env = d.EnvVars
-	return nil
-}
-
-func (d *GoDefinition_0_3) hydrateFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
-	if v, ok := t.KindOptions["entrypoint"]; ok {
-		if sv, ok := v.(string); ok {
-			d.Entrypoint = sv
-		} else {
-			return errors.Errorf("expected string entrypoint, got %T instead", v)
-		}
-	}
-	d.EnvVars = t.Env
-	return nil
-}
-
-func (d *GoDefinition_0_3) setEntrypoint(entrypoint string) error {
-	d.Entrypoint = entrypoint
-	return nil
-}
-
-func (d *GoDefinition_0_3) setAbsoluteEntrypoint(entrypoint string) error {
-	d.absoluteEntrypoint = entrypoint
-	return nil
-}
-
-func (d *GoDefinition_0_3) getAbsoluteEntrypoint() (string, error) {
-	if d.absoluteEntrypoint == "" {
-		return "", ErrNoAbsoluteEntrypoint
-	}
-	return d.absoluteEntrypoint, nil
-}
-
-func (d *GoDefinition_0_3) getKindOptions() (build.KindOptions, error) {
-	return build.KindOptions{
-		"entrypoint": d.Entrypoint,
-	}, nil
-}
-
-func (d *GoDefinition_0_3) getEntrypoint() (string, error) {
-	return d.Entrypoint, nil
-}
-
-func (d *GoDefinition_0_3) getEnv() (api.TaskEnv, error) {
-	return d.EnvVars, nil
-}
-
-func (d *GoDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
 	return []api.ConfigAttachment{}
 }
 
@@ -851,18 +672,6 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 	}
 
 	switch kind {
-	case build.TaskKindDeno:
-		def.Deno = &DenoDefinition_0_3{
-			Entrypoint: entrypoint,
-		}
-	case build.TaskKindDockerfile:
-		def.Dockerfile = &DockerfileDefinition_0_3{
-			Dockerfile: entrypoint,
-		}
-	case build.TaskKindGo:
-		def.Go = &GoDefinition_0_3{
-			Entrypoint: entrypoint,
-		}
 	case build.TaskKindImage:
 		def.Image = &ImageDefinition_0_3{
 			Image:   "alpine:3",
@@ -1093,13 +902,7 @@ func (d *Definition_0_3) GetAbsoluteEntrypoint() (string, error) {
 }
 
 func (d Definition_0_3) Kind() (build.TaskKind, error) {
-	if d.Deno != nil {
-		return build.TaskKindDeno, nil
-	} else if d.Dockerfile != nil {
-		return build.TaskKindDockerfile, nil
-	} else if d.Go != nil {
-		return build.TaskKindGo, nil
-	} else if d.Image != nil {
+	if d.Image != nil {
 		return build.TaskKindImage, nil
 	} else if d.Node != nil {
 		return build.TaskKindNode, nil
@@ -1117,13 +920,7 @@ func (d Definition_0_3) Kind() (build.TaskKind, error) {
 }
 
 func (d Definition_0_3) taskKind() (taskKind_0_3, error) {
-	if d.Deno != nil {
-		return d.Deno, nil
-	} else if d.Dockerfile != nil {
-		return d.Dockerfile, nil
-	} else if d.Go != nil {
-		return d.Go, nil
-	} else if d.Image != nil {
+	if d.Image != nil {
 		return d.Image, nil
 	} else if d.Node != nil {
 		return d.Node, nil
@@ -1566,15 +1363,6 @@ func extractConfigVarValue(v interface{}) (string, error) {
 
 func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
 	switch t.Kind {
-	case build.TaskKindDeno:
-		d.Deno = &DenoDefinition_0_3{}
-		return d.Deno.hydrateFromTask(ctx, client, t)
-	case build.TaskKindDockerfile:
-		d.Dockerfile = &DockerfileDefinition_0_3{}
-		return d.Dockerfile.hydrateFromTask(ctx, client, t)
-	case build.TaskKindGo:
-		d.Go = &GoDefinition_0_3{}
-		return d.Go.hydrateFromTask(ctx, client, t)
 	case build.TaskKindImage:
 		d.Image = &ImageDefinition_0_3{}
 		return d.Image.hydrateFromTask(ctx, client, t)

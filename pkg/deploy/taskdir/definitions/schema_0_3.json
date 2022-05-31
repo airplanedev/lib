@@ -122,67 +122,6 @@
         {
           "type": "object",
           "properties": {
-            "deno": {
-              "type": "object",
-              "properties": {
-                "entrypoint": { "type": "string" },
-                "envVars": { "$ref": "#/$defs/envVars" }
-              },
-              "additionalProperties": false,
-              "required": ["entrypoint"]
-            }
-          },
-          "required": ["deno"]
-        }
-      ]
-    },
-    {
-      "allOf": [
-        { "$ref": "#/$defs/baseDefinition" },
-        {
-          "type": "object",
-          "properties": {
-            "go": {
-              "type": "object",
-              "properties": {
-                "entrypoint": { "type": "string" },
-                "envVars": { "$ref": "#/$defs/envVars" }
-              },
-              "additionalProperties": false,
-              "required": ["entrypoint"]
-            }
-          },
-          "required": ["go"]
-        }
-      ]
-    },
-    {
-      "allOf": [
-        { "$ref": "#/$defs/baseDefinition" },
-        {
-          "type": "object",
-          "properties": {
-            "dockerfile": {
-              "type": "object",
-              "properties": {
-                "dockerfile": { "type": "string" },
-                "envVars": { "$ref": "#/$defs/envVars" }
-              },
-              "additionalProperties": false,
-              "required": ["dockerfile"]
-            }
-          },
-          "required": ["dockerfile"]
-        }
-      ]
-    },
-
-    {
-      "allOf": [
-        { "$ref": "#/$defs/baseDefinition" },
-        {
-          "type": "object",
-          "properties": {
             "sql": {
               "description": "Configuration for a SQL task.",
               "type": "object",
@@ -294,10 +233,7 @@
     "node": true,
     "python": true,
     "shell": true,
-    "deno": true,
     "docker": true,
-    "go": true,
-    "dockerfile": true,
     "sql": true,
     "rest": true
   },
@@ -519,17 +455,19 @@
               "required": ["cron"]
             }
           },
-          "examples": [{ 
-            "run_at_midnight": {
-              "name": "Daily Midnight Batch",
-              "description": "Runs this task daily at midnight.",
-              "cron": "0 0 * * *",
-              "paramValues": {
-                "param_one": 5,
-                "param_two": "hello"
+          "examples": [
+            {
+              "run_at_midnight": {
+                "name": "Daily Midnight Batch",
+                "description": "Runs this task daily at midnight.",
+                "cron": "0 0 * * *",
+                "paramValues": {
+                  "param_one": 5,
+                  "param_two": "hello"
+                }
               }
             }
-          }]
+          ]
         }
       },
       "required": ["name", "slug"]
