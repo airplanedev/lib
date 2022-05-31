@@ -108,24 +108,26 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		IsDurable:          isDurable,
 	}
 
-	// Workaround to get esbuild to not bundle dependencies.
-	// See build.ExternalPackages for details.
-	deps, err := ExternalPackages(rootPackageJSON)
-	if err != nil {
-		return "", err
-	}
-	var flags []string
-	for _, dep := range deps {
-		flags = append(flags, fmt.Sprintf("--external:%s", dep))
-	}
-	if isDurable {
-		// Even if these are imported, we need to mark the root packages
-		// as external for esbuild to work properly. Esbuild doesn't
-		// care about repeats, so no need to dedupe.
-		flags = append(flags, "--external:@temporalio", "--external:@swc")
-	}
+	if cfg.HasPackageJSON {
+		// Workaround to get esbuild to not bundle dependencies.
+		// See build.ExternalPackages for details.
+		deps, err := ExternalPackages(rootPackageJSON)
+		if err != nil {
+			return "", err
+		}
+		var flags []string
+		for _, dep := range deps {
+			flags = append(flags, fmt.Sprintf("--external:%s", dep))
+		}
+		if isDurable {
+			// Even if these are imported, we need to mark the root packages
+			// as external for esbuild to work properly. Esbuild doesn't
+			// care about repeats, so no need to dedupe.
+			flags = append(flags, "--external:@temporalio", "--external:@swc")
+		}
 
-	cfg.ExternalFlags = strings.Join(flags, " ")
+		cfg.ExternalFlags = strings.Join(flags, " ")
+	}
 
 	if !strings.HasPrefix(cfg.Workdir, "/") {
 		cfg.Workdir = "/" + cfg.Workdir

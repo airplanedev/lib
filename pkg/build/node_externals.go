@@ -47,10 +47,6 @@ func ExternalPackages(rootPackageJSON string) ([]string, error) {
 
 	var deps []string
 	for _, pathPackageJSON := range pathPackageJSONs {
-		if pathPackageJSON == "" {
-			continue
-		}
-
 		var yarnWorkspacePackages map[string]bool
 		if usesWorkspaces {
 			// If we are in a npm/yarn workspace, we want to bundle all packages in the same
