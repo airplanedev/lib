@@ -143,13 +143,13 @@ var fullDef = Definition_0_3{
 			Type:        "shorttext",
 			Description: "Someone's name.",
 			Default:     "World",
-			Required:    DefaultTrueDefinition_0_3{pointers.Bool(true)},
+			Required:    DefaultTrueDefinition{pointers.Bool(true)},
 		},
 	},
 	Python: &PythonDefinition_0_3{
 		Entrypoint: "hello_world.py",
 	},
-	Timeout: DefaultTimeoutDefinition_0_3{3600},
+	Timeout: DefaultTimeoutDefinition{3600},
 	Schedules: map[string]ScheduleDefinition_0_3{
 		"every_midnight": {
 			Name:     "Every Midnight",
@@ -230,7 +230,7 @@ func TestDefinitionMarshal_0_3(t *testing.T) {
 					BodyType: "json",
 					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
 				},
-				Timeout: DefaultTimeoutDefinition_0_3{300},
+				Timeout: DefaultTimeoutDefinition{300},
 			},
 			expected: []byte(
 				`name: REST task
@@ -261,7 +261,7 @@ timeout: 300
 					BodyType: "json",
 					Body:     "{\n  \"name\": \"foo\",\n  \"number\": 30\n}\n",
 				},
-				Timeout: DefaultTimeoutDefinition_0_3{300},
+				Timeout: DefaultTimeoutDefinition{300},
 			},
 			expected: []byte(
 				`{
@@ -381,7 +381,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -419,7 +419,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -455,7 +455,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -493,7 +493,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -544,7 +544,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					FormData: map[string]interface{}{},
 					Configs:  []string{},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -652,26 +652,26 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						Slug:        "required_boolean",
 						Type:        "boolean",
 						Description: "A required boolean.",
-						Required:    DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required:    DefaultTrueDefinition{pointers.Bool(true)},
 					},
 					{
 						Name:     "Short text",
 						Slug:     "short_text",
 						Type:     "shorttext",
 						Default:  "foobar",
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required: DefaultTrueDefinition{pointers.Bool(true)},
 					},
 					{
 						Name:     "SQL",
 						Slug:     "sql",
 						Type:     "sql",
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required: DefaultTrueDefinition{pointers.Bool(true)},
 					},
 					{
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(false)},
+						Required: DefaultTrueDefinition{pointers.Bool(false)},
 					},
 					{
 						Name: "Options",
@@ -691,14 +691,14 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 								Value: 3,
 							},
 						},
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required: DefaultTrueDefinition{pointers.Bool(true)},
 					},
 					{
 						Name:     "Regex",
 						Slug:     "regex",
 						Type:     "shorttext",
 						Regex:    "foo.*",
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required: DefaultTrueDefinition{pointers.Bool(true)},
 					},
 					{
 						Name:    "Config var",
@@ -715,13 +715,13 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 								Value: "OTHER_API_KEY",
 							},
 						},
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+						Required: DefaultTrueDefinition{pointers.Bool(true)},
 					},
 				},
 				Python: &PythonDefinition_0_3{
 					Entrypoint: "main.py",
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -746,7 +746,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(false)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(false)},
 			},
 		},
 		{
@@ -771,7 +771,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -830,7 +830,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 					FormData: map[string]interface{}{},
 					Configs:  []string{"CONFIG_NAME_1", "CONFIG_NAME_2"},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 		{
@@ -936,7 +936,7 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 						},
 					},
 				},
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(true)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
 	} {
@@ -1120,7 +1120,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    true,
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{pointers.Bool(false)},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(false)},
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -1149,7 +1149,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 					Entrypoint: "main.py",
 				},
 				RequireRequests:    false,
-				AllowSelfApprovals: DefaultTrueDefinition_0_3{nil},
+				AllowSelfApprovals: DefaultTrueDefinition{nil},
 			},
 			request: api.UpdateTaskRequest{
 				Name:        "Test Task",
@@ -1195,7 +1195,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						Name:     "Optional long text",
 						Slug:     "optional_long_text",
 						Type:     "longtext",
-						Required: DefaultTrueDefinition_0_3{pointers.Bool(false)},
+						Required: DefaultTrueDefinition{pointers.Bool(false)},
 					},
 					{
 						Name: "Options",

@@ -37,11 +37,11 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Constraints        map[string]string            `json:"constraints,omitempty"`
-	RequireRequests    bool                         `json:"requireRequests,omitempty"`
-	AllowSelfApprovals DefaultTrueDefinition_0_3    `json:"allowSelfApprovals,omitempty"`
-	Timeout            DefaultTimeoutDefinition_0_3 `json:"timeout,omitempty"`
-	Runtime            build.TaskRuntime            `json:"runtime,omitempty"`
+	Constraints        map[string]string        `json:"constraints,omitempty"`
+	RequireRequests    bool                     `json:"requireRequests,omitempty"`
+	AllowSelfApprovals DefaultTrueDefinition    `json:"allowSelfApprovals,omitempty"`
+	Timeout            DefaultTimeoutDefinition `json:"timeout,omitempty"`
+	Runtime            build.TaskRuntime        `json:"runtime,omitempty"`
 
 	Schedules map[string]ScheduleDefinition_0_3 `json:"schedules,omitempty"`
 
@@ -795,14 +795,14 @@ func (d *RESTDefinition_0_3) getConfigAttachments() []api.ConfigAttachment {
 }
 
 type ParameterDefinition_0_3 struct {
-	Name        string                    `json:"name"`
-	Slug        string                    `json:"slug"`
-	Type        string                    `json:"type"`
-	Description string                    `json:"description,omitempty"`
-	Default     interface{}               `json:"default,omitempty"`
-	Required    DefaultTrueDefinition_0_3 `json:"required,omitempty"`
-	Options     []OptionDefinition_0_3    `json:"options,omitempty"`
-	Regex       string                    `json:"regex,omitempty"`
+	Name        string                 `json:"name"`
+	Slug        string                 `json:"slug"`
+	Type        string                 `json:"type"`
+	Description string                 `json:"description,omitempty"`
+	Default     interface{}            `json:"default,omitempty"`
+	Required    DefaultTrueDefinition  `json:"required,omitempty"`
+	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
+	Regex       string                 `json:"regex,omitempty"`
 }
 
 type OptionDefinition_0_3 struct {
@@ -902,6 +902,7 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 	switch format {
 	case DefFormatYAML:
+		// Use the JSON marshaler so we use MarshalJSON methods.
 		buf, err := yaml.MarshalWithOptions(d,
 			yaml.UseJSONMarshaler(),
 			yaml.UseLiteralStyleIfMultiline(true))
@@ -911,6 +912,8 @@ func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 		return buf, nil
 
 	case DefFormatJSON:
+		// Use the YAML marshaler so we can take advantage of the yaml.IsZeroer check on omitempty.
+		// But make it use the JSON marshaler so we use MarshalJSON methods.
 		buf, err := yaml.MarshalWithOptions(d,
 			yaml.UseJSONMarshaler(),
 			yaml.JSON())
@@ -1625,72 +1628,6 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
-}
-
-type DefaultTrueDefinition_0_3 struct {
-	value *bool
-}
-
-var _ yaml.IsZeroer = &DefaultTrueDefinition_0_3{}
-var _ json.Unmarshaler = &DefaultTrueDefinition_0_3{}
-var _ json.Marshaler = &DefaultTrueDefinition_0_3{}
-
-func NewDefaultTrueDefinition_0_3(value bool) DefaultTrueDefinition_0_3 {
-	return DefaultTrueDefinition_0_3{&value}
-}
-
-func (d DefaultTrueDefinition_0_3) Value() bool {
-	if d.value == nil {
-		return true
-	} else {
-		return *d.value
-	}
-}
-
-func (d *DefaultTrueDefinition_0_3) UnmarshalJSON(b []byte) error {
-	var v bool
-	if err := json.Unmarshal(b, &v); err != nil {
-		return err
-	}
-	d.value = &v
-	return nil
-}
-
-func (d DefaultTrueDefinition_0_3) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.Value())
-}
-
-func (d DefaultTrueDefinition_0_3) IsZero() bool {
-	return d.Value() == true
-}
-
-type DefaultTimeoutDefinition_0_3 struct {
-	value int
-}
-
-var _ yaml.IsZeroer = &DefaultTimeoutDefinition_0_3{}
-var _ json.Unmarshaler = &DefaultTimeoutDefinition_0_3{}
-var _ json.Marshaler = &DefaultTimeoutDefinition_0_3{}
-
-func (d DefaultTimeoutDefinition_0_3) Value() int {
-	if d.value == 0 {
-		return 3600
-	} else {
-		return d.value
-	}
-}
-
-func (d *DefaultTimeoutDefinition_0_3) UnmarshalJSON(b []byte) error {
-	ret := json.Unmarshal(b, &d.value)
-	return ret
-}
-
-func (d DefaultTimeoutDefinition_0_3) MarshalJSON() ([]byte, error) {
-	return json.Marshal(d.Value())
-}
-
-func (d DefaultTimeoutDefinition_0_3) IsZero() bool {
-	return d.Value() == 3600
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

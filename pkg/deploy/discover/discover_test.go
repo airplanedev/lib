@@ -41,7 +41,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
@@ -68,7 +68,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
@@ -79,7 +79,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task2",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
@@ -110,7 +110,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
@@ -121,7 +121,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task2",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
@@ -237,7 +237,7 @@ func TestDiscover(t *testing.T) {
 					Def: &definitions.Definition_0_3{
 						Slug:               "my_task",
 						Node:               &definitions.NodeDefinition_0_3{},
-						AllowSelfApprovals: definitions.NewDefaultTrueDefinition_0_3(true),
+						AllowSelfApprovals: definitions.NewDefaultTrueDefinition(true),
 					},
 					Source: ConfigSourceScript,
 				},
