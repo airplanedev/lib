@@ -45,6 +45,7 @@ type Task struct {
 	Timeout                    int                `json:"timeout" yaml:"timeout"`
 	IsArchived                 bool               `json:"isArchived" yaml:"isArchived"`
 	InterpolationMode          string             `json:"interpolationMode" yaml:"-"`
+	Triggers                   []Trigger          `json:"triggers" yaml:"-"`
 }
 
 type GetTaskRequest struct {
@@ -352,8 +353,8 @@ type GetAppRequest struct {
 }
 
 type Schedule struct {
-	Name        string                 `json:"name"`
-	Description string                 `json:"description"`
+	Name        string                 `json:"name,omitempty"`
+	Description string                 `json:"description,omitempty"`
 	CronExpr    string                 `json:"cronExpr"`
-	ParamValues map[string]interface{} `json:"paramValues"`
+	ParamValues map[string]interface{} `json:"paramValues,omitempty"`
 }

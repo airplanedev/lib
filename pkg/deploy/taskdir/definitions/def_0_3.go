@@ -37,11 +37,11 @@ type Definition_0_3 struct {
 	SQL  *SQLDefinition_0_3  `json:"sql,omitempty"`
 	REST *RESTDefinition_0_3 `json:"rest,omitempty"`
 
-	Constraints        map[string]string `json:"constraints,omitempty"`
-	RequireRequests    bool              `json:"requireRequests,omitempty"`
-	AllowSelfApprovals *bool             `json:"allowSelfApprovals,omitempty"`
-	Timeout            int               `json:"timeout,omitempty"`
-	Runtime            build.TaskRuntime `json:"runtime,omitempty"`
+	Constraints        map[string]string        `json:"constraints,omitempty"`
+	RequireRequests    bool                     `json:"requireRequests,omitempty"`
+	AllowSelfApprovals DefaultTrueDefinition    `json:"allowSelfApprovals,omitempty"`
+	Timeout            DefaultTimeoutDefinition `json:"timeout,omitempty"`
+	Runtime            build.TaskRuntime        `json:"runtime,omitempty"`
 
 	Schedules map[string]ScheduleDefinition_0_3 `json:"schedules,omitempty"`
 
@@ -800,7 +800,7 @@ type ParameterDefinition_0_3 struct {
 	Type        string                 `json:"type"`
 	Description string                 `json:"description,omitempty"`
 	Default     interface{}            `json:"default,omitempty"`
-	Required    *bool                  `json:"required,omitempty"`
+	Required    DefaultTrueDefinition  `json:"required,omitempty"`
 	Options     []OptionDefinition_0_3 `json:"options,omitempty"`
 	Regex       string                 `json:"regex,omitempty"`
 }
@@ -838,7 +838,7 @@ type ScheduleDefinition_0_3 struct {
 	Name        string                 `json:"name,omitempty"`
 	Description string                 `json:"description,omitempty"`
 	CronExpr    string                 `json:"cron"`
-	ParamValues map[string]interface{} `json:"params,omitempty"`
+	ParamValues map[string]interface{} `json:"paramValues,omitempty"`
 }
 
 //go:embed schema_0_3.json
@@ -902,18 +902,30 @@ func NewDefinition_0_3(name string, slug string, kind build.TaskKind, entrypoint
 func (d Definition_0_3) Marshal(format DefFormat) ([]byte, error) {
 	switch format {
 	case DefFormatYAML:
-		buf, err := yaml.MarshalWithOptions(d, yaml.UseLiteralStyleIfMultiline(true))
+		// Use the JSON marshaler so we use MarshalJSON methods.
+		buf, err := yaml.MarshalWithOptions(d,
+			yaml.UseJSONMarshaler(),
+			yaml.UseLiteralStyleIfMultiline(true))
 		if err != nil {
 			return nil, err
 		}
 		return buf, nil
 
 	case DefFormatJSON:
-		buf, err := json.MarshalIndent(d, "", "\t")
+		// Use the YAML marshaler so we can take advantage of the yaml.IsZeroer check on omitempty.
+		// But make it use the JSON marshaler so we use MarshalJSON methods.
+		buf, err := yaml.MarshalWithOptions(d,
+			yaml.UseJSONMarshaler(),
+			yaml.JSON())
 		if err != nil {
 			return nil, err
 		}
-		return buf, nil
+		// `yaml.Marshal` doesn't allow configuring JSON indentation, so do it after the fact.
+		var out bytes.Buffer
+		if err := json.Indent(&out, buf, "", "\t"); err != nil {
+			return nil, err
+		}
+		return out.Bytes(), nil
 
 	default:
 		return nil, errors.Errorf("unknown format: %s", format)
@@ -930,8 +942,8 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		len(d.Parameters) > 0 ||
 		len(d.Constraints) > 0 ||
 		d.RequireRequests ||
-		(d.AllowSelfApprovals != nil && !*d.AllowSelfApprovals) ||
-		d.Timeout > 0 {
+		!d.AllowSelfApprovals.IsZero() ||
+		!d.Timeout.IsZero() {
 		return d.Marshal(format)
 	}
 
@@ -1133,7 +1145,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		Slug:        d.Slug,
 		Name:        d.Name,
 		Description: d.Description,
-		Timeout:     d.Timeout,
+		Timeout:     d.Timeout.Value(),
 		Runtime:     d.Runtime,
 		ExecuteRules: api.UpdateExecuteRulesRequest{
 			RequireRequests: &d.RequireRequests,
@@ -1157,12 +1169,7 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		}
 	}
 
-	if d.AllowSelfApprovals != nil {
-		disallow := !*d.AllowSelfApprovals
-		req.ExecuteRules.DisallowSelfApprove = &disallow
-	} else {
-		req.ExecuteRules.DisallowSelfApprove = pointers.Bool(false)
-	}
+	req.ExecuteRules.DisallowSelfApprove = pointers.Bool(!d.AllowSelfApprovals.Value())
 
 	if err := d.addKindSpecificsToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
@@ -1175,10 +1182,9 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 	req.Parameters = make([]api.Parameter, len(d.Parameters))
 	for i, pd := range d.Parameters {
 		param := api.Parameter{
-			Name:    pd.Name,
-			Slug:    pd.Slug,
-			Desc:    pd.Description,
-			Default: pd.Default,
+			Name: pd.Name,
+			Slug: pd.Slug,
+			Desc: pd.Description,
 		}
 
 		switch pd.Type {
@@ -1196,7 +1202,43 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 			return errors.Errorf("unknown parameter type: %s", pd.Type)
 		}
 
-		if pd.Required != nil && !*pd.Required {
+		if pd.Default != nil {
+			if pd.Type == "configvar" {
+				switch reflect.ValueOf(pd.Default).Kind() {
+				case reflect.Map:
+					m, ok := pd.Default.(map[string]interface{})
+					if !ok {
+						return errors.Errorf("expected map but got %T", pd.Default)
+					}
+					if configName, ok := m["config"]; !ok {
+						return errors.Errorf("missing config property from configvar type: %v", pd.Default)
+					} else {
+						param.Default = map[string]interface{}{
+							"__airplaneType": "configvar",
+							"name":           configName,
+						}
+					}
+				case reflect.String:
+					param.Default = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           pd.Default,
+					}
+				default:
+					return errors.Errorf("unsupported type for default value: %T", pd.Default)
+				}
+			} else {
+				switch reflect.ValueOf(pd.Default).Kind() {
+				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					param.Default = pd.Default
+				default:
+					return errors.Errorf("unsupported type for default value: %T", pd.Default)
+				}
+			}
+		}
+
+		if !pd.Required.Value() {
 			param.Constraints.Optional = true
 		}
 
@@ -1211,6 +1253,11 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 						"__airplaneType": "configvar",
 						"name":           *od.Config,
 					}
+				} else if pd.Type == "configvar" {
+					param.Constraints.Options[j].Value = map[string]interface{}{
+						"__airplaneType": "configvar",
+						"name":           od.Value,
+					}
 				} else {
 					param.Constraints.Options[j].Value = od.Value
 				}
@@ -1223,18 +1270,6 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 }
 
 func (d Definition_0_3) addKindSpecificsToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	resourcesByName := map[string]api.Resource{}
-	if d.SQL != nil || d.REST != nil {
-		// Remap resources from ref -> name to ref -> id.
-		resp, err := client.ListResources(ctx)
-		if err != nil {
-			return errors.Wrap(err, "fetching resources")
-		}
-		for _, resource := range resp.Resources {
-			resourcesByName[resource.Name] = resource
-		}
-	}
-
 	kind, options, err := d.GetKindAndOptions()
 	if err != nil {
 		return err
@@ -1348,6 +1383,10 @@ func (d *Definition_0_3) SetWorkdir(taskroot, workdir string) error {
 }
 
 func (d *Definition_0_3) GetSchedules() map[string]api.Schedule {
+	if len(d.Schedules) == 0 {
+		return nil
+	}
+
 	schedules := make(map[string]api.Schedule)
 	for slug, def := range d.Schedules {
 		schedules[slug] = api.Schedule{
@@ -1367,7 +1406,6 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		Description:     t.Description,
 		RequireRequests: t.ExecuteRules.RequireRequests,
 		Runtime:         t.Runtime,
-		Timeout:         t.Timeout,
 	}
 
 	if err := d.convertParametersFromTask(ctx, client, &t); err != nil {
@@ -1385,9 +1423,29 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		}
 	}
 
-	if t.ExecuteRules.DisallowSelfApprove {
-		v := false
-		d.AllowSelfApprovals = &v
+	d.AllowSelfApprovals.value = pointers.Bool(!t.ExecuteRules.DisallowSelfApprove)
+	d.Timeout.value = t.Timeout
+
+	schedules := make(map[string]ScheduleDefinition_0_3)
+	for _, trigger := range t.Triggers {
+		if trigger.Kind != api.TriggerKindSchedule || trigger.Slug == nil {
+			// Trigger is not a schedule deployed via code
+			continue
+		}
+		if trigger.ArchivedAt != nil || trigger.DisabledAt != nil {
+			// Trigger is archived or disabled, so don't add to task defn file
+			continue
+		}
+
+		schedules[*trigger.Slug] = ScheduleDefinition_0_3{
+			Name:        trigger.Name,
+			Description: trigger.Description,
+			CronExpr:    trigger.KindConfig.Schedule.CronExpr.String(),
+			ParamValues: trigger.KindConfig.Schedule.ParamValues,
+		}
+	}
+	if len(schedules) > 0 {
+		d.Schedules = schedules
 	}
 
 	return d, nil
@@ -1403,7 +1461,6 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			Name:        param.Name,
 			Slug:        param.Slug,
 			Description: param.Desc,
-			Default:     param.Default,
 		}
 
 		switch param.Type {
@@ -1424,44 +1481,63 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 			return errors.Errorf("unknown parameter type: %s", param.Type)
 		}
 
-		if param.Constraints.Optional {
-			v := false
-			p.Required = &v
+		if param.Default != nil {
+			if param.Type == "configvar" {
+				switch k := reflect.ValueOf(param.Default).Kind(); k {
+				case reflect.Map:
+					configName, err := extractConfigVarValue(param.Default)
+					if err != nil {
+						return errors.Wrap(err, "unhandled default configvar")
+					}
+					p.Default = configName
+				default:
+					return errors.Errorf("unsupported type for default value: %T", param.Default)
+				}
+			} else {
+				switch k := reflect.ValueOf(param.Default).Kind(); k {
+				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+					reflect.Float32, reflect.Float64:
+					p.Default = param.Default
+				default:
+					return errors.Errorf("unsupported type for default value: %T", param.Default)
+				}
+			}
 		}
+
+		p.Required.value = pointers.Bool(!param.Constraints.Optional)
 
 		p.Regex = param.Constraints.Regex
 
 		if len(param.Constraints.Options) > 0 {
 			p.Options = make([]OptionDefinition_0_3, len(param.Constraints.Options))
 			for j, opt := range param.Constraints.Options {
-				switch k := reflect.ValueOf(opt.Value).Kind(); k {
-				case reflect.Map:
-					m, ok := opt.Value.(map[string]interface{})
-					if !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					}
-					if airplaneType, ok := m["__airplaneType"]; !ok || airplaneType != "configvar" {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					}
-					if configName, ok := m["name"]; !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					} else if configNameStr, ok := configName.(string); !ok {
-						return errors.Errorf("unhandled option: %v", opt.Value)
-					} else {
-						p.Options[j] = OptionDefinition_0_3{
-							Label:  opt.Label,
-							Config: &configNameStr,
+				if param.Type == "configvar" {
+					switch k := reflect.ValueOf(opt.Value).Kind(); k {
+					case reflect.Map:
+						configName, err := extractConfigVarValue(opt.Value)
+						if err != nil {
+							return errors.Wrap(err, "unhandled option")
 						}
+						p.Options[j] = OptionDefinition_0_3{
+							Label: opt.Label,
+							Value: configName,
+						}
+					default:
+						return errors.Errorf("unhandled option type: %s", k)
 					}
-				case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
-					reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
-					reflect.Float32, reflect.Float64:
-					p.Options[j] = OptionDefinition_0_3{
-						Label: opt.Label,
-						Value: opt.Value,
+				} else {
+					switch k := reflect.ValueOf(opt.Value).Kind(); k {
+					case reflect.String, reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+						reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+						reflect.Float32, reflect.Float64:
+						p.Options[j] = OptionDefinition_0_3{
+							Label: opt.Label,
+							Value: opt.Value,
+						}
+					default:
+						return errors.Errorf("unhandled option type: %s", k)
 					}
-				default:
-					return errors.Errorf("unhandled option type: %s", k)
 				}
 			}
 		}
@@ -1469,6 +1545,23 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 		d.Parameters[idx] = p
 	}
 	return nil
+}
+
+func extractConfigVarValue(v interface{}) (string, error) {
+	m, ok := v.(map[string]interface{})
+	if !ok {
+		return "", errors.Errorf("expected map but got %T", v)
+	}
+	if airplaneType, ok := m["__airplaneType"]; !ok || airplaneType != "configvar" {
+		return "", errors.Errorf("expected airplaneType=configvar but got %v", airplaneType)
+	}
+	if configName, ok := m["name"]; !ok {
+		return "", errors.Errorf("missing name property from configvar type: %v", v)
+	} else if configNameStr, ok := configName.(string); !ok {
+		return "", errors.Errorf("expected name to be string but got %T", configName)
+	} else {
+		return configNameStr, nil
+	}
 }
 
 func (d *Definition_0_3) convertTaskKindFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
