@@ -116,7 +116,8 @@ func findNestedPackageJSONs(dir string) ([]string, error) {
 	var pathPackageJSONs []string
 	err := filepath.WalkDir(dir,
 		func(path string, di fs.DirEntry, err error) error {
-			if !strings.Contains(path, "node_modules") && di.Name() == "package.json" {
+			if !strings.Contains(path, "node_modules") && !strings.Contains(path, ".airplane") &&
+				di.Name() == "package.json" {
 				pathPackageJSONs = append(pathPackageJSONs, path)
 			}
 			return nil
@@ -153,7 +154,7 @@ func getWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
 	cmd.Dir = filepath.Dir(pathPackageJSON)
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return nil, errors.Wrap(err, "reading yarn/npm workspaces. Do you have yarn installed?")
+		return nil, errors.Wrapf(err, "reading yarn/npm workspaces: %s Do you have yarn installed?", string(out))
 	}
 	// out will be something like:
 	// yarn workspaces v1.22.17

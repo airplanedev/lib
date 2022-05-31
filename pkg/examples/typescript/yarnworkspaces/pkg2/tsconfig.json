@@ -1,11 +1,10 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "outDir": "./dist",
-    "rootDir": "./src",
+    "outDir": "dist",
+    "rootDir": "src",
     "composite": true
   },
-  "include": ["./src/**/*"],
+  "include": ["src"],
   "references": [
     {"path": "../pkg1"}
   ]
