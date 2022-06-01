@@ -55,7 +55,7 @@ func TestDev(tt *testing.T) {
 		require.NoError(tt, err)
 		var cmd *exec.Cmd
 		if fsx.Exists(filepath.Join(root, "yarn.lock")) {
-			cmd = exec.CommandContext(ctx, "yarn", "install", "--frozen-lockfile")
+			cmd = exec.CommandContext(ctx, "yarn")
 		} else {
 			cmd = exec.CommandContext(ctx, "npm", "install", "--no-save")
 		}
