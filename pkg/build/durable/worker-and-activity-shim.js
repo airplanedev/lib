@@ -60,7 +60,7 @@ async function runWorker(params) {
             `airplane_durable_log:workflow//${workflowInfo.workflowId}/${workflowInfo.runId} ${message}`
           );
         },
-        callDuringReplay: false,
+        callDuringReplay: true,
       },
     },
   };
