@@ -197,6 +197,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, err
 	}
+	logger.Debug("Discovered external dependencies: %v", externalDeps)
 
 	start := time.Now()
 	res := esbuild.Build(esbuild.BuildOptions{
