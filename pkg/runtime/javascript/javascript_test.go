@@ -2,6 +2,7 @@ package javascript
 
 import (
 	"context"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
@@ -55,7 +56,8 @@ func TestDev(tt *testing.T) {
 		require.NoError(tt, err)
 		var cmd *exec.Cmd
 		if fsx.Exists(filepath.Join(root, "yarn.lock")) {
-			cmd = exec.CommandContext(ctx, "yarn", "--network-concurrency 1")
+			os.Remove(filepath.Join(root, "yarn.lock"))
+			cmd = exec.CommandContext(ctx, "yarn")
 		} else {
 			cmd = exec.CommandContext(ctx, "npm", "install", "--no-save")
 		}
