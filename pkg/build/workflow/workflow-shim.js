@@ -18,7 +18,7 @@ export async function __airplaneEntrypoint(params) {
     throw err;
   }
 
-  // TODO: Update SDK to include a durable version of setOutput, then
+  // TODO: Update SDK to include a workflow version of setOutput, then
   // use that instead.
   if (result !== undefined) {
     const output = JSON.stringify(result);

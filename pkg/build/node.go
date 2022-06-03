@@ -24,7 +24,7 @@ type templateParams struct {
 	InlineWorkflowBundlerScript      string
 	InlineWorkflowInterceptorsScript string
 	InlineWorkflowShimScript         string
-	IsDurable                        bool
+	IsWorkflow                       bool
 	NodeVersion                      string
 	ExternalFlags                    string
 	InstallCommand                   string
@@ -61,16 +61,16 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
 
 	runtime, ok := options["runtime"]
-	var isDurable bool
+	var isWorkflow bool
 
 	if ok {
 		// Depending on how the options were serialized, the runtime can be
 		// either a string or TaskRuntime; handle both.
 		switch v := runtime.(type) {
 		case string:
-			isDurable = v == string(TaskRuntimeDurable)
+			isWorkflow = v == string(TaskRuntimeWorkflow)
 		case TaskRuntime:
-			isDurable = v == TaskRuntimeDurable
+			isWorkflow = v == TaskRuntimeWorkflow
 		default:
 		}
 	}
@@ -105,7 +105,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		NodeVersion:        GetNodeVersion(options),
 		PostInstallCommand: pkg.Settings.PostInstallCommand,
 		Args:               argsCommand,
-		IsDurable:          isDurable,
+		IsWorkflow:         isWorkflow,
 	}
 
 	if cfg.HasPackageJSON {
@@ -119,7 +119,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		for _, dep := range deps {
 			flags = append(flags, fmt.Sprintf("--external:%s", dep))
 		}
-		if isDurable {
+		if isWorkflow {
 			// Even if these are imported, we need to mark the root packages
 			// as external for esbuild to work properly. Esbuild doesn't
 			// care about repeats, so no need to dedupe.
@@ -138,13 +138,13 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		return "", err
 	}
 
-	pjson, err := GenShimPackageJSON(rootPackageJSON, isDurable)
+	pjson, err := GenShimPackageJSON(rootPackageJSON, isWorkflow)
 	if err != nil {
 		return "", err
 	}
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
-	if isDurable {
+	if isWorkflow {
 		cfg.InlineShim = inlineString(workerAndActivityShim)
 		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
 		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
@@ -229,7 +229,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		RUN {{.PostInstallCommand}}
 		{{end}}
 
-		{{if .IsDurable}}
+		{{if .IsWorkflow}}
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
 		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js
@@ -247,7 +247,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	`), cfg)
 }
 
-func GenShimPackageJSON(pathPackageJSON string, isDurable bool) ([]byte, error) {
+func GenShimPackageJSON(pathPackageJSON string, isWorkflow bool) ([]byte, error) {
 	deps, err := ListDependencies(pathPackageJSON)
 	if err != nil {
 		return nil, err
@@ -262,7 +262,7 @@ func GenShimPackageJSON(pathPackageJSON string, isDurable bool) ([]byte, error) 
 		},
 	}
 
-	if isDurable {
+	if isWorkflow {
 		// TODO: Make this configurable
 		pjson.Dependencies["temporalio"] = "0.23.0"
 	}
@@ -294,16 +294,16 @@ func GetNodeVersion(opts KindOptions) string {
 //go:embed node-shim.js
 var nodeShim string
 
-//go:embed durable/worker-and-activity-shim.js
+//go:embed workflow/worker-and-activity-shim.js
 var workerAndActivityShim string
 
-//go:embed durable/workflow-bundler.js
+//go:embed workflow/workflow-bundler.js
 var workflowBundlerScript string
 
-//go:embed durable/workflow-interceptors.js
+//go:embed workflow/workflow-interceptors.js
 var workflowInterceptorsScript string
 
-//go:embed durable/workflow-shim.js
+//go:embed workflow/workflow-shim.js
 var workflowShimScript string
 
 func TemplatedNodeShim(entrypoint string) (string, error) {

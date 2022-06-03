@@ -1,5 +1,5 @@
 {
-  "name": "durable-simple",
+  "name": "workflow-simple",
   "version": "0.1.0",
   "private": true,
   "type": "module",

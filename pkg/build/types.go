@@ -24,7 +24,7 @@ type TaskRuntime string
 
 const (
 	TaskRuntimeStandard TaskRuntime = ""
-	TaskRuntimeDurable  TaskRuntime = "durable"
+	TaskRuntimeWorkflow TaskRuntime = "workflow"
 )
 
 // Value represents a value.

@@ -18,6 +18,6 @@ export async function makeHTTPCall(url) {
 function log(message) {
   const info = Context.current().info;
   console.log(
-    `airplane_durable_log:activity/${info.activityType}/${info.workflowExecution.workflowId}/${info.workflowExecution.runId} ${message}`
+    `airplane_workflow_log:activity/${info.activityType}/${info.workflowExecution.workflowId}/${info.workflowExecution.runId} ${message}`
   );
 }

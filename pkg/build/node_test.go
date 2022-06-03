@@ -195,17 +195,17 @@ func TestNodeBuilder(t *testing.T) {
 	RunTests(t, ctx, tests)
 }
 
-func TestNodeDurableBuilder(t *testing.T) {
+func TestNodeWorkflowBuilder(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []Test{
 		{
-			Root: "javascript/durable",
+			Root: "javascript/workflow",
 			Kind: TaskKindNode,
 			Options: KindOptions{
 				"shim":       "true",
 				"entrypoint": "task.js",
-				"runtime":    TaskRuntimeDurable,
+				"runtime":    TaskRuntimeWorkflow,
 			},
 			SkipRun: true,
 		},

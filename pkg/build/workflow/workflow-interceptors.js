@@ -96,5 +96,5 @@ export const interceptors = () => ({
 function workflowLog(info, message) {
   // Log out interceptor messages with specific prefix so that we can
   // link them back to a specific task run.
-  console.log(`airplane_durable_log:interceptor//${info.workflowId}/${info.runId} ${message}`);
+  console.log(`airplane_workflow_log:interceptor//${info.workflowId}/${info.runId} ${message}`);
 }
