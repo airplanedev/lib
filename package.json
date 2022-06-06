@@ -5,7 +5,7 @@
     "@types/node": "17.0.8"
   },
   "dependencies": {
-    "airplane": "0.1.2",
+    "airplane": "github:airplanedev/node-sdk#6d1e8f243fc7ff5233d4eba0042af4e8010efb25",
     "execa": "5.1.1"
   }
 }
