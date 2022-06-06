@@ -11,7 +11,7 @@ name: {{.name}}
 # A human-readable description for your task.
 # description: "My Airplane task"
 
-# A list of inputs to your task.
+# A list of inputs to your task.{{.paramsExtraDescription}}
 # parameters:
 # -
 #   # An identifier for the parameter, which can be used in JavaScript
@@ -115,6 +115,8 @@ shell:
   #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
+const shellParamsExtraDescription = ` Parameters are passed into your script
+# as environment variables of form PARAM_{SLUG}, e.g. PARAM_USER_EMAIL.`
 
 const imageTemplate = `
 # Configuration for a Docker task.
@@ -140,6 +142,8 @@ docker:
   #   ENV_VAR_FROM_VALUE:
   #     value: env_var_value
 `
+const imageParamsExtraDescription = ` Parameters can be passed into the docker command
+# as {{params.slug}}, e.g. command: /bin/my_command --id {{params.user_id}}.`
 
 const sqlTemplate = `
 # Configuration for a SQL task.

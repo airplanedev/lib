@@ -9,7 +9,8 @@ name: My Task
 # A human-readable description for your task.
 # description: "My Airplane task"
 
-# A list of inputs to your task.
+# A list of inputs to your task. Parameters can be passed into the docker command
+# as {{params.slug}}, e.g. command: /bin/my_command --id {{params.user_id}}.
 # parameters:
 # -
 #   # An identifier for the parameter, which can be used in JavaScript

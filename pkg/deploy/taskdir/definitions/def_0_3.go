@@ -762,6 +762,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 	}
 
 	taskDefinition := new(bytes.Buffer)
+	var paramsExtraInfo string
 	switch kind {
 	case build.TaskKindImage:
 		if d.Image.Entrypoint != "" || len(d.Image.EnvVars) > 0 {
@@ -774,6 +775,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		if err := tmpl.Execute(taskDefinition, d.Image); err != nil {
 			return nil, errors.Wrap(err, "executing image template")
 		}
+		paramsExtraInfo = imageParamsExtraDescription
 	case build.TaskKindNode:
 		if len(d.Node.EnvVars) > 0 {
 			return d.Marshal(format)
@@ -807,6 +809,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		if err := tmpl.Execute(taskDefinition, d.Shell); err != nil {
 			return nil, errors.Wrap(err, "executing shell template")
 		}
+		paramsExtraInfo = shellParamsExtraDescription
 	case build.TaskKindSQL:
 		if d.SQL.Resource != "" || len(d.SQL.QueryArgs) > 0 {
 			return d.Marshal(format)
@@ -842,9 +845,10 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 	}
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, map[string]interface{}{
-		"slug":           d.Slug,
-		"name":           d.Name,
-		"taskDefinition": taskDefinition.String(),
+		"slug":                   d.Slug,
+		"name":                   d.Name,
+		"taskDefinition":         taskDefinition.String(),
+		"paramsExtraDescription": paramsExtraInfo,
 	}); err != nil {
 		return nil, errors.Wrap(err, "executing definition template")
 	}

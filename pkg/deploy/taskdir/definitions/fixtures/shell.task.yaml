@@ -9,7 +9,8 @@ name: My Task
 # A human-readable description for your task.
 # description: "My Airplane task"
 
-# A list of inputs to your task.
+# A list of inputs to your task. Parameters are passed into your script
+# as environment variables of form PARAM_{SLUG}, e.g. PARAM_USER_EMAIL.
 # parameters:
 # -
 #   # An identifier for the parameter, which can be used in JavaScript
