@@ -3,7 +3,8 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 // Activity code runs in the same node process as the worker, so we import it here directly.
 //
 // TODO: Make this path configurable.
-import * as activities from '../activities.js';
+
+// import * as activities from '../activities.js';
 
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
@@ -15,6 +16,7 @@ async function runWorker(params) {
   if (temporalHost === undefined) {
     throw 'AP_TEMPORAL_HOST is not set in environment';
   }
+
 
   const taskQueue = process.env.AP_TASK_QUEUE;
   if (taskQueue === undefined) {
@@ -69,7 +71,7 @@ async function runWorker(params) {
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
-    activities,
+    airplane.executeTask,
     connection,
     namespace,
     taskQueue,
