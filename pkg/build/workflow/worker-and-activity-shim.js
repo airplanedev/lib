@@ -71,7 +71,7 @@ async function runWorker(params) {
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
-    airplane.executeTask,
+    activities: airplane.executeTask,
     connection,
     namespace,
     taskQueue,
