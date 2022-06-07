@@ -4,12 +4,12 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 //
 // TODO: Make this path configurable.
 
-// import * as activities from '../activities.js';
+import * as activities from '../activities/activities.js';
 
-import * as sdkActivities from 'airplane/activities'
-const activities = {
-  ...sdkActivities,
-};
+// import * as sdkActivities from 'airplane/activities'
+// const activities = {
+//   ...sdkActivities,
+// };
 
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
