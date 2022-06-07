@@ -6,6 +6,11 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 
 // import * as activities from '../activities.js';
 
+import * as sdkActivities from 'airplane/activities'
+const activities = {
+  ...sdkActivities,
+};
+
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
 async function runWorker(params) {
@@ -71,7 +76,7 @@ async function runWorker(params) {
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
-    activities: airplane.executeTask,
+    activities,
     connection,
     namespace,
     taskQueue,

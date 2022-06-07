@@ -258,7 +258,7 @@ func GenShimPackageJSON(pathPackageJSON string, isWorkflow bool) ([]byte, error)
 		Type         string            `json:"type,omitempty"`
 	}{
 		Dependencies: map[string]string{
-			"airplane": "~0.1.2",
+			"airplane": "github:airplanedev/node-sdk#e1dae59",
 		},
 	}
 
