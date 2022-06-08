@@ -2,22 +2,15 @@ package discover
 
 import (
 	"context"
-	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/utils/logger"
-	"github.com/goccy/go-yaml"
 	"github.com/pkg/errors"
 )
-
-type AppDefinition struct {
-	// TODO: expand this with additional fields that configure an app.
-	Slug       string `json:"slug"`
-	Entrypoint string `json:"entrypoint"`
-}
 
 type AppDefnDiscoverer struct {
 	Client api.IAPIClient
@@ -26,7 +19,7 @@ type AppDefnDiscoverer struct {
 
 var _ AppDiscoverer = &AppDefnDiscoverer{}
 
-func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*AppConfig, error) {
+func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*ViewConfig, error) {
 	if !definitions.IsAppDef(file) {
 		return nil, nil
 	}
@@ -37,42 +30,40 @@ func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*Ap
 	}
 
 	format := definitions.GetAppDefFormat(file)
-	switch format {
-	case definitions.DefFormatYAML:
-		buf, err = yaml.YAMLToJSON(buf)
-		if err != nil {
-			return nil, err
-		}
-	case definitions.DefFormatJSON:
-		// nothing
-	default:
-		return nil, errors.Errorf("unknown format: %s", format)
-	}
+	d := definitions.ViewDefinition{}
 
-	var d AppDefinition
-	if err = json.Unmarshal(buf, &d); err != nil {
-		return nil, err
+	if err = d.Unmarshal(format, buf); err != nil {
+		switch err := errors.Cause(err).(type) {
+		case definitions.ErrSchemaValidation:
+			errorMsgs := []string{}
+			for _, verr := range err.Errors {
+				errorMsgs = append(errorMsgs, fmt.Sprintf("%s: %s", verr.Field(), verr.Description()))
+			}
+			return nil, definitions.NewErrReadDefinition(fmt.Sprintf("Error reading %s", file), errorMsgs...)
+		default:
+			return nil, errors.Wrap(err, "unmarshalling view definition")
+		}
 	}
 
 	root, err := filepath.Abs(filepath.Dir(file))
 	if err != nil {
-		return nil, errors.Wrap(err, "getting absolute app definition root")
+		return nil, errors.Wrap(err, "getting absolute view definition root")
 	}
 
 	app, err := dd.Client.GetApp(ctx, api.GetAppRequest{Slug: d.Slug})
 	if err != nil {
 		var merr *api.AppMissingError
 		if !errors.As(err, &merr) {
-			return nil, errors.Wrap(err, "unable to get app")
+			return nil, errors.Wrap(err, "unable to get view")
 		}
 		// TODO offer to create the app.
 		if dd.Logger != nil {
-			dd.Logger.Warning(`App with slug %s does not exist, skipping deploy.`, d.Slug)
+			dd.Logger.Warning(`View with slug %s does not exist, skipping deploy. :(`, d.Slug)
 		}
 		return nil, nil
 	}
 	if app.ArchivedAt != nil {
-		dd.Logger.Warning(`App with slug %s is archived, skipping deployment.`, app.Slug)
+		dd.Logger.Warning(`View with slug %s is archived, skipping deployment.`, app.Slug)
 		return nil, nil
 	}
 
@@ -84,12 +75,11 @@ func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*Ap
 		}
 	}
 
-	return &AppConfig{
-		ID:         app.ID,
-		Slug:       d.Slug,
-		Entrypoint: d.Entrypoint,
-		Source:     dd.ConfigSource(),
-		Root:       root,
+	return &ViewConfig{
+		ID:     app.ID,
+		Def:    d,
+		Source: dd.ConfigSource(),
+		Root:   root,
 	}, nil
 }
 

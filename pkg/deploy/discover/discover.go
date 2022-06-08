@@ -38,15 +38,14 @@ func (c TaskConfig) GetSource() ConfigSource {
 	return c.Source
 }
 
-type AppConfig struct {
-	ID         string
-	Root       string
-	Entrypoint string
-	Slug       string
-	Source     ConfigSource
+type ViewConfig struct {
+	ID     string
+	Root   string
+	Def    definitions.ViewDefinition
+	Source ConfigSource
 }
 
-func (c AppConfig) GetSource() ConfigSource {
+func (c ViewConfig) GetSource() ConfigSource {
 	return c.Source
 }
 
@@ -68,7 +67,7 @@ type TaskDiscoverer interface {
 type AppDiscoverer interface {
 	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
 	// If the task should not be discovered as an Airplane task, a nil task config is returned.
-	GetAppConfig(ctx context.Context, file string) (*AppConfig, error)
+	GetAppConfig(ctx context.Context, file string) (*ViewConfig, error)
 	// ConfigSource returns a unique identifier of this Discoverer.
 	ConfigSource() ConfigSource
 }
@@ -90,9 +89,9 @@ type Discoverer struct {
 // If there are multiple configs discovered with the same slug, the order of the discoverers takes
 // precedence; if a single discoverer discovers multiple configs with the same slug, the first config
 // discovered takes precedence. Configs are returned in alphabetical order of their slugs.
-func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfig, []AppConfig, error) {
+func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfig, []ViewConfig, error) {
 	taskConfigsBySlug := map[string][]TaskConfig{}
-	appConfigsBySlug := map[string][]AppConfig{}
+	appConfigsBySlug := map[string][]ViewConfig{}
 	for _, p := range paths {
 		if ignoredDirectories[p] {
 			continue
@@ -124,9 +123,9 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], tc)
 			}
 			for _, ac := range nestedAppConfigs {
-				slug := ac.Slug
+				slug := ac.Def.Slug
 				if _, ok := appConfigsBySlug[slug]; !ok {
-					appConfigsBySlug[slug] = []AppConfig{}
+					appConfigsBySlug[slug] = []ViewConfig{}
 				}
 				appConfigsBySlug[slug] = append(appConfigsBySlug[slug], ac)
 			}
@@ -156,9 +155,9 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 					// This file is not an Airplane app.
 					continue
 				}
-				slug := appConfig.Slug
+				slug := appConfig.Def.Slug
 				if _, ok := appConfigsBySlug[slug]; !ok {
-					appConfigsBySlug[slug] = []AppConfig{}
+					appConfigsBySlug[slug] = []ViewConfig{}
 				}
 				appConfigsBySlug[slug] = append(appConfigsBySlug[slug], *appConfig)
 			}

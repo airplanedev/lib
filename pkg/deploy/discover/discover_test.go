@@ -22,7 +22,7 @@ func TestDiscover(t *testing.T) {
 		existingApps        map[string]api.App
 		expectedErr         bool
 		expectedTaskConfigs []TaskConfig
-		expectedAppConfigs  []AppConfig
+		expectedAppConfigs  []ViewConfig
 		buildConfigs        []build.BuildConfig
 		defnFilePath        string
 		absEntrypoints      []string
@@ -360,18 +360,22 @@ func TestDiscover(t *testing.T) {
 			expectedErr: true,
 		},
 		{
-			name:  "app defn",
+			name:  "view defn",
 			paths: []string{"./fixtures/app/defn.app.yaml"},
 			existingApps: map[string]api.App{
-				"my_app": {ID: "app123", Slug: "my_app", Name: "My App"},
+				"my_view": {ID: "view123", Slug: "my_view", Name: "My View"},
 			},
-			expectedAppConfigs: []AppConfig{
+			expectedAppConfigs: []ViewConfig{
 				{
-					ID:         "app123",
-					Slug:       "my_app",
-					Root:       fixturesPath + "/app",
-					Entrypoint: fixturesPath + "/app/foo.js",
-					Source:     ConfigSourceDefn,
+					ID: "view123",
+					Def: definitions.ViewDefinition{
+						Name:        "My View",
+						Slug:        "my_view",
+						Description: "Test view yaml file",
+						Entrypoint:  fixturesPath + "/app/foo.js",
+					},
+					Root:   fixturesPath + "/app",
+					Source: ConfigSourceDefn,
 				},
 			},
 		},
