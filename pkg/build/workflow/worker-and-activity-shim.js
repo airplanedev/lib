@@ -4,7 +4,7 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 //
 // TODO: Make this path configurable.
 
-import { registerActivities } from './activities';
+import { registerActivities } from "airplane";
 
 // import * as sdkActivities from 'airplane/activities'
 // const activities = {
