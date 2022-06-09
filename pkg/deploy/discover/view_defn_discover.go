@@ -12,21 +12,21 @@ import (
 	"github.com/pkg/errors"
 )
 
-type AppDefnDiscoverer struct {
+type ViewDefnDiscoverer struct {
 	Client api.IAPIClient
 	Logger logger.Logger
 }
 
-var _ AppDiscoverer = &AppDefnDiscoverer{}
+var _ ViewDiscoverer = &ViewDefnDiscoverer{}
 
-func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*ViewConfig, error) {
+func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*ViewConfig, error) {
 	if !definitions.IsAppDef(file) {
 		return nil, nil
 	}
 
 	buf, err := ioutil.ReadFile(file)
 	if err != nil {
-		return nil, errors.Wrap(err, "reading app definition")
+		return nil, errors.Wrap(err, "reading view definition")
 	}
 
 	format := definitions.GetAppDefFormat(file)
@@ -50,20 +50,20 @@ func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*Vi
 		return nil, errors.Wrap(err, "getting absolute view definition root")
 	}
 
-	app, err := dd.Client.GetApp(ctx, api.GetAppRequest{Slug: d.Slug})
+	view, err := dd.Client.GetApp(ctx, api.GetAppRequest{Slug: d.Slug})
 	if err != nil {
 		var merr *api.AppMissingError
 		if !errors.As(err, &merr) {
 			return nil, errors.Wrap(err, "unable to get view")
 		}
-		// TODO offer to create the app.
+		// TODO offer to create the view.
 		if dd.Logger != nil {
-			dd.Logger.Warning(`View with slug %s does not exist, skipping deploy. :(`, d.Slug)
+			dd.Logger.Warning(`View with slug %s does not exist, skipping deploy.`, d.Slug)
 		}
 		return nil, nil
 	}
-	if app.ArchivedAt != nil {
-		dd.Logger.Warning(`View with slug %s is archived, skipping deployment.`, app.Slug)
+	if view.ArchivedAt != nil {
+		dd.Logger.Warning(`View with slug %s is archived, skipping deployment.`, view.Slug)
 		return nil, nil
 	}
 
@@ -76,13 +76,13 @@ func (dd *AppDefnDiscoverer) GetAppConfig(ctx context.Context, file string) (*Vi
 	}
 
 	return &ViewConfig{
-		ID:     app.ID,
+		ID:     view.ID,
 		Def:    d,
 		Source: dd.ConfigSource(),
 		Root:   root,
 	}, nil
 }
 
-func (dd *AppDefnDiscoverer) ConfigSource() ConfigSource {
+func (dd *ViewDefnDiscoverer) ConfigSource() ConfigSource {
 	return ConfigSourceDefn
 }
