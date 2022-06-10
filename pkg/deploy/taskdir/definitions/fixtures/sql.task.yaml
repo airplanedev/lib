@@ -10,32 +10,28 @@ name: My Task
 # description: "My Airplane task"
 
 # A list of inputs to your task.
-# parameters:
-# -
-#   # An identifier for the parameter, which can be used in JavaScript
-#   # templates (https://docs.airplane.dev/runbooks/javascript-templates).
-#   slug: name
-#   # A human-readable name for the parameter.
-#   name: Name
-#   # The type of parameter. Valid values: shorttext, longtext, sql, boolean,
-#   # upload, integer, float, date, datetime, configvar.
-#   type: shorttext
-#   # A human-readable description of the parameter.
-#   description: The user's name.
-#   # The default value of the parameter.
-#   default: Alfred Pennyworth
-#   # Set to false to indicate that this parameter. is optional. Default: true.
-#   required: false
-#   # A list of options to constrain the parameter values. For configvar types,
-#   # each option needs to be an object with a label (value to show to user) and
-#   # a config (name of the config var). For all other types, each option can be
-#   # a single value or an object with a label and a value.
-#   options:
-#   - Alfred Pennyworth
-#   - label: Batman
-#     value: Bruce Wayne
-#   # A regular expression with which to validate parameter values.
-#   regex: "^[a-zA-Z ]+$"
+parameters:
+  - slug: user_id
+    name: User ID
+    # The type of parameter. Valid values: shorttext, longtext, sql, boolean,
+    # upload, integer, float, date, datetime, configvar.
+    type: shorttext
+    # A human-readable description of the parameter.
+    description: The user's name.
+    # The default value of the parameter.
+    default: Alfred Pennyworth
+    # Set to false to indicate that this parameter. is optional. Default: true.
+    required: false
+    # A list of options to constrain the parameter values. For configvar types,
+    # each option needs to be an object with a label (value to show to user) and
+    # a config (name of the config var). For all other types, each option can be
+    # a single value or an object with a label and a value.
+    options:
+      - Alfred Pennyworth
+      - label: Batman
+        value: Bruce Wayne
+    # A regular expression with which to validate parameter values.
+    regex: "^[a-zA-Z ]+$"
 
 # Configuration for a SQL task.
 sql:
@@ -62,7 +58,6 @@ sql:
   # configs:
   #   - API_KEY
   #   - DB_PASSWORD
-
 # Set label constraints to restrict this task to run only on agents with
 # matching labels.
 # constraints:
