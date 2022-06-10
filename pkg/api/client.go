@@ -100,6 +100,14 @@ type UpdateTaskRequest struct {
 	EnvSlug                    string                    `json:"envSlug"`
 }
 
+type UpdateViewRequest struct {
+	Slug        string `json:"slug"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	// TODO: rename type from TaskEnv
+	Env TaskEnv `json:"env"`
+}
+
 type UpdateExecuteRulesRequest struct {
 	DisallowSelfApprove *bool `json:"disallowSelfApprove"`
 	RequireRequests     *bool `json:"requireRequests"`
