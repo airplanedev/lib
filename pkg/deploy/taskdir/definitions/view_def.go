@@ -11,12 +11,11 @@ import (
 )
 
 type ViewDefinition struct {
-	Name        string `json:"name"`
-	Slug        string `json:"slug"`
-	Description string `json:"description,omitempty"`
-	Entrypoint  string `json:"entrypoint"`
-	// TODO: create ViewEnv type or rename TaskEnv to not be task-specific
-	EnvVars api.TaskEnv `json:"envVars,omitempty"`
+	Name        string      `json:"name"`
+	Slug        string      `json:"slug"`
+	Description string      `json:"description,omitempty"`
+	Entrypoint  string      `json:"entrypoint"`
+	EnvVars     api.EnvVars `json:"envVars,omitempty"`
 }
 
 //go:embed view_schema.json
