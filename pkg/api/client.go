@@ -104,7 +104,7 @@ type UpdateViewRequest struct {
 	Slug        string  `json:"slug"`
 	Name        string  `json:"name"`
 	Description string  `json:"description"`
-	EnvVars     EnvVars `json:"env"`
+	EnvVars     EnvVars `json:"envVars"`
 }
 
 type UpdateExecuteRulesRequest struct {
