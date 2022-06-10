@@ -101,11 +101,10 @@ type UpdateTaskRequest struct {
 }
 
 type UpdateViewRequest struct {
-	Slug        string `json:"slug"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-	// TODO: rename type from TaskEnv
-	Env TaskEnv `json:"env"`
+	Slug        string  `json:"slug"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	EnvVars     EnvVars `json:"env"`
 }
 
 type UpdateExecuteRulesRequest struct {
@@ -177,6 +176,8 @@ type ResourceRequests map[string]string
 type Resources map[string]string
 
 type TaskEnv map[string]EnvVarValue
+
+type EnvVars map[string]EnvVarValue
 
 type EnvVarValue struct {
 	Value  *string `json:"value,omitempty" yaml:"value,omitempty"`
