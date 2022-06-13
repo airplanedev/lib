@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "View",
+  "type": "object",
+
+  "properties": {
+    "slug": {
+      "description": "Used by Airplane to identify your view. Do not change.",
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$",
+      "maxLength": 50
+    },
+    "name": {
+      "description": "A human-readable name for your view.",
+      "type": "string"
+    },
+    "description": {
+      "description": "A human-readable description for your view.",
+      "type": "string"
+    },
+    "entrypoint": {
+      "description": "The path to the directory containing the code for this view. This can be absolute or relative to the location of the definition file.",
+      "type": "string"
+    },
+    "envVars": { "$ref": "#/$defs/envVars" }
+  },
+  "additionalProperties": false,
+  "required": ["name", "slug", "entrypoint"],
+  "$defs": {
+    "envVars": {
+      "description": "A map of environment variables to use for the view. If specifying raw values, the value may be a string; if using config variables, the value must be an object with config mapped to the name of the config variable.",
+      "examples": ["env_var_value", { "config": "db_from_config" }],
+      "type": "object",
+      "patternProperties": {
+        ".*": {
+          "oneOf": [
+            { "type": "string" },
+            {
+              "type": "object",
+              "properties": {
+                "config": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string" }
+              },
+              "additionalProperties": false
+            }
+          ]
+        }
+      }
+    }
+  }
+}
