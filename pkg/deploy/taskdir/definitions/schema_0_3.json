@@ -220,6 +220,7 @@
     "slug": true,
     "description": true,
     "parameters": true,
+    "resources": true,
     "constraints": true,
     "requireRequests": true,
     "allowSelfApprovals": true,
@@ -386,6 +387,16 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/parameter"
+          }
+        },
+        "resources": {
+          "description": "[Experimental] A map of resources that can be accessed from your task. Keys determine how you refer to the resource; values are existing resource slugs in your Airplane team.",
+          "type": "object",
+          "patternProperties": {
+            "^[a-z0-9_]{1,50}$": {
+              "type": "string",
+              "pattern": "^[a-z0-9_]{1,50}$"
+            }
           }
         },
         "constraints": {
