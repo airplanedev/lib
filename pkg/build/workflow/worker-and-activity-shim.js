@@ -4,6 +4,7 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 //
 // TODO: Make this path configurable.
 
+import * as customActivities from "../activities"
 import { registerActivities } from "airplane"
 
 // Main worker entrypoint; starts a worker that will process activities
@@ -70,7 +71,10 @@ async function runWorker(params) {
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
-    activities: registerActivities(),
+    activities: {
+      ...customActivities,
+      ...(registerActivities()),
+    },
     connection,
     namespace,
     taskQueue,
