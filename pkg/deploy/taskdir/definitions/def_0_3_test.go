@@ -527,8 +527,9 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 			},
 			definition: Definition_0_3{
-				Name: "REST Task",
-				Slug: "rest_task",
+				Name:      "REST Task",
+				Slug:      "rest_task",
+				Resources: map[string]string{},
 				REST: &RESTDefinition_0_3{
 					Resource: "httpbin",
 					Method:   "GET",
@@ -813,8 +814,9 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 			},
 			definition: Definition_0_3{
-				Name: "REST Task",
-				Slug: "rest_task",
+				Name:      "REST Task",
+				Slug:      "rest_task",
+				Resources: map[string]string{},
 				REST: &RESTDefinition_0_3{
 					Resource: "httpbin",
 					Method:   "GET",
@@ -939,6 +941,57 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
 			},
 		},
+		{
+			name: "simple resources",
+			resources: []api.Resource{
+				{
+					ID:   "res20220613localdb",
+					Name: "Local DB",
+					Slug: "local_db",
+				},
+			},
+			task: api.Task{
+				Name:        "Image Task",
+				Slug:        "image_task",
+				Command:     []string{"bash"},
+				Arguments:   []string{"-c", `echo "foobar"`},
+				Kind:        build.TaskKindImage,
+				KindOptions: build.KindOptions{},
+				Image:       pointers.String("ubuntu:latest"),
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
+				Resources: map[string]string{
+					"db": "res20220613localdb",
+				},
+			},
+			definition: Definition_0_3{
+				Name: "Image Task",
+				Slug: "image_task",
+				Resources: map[string]string{
+					"db": "local_db",
+				},
+				Image: &ImageDefinition_0_3{
+					Image:      "ubuntu:latest",
+					Entrypoint: "bash",
+					Command:    `-c 'echo "foobar"'`,
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
+				},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
+			},
+		},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			assert := require.New(t)
@@ -976,6 +1029,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Description: "A task for testing",
 				Configs:     &[]api.ConfigAttachment{},
 				Parameters:  []api.Parameter{},
+				Resources:   map[string]string{},
 				Kind:        build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
@@ -1001,6 +1055,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Node Task",
 				Slug:       "node_task",
 				Parameters: []api.Parameter{},
+				Resources:  map[string]string{},
 				Configs:    &[]api.ConfigAttachment{},
 				Kind:       build.TaskKindNode,
 				KindOptions: build.KindOptions{
@@ -1027,6 +1082,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Shell Task",
 				Slug:       "shell_task",
 				Parameters: []api.Parameter{},
+				Resources:  map[string]string{},
 				Configs:    &[]api.ConfigAttachment{},
 				Kind:       build.TaskKindShell,
 				KindOptions: build.KindOptions{
@@ -1054,6 +1110,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:       "Image Task",
 				Slug:       "image_task",
 				Parameters: []api.Parameter{},
+				Resources:  map[string]string{},
 				Configs:    &[]api.ConfigAttachment{},
 				Command:    []string{"bash"},
 				Arguments:  []string{"-c", `echo "foobar"`},
@@ -1126,6 +1183,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
+				Resources:   map[string]string{},
 				Configs:     &[]api.ConfigAttachment{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
@@ -1155,6 +1213,7 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				Name:        "Test Task",
 				Slug:        "test_task",
 				Parameters:  []api.Parameter{},
+				Resources:   map[string]string{},
 				Configs:     &[]api.ConfigAttachment{},
 				Description: "A task for testing",
 				Kind:        build.TaskKindPython,
@@ -1388,8 +1447,9 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 						},
 					},
 				},
-				Configs: &[]api.ConfigAttachment{},
-				Kind:    build.TaskKindPython,
+				Resources: map[string]string{},
+				Configs:   &[]api.ConfigAttachment{},
+				Kind:      build.TaskKindPython,
 				KindOptions: build.KindOptions{
 					"entrypoint": "main.py",
 				},
@@ -1449,6 +1509,63 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 				{
 					ID:   "rest_id",
 					Name: "rest",
+				},
+			},
+		},
+		{
+			name: "simple resources",
+			definition: Definition_0_3{
+				Name: "Image Task",
+				Slug: "image_task",
+				Resources: map[string]string{
+					"db": "local_db",
+				},
+				Image: &ImageDefinition_0_3{
+					Image:      "ubuntu:latest",
+					Entrypoint: "bash",
+					Command:    `-c 'echo "foobar"'`,
+					EnvVars: api.TaskEnv{
+						"value": api.EnvVarValue{
+							Value: pointers.String("value"),
+						},
+						"config": api.EnvVarValue{
+							Config: pointers.String("config"),
+						},
+					},
+				},
+				AllowSelfApprovals: DefaultTrueDefinition{pointers.Bool(true)},
+			},
+			request: api.UpdateTaskRequest{
+				Name:       "Image Task",
+				Slug:       "image_task",
+				Parameters: []api.Parameter{},
+				Configs:    &[]api.ConfigAttachment{},
+				Command:    []string{"bash"},
+				Arguments:  []string{"-c", `echo "foobar"`},
+				Kind:       build.TaskKindImage,
+				Image:      pointers.String("ubuntu:latest"),
+				Env: api.TaskEnv{
+					"value": api.EnvVarValue{
+						Value: pointers.String("value"),
+					},
+					"config": api.EnvVarValue{
+						Config: pointers.String("config"),
+					},
+				},
+				Resources: map[string]string{
+					"db": "res20220613localdb",
+				},
+				ExecuteRules: api.UpdateExecuteRulesRequest{
+					DisallowSelfApprove: pointers.Bool(false),
+					RequireRequests:     pointers.Bool(false),
+				},
+				Timeout: 3600,
+			},
+			resources: []api.Resource{
+				{
+					ID:   "res20220613localdb",
+					Name: "Local DB",
+					Slug: "local_db",
 				},
 			},
 		},
