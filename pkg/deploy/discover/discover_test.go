@@ -19,10 +19,10 @@ func TestDiscover(t *testing.T) {
 		name                string
 		paths               []string
 		existingTasks       map[string]api.Task
-		existingApps        map[string]api.App
+		existingViews       map[string]api.App
 		expectedErr         bool
 		expectedTaskConfigs []TaskConfig
-		expectedAppConfigs  []AppConfig
+		expectedViewConfigs []ViewConfig
 		buildConfigs        []build.BuildConfig
 		defnFilePath        string
 		absEntrypoints      []string
@@ -360,18 +360,22 @@ func TestDiscover(t *testing.T) {
 			expectedErr: true,
 		},
 		{
-			name:  "app defn",
+			name:  "view defn",
 			paths: []string{"./fixtures/app/defn.app.yaml"},
-			existingApps: map[string]api.App{
-				"my_app": {ID: "app123", Slug: "my_app", Name: "My App"},
+			existingViews: map[string]api.App{
+				"my_view": {ID: "view123", Slug: "my_view", Name: "My View"},
 			},
-			expectedAppConfigs: []AppConfig{
+			expectedViewConfigs: []ViewConfig{
 				{
-					ID:         "app123",
-					Slug:       "my_app",
-					Root:       fixturesPath + "/app",
-					Entrypoint: fixturesPath + "/app/foo.js",
-					Source:     ConfigSourceDefn,
+					ID: "view123",
+					Def: definitions.ViewDefinition{
+						Name:        "My View",
+						Slug:        "my_view",
+						Description: "Test view yaml file",
+						Entrypoint:  fixturesPath + "/app/foo.js",
+					},
+					Root:   fixturesPath + "/app",
+					Source: ConfigSourceDefn,
 				},
 			},
 		},
@@ -381,7 +385,7 @@ func TestDiscover(t *testing.T) {
 			require := require.New(t)
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
-				Apps:  tC.existingApps,
+				Apps:  tC.existingViews,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
 				Client: apiClient,
@@ -391,17 +395,17 @@ func TestDiscover(t *testing.T) {
 				Client: apiClient,
 				Logger: &logger.MockLogger{},
 			}
-			appDefnDiscoverer := &AppDefnDiscoverer{
+			viewDefnDiscoverer := &ViewDefnDiscoverer{
 				Client: apiClient,
 				Logger: &logger.MockLogger{},
 			}
 			d := &Discoverer{
 				TaskDiscoverers: []TaskDiscoverer{defnDiscoverer, scriptDiscoverer},
-				AppDiscoverers:  []AppDiscoverer{appDefnDiscoverer},
+				ViewDiscoverers: []ViewDiscoverer{viewDefnDiscoverer},
 				Client:          apiClient,
 				Logger:          &logger.MockLogger{},
 			}
-			taskConfigs, appConfigs, err := d.Discover(context.Background(), tC.paths...)
+			taskConfigs, viewConfigs, err := d.Discover(context.Background(), tC.paths...)
 			if tC.expectedErr {
 				require.NotNil(err)
 				return
@@ -421,9 +425,9 @@ func TestDiscover(t *testing.T) {
 				require.Equal(tC.expectedTaskConfigs[i], taskConfigs[i])
 			}
 
-			require.Equal(len(tC.expectedAppConfigs), len(appConfigs))
-			for i := range tC.expectedAppConfigs {
-				require.Equal(tC.expectedAppConfigs[i], appConfigs[i])
+			require.Equal(len(tC.expectedViewConfigs), len(viewConfigs))
+			for i := range tC.expectedViewConfigs {
+				require.Equal(tC.expectedViewConfigs[i], viewConfigs[i])
 			}
 		})
 	}

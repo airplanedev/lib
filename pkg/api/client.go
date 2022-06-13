@@ -100,6 +100,13 @@ type UpdateTaskRequest struct {
 	EnvSlug                    string                    `json:"envSlug"`
 }
 
+type UpdateViewRequest struct {
+	Slug        string  `json:"slug"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	EnvVars     EnvVars `json:"envVars"`
+}
+
 type UpdateExecuteRulesRequest struct {
 	DisallowSelfApprove *bool `json:"disallowSelfApprove"`
 	RequireRequests     *bool `json:"requireRequests"`
@@ -169,6 +176,8 @@ type ResourceRequests map[string]string
 type Resources map[string]string
 
 type TaskEnv map[string]EnvVarValue
+
+type EnvVars map[string]EnvVarValue
 
 type EnvVarValue struct {
 	Value  *string `json:"value,omitempty" yaml:"value,omitempty"`
