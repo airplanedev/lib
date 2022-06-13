@@ -1088,7 +1088,7 @@ func (d Definition_0_3) addResourcesToUpdateTaskRequest(ctx context.Context, cli
 		if ok {
 			req.Resources[alias] = r.ID
 		} else {
-			return errors.Errorf("unknown resource: %s", slug)
+			return errors.Errorf("unknown resource: %q", slug)
 		}
 	}
 
