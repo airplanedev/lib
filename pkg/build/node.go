@@ -264,6 +264,7 @@ func GenShimPackageJSON(pathPackageJSON string, isWorkflow bool) ([]byte, error)
 
 	if isWorkflow {
 		// TODO: Make this configurable
+		pjson.Dependencies["airplane"] = "0.2.0-6"
 		pjson.Dependencies["temporalio"] = "0.23.0"
 	}
 

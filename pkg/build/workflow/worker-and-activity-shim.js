@@ -4,12 +4,7 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 //
 // TODO: Make this path configurable.
 
-import { registerActivities } from "airplane";
-
-// import * as sdkActivities from 'airplane/activities'
-// const activities = {
-//   ...sdkActivities,
-// };
+import { registerActivities } from "airplane"
 
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
@@ -21,7 +16,6 @@ async function runWorker(params) {
   if (temporalHost === undefined) {
     throw 'AP_TEMPORAL_HOST is not set in environment';
   }
-
 
   const taskQueue = process.env.AP_TASK_QUEUE;
   if (taskQueue === undefined) {
@@ -84,6 +78,8 @@ async function runWorker(params) {
       activityInbound: [(ctx) => new ActivityLogInboundInterceptor(ctx)],
     },
     sinks,
+    enableSDKTracing: true,
+    debugMode: true,
   });
 
   await worker.run();
