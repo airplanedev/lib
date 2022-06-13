@@ -82,8 +82,6 @@ async function runWorker(params) {
       activityInbound: [(ctx) => new ActivityLogInboundInterceptor(ctx)],
     },
     sinks,
-    enableSDKTracing: true,
-    debugMode: true,
   });
 
   await worker.run();
