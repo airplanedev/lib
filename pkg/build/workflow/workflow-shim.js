@@ -11,7 +11,7 @@ export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
 
   try {
-    var result = await task(params);
+    var result = await task(JSON.parse(params[0]));
   } catch (err) {
     logger.info(err);
     logger.info('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
