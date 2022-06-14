@@ -2,6 +2,7 @@ package fsx
 
 import (
 	"io/ioutil"
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -74,4 +75,40 @@ func TestFindUntil(t *testing.T) {
 	v, ok = FindUntil("testdata/a/b/c", "testdata", filename)
 	assert.True(ok)
 	assert.Equal("b", getFile(filepath.Join(v, filename)))
+}
+
+func TestAssertExistsAll(t *testing.T) {
+	var assert = require.New(t)
+
+	cwd, err := os.Getwd()
+	assert.NoError(err)
+
+	err = AssertExistsAll(
+		cwd+"/testdata/a/b/a.txt",
+		cwd+"/testdata/a/b/b.txt",
+		cwd+"/testdata/a/b/c.txt",
+	)
+	assert.ErrorContains(err, "could not find file")
+
+	err = AssertExistsAll(
+		cwd+"/testdata/a/b/b.txt",
+		cwd+"/testdata/a/b/c.txt",
+	)
+	assert.NoError(err)
+}
+
+func TestAssertExistsAny(t *testing.T) {
+	var assert = require.New(t)
+
+	cwd, err := os.Getwd()
+	assert.NoError(err)
+
+	err = AssertExistsAny(
+		cwd+"/testdata/monorepo/my/task/activities.ts",
+		cwd+"/testdata/monorepo/my/task/activities.js",
+	)
+	assert.ErrorContains(err, "could not find any files")
+
+	err = AssertExistsAny(cwd + "/testdata/monorepo/my/task/task.ts")
+	assert.NoError(err)
 }

@@ -25,6 +25,7 @@ type templateParams struct {
 	InlineWorkflowInterceptorsScript string
 	InlineWorkflowShimScript         string
 	IsWorkflow                       bool
+	HasCustomActivities              bool
 	NodeVersion                      string
 	ExternalFlags                    string
 	InstallCommand                   string
@@ -59,6 +60,11 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	pathPackageLock := filepath.Join(root, "package-lock.json")
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
+
+	hasCustomActivities := fsx.AssertExistsAny(
+		filepath.Join(root, "activities.ts"),
+		filepath.Join(root, "activities.js"),
+	) == nil
 
 	runtime, ok := options["runtime"]
 	var isWorkflow bool
@@ -102,10 +108,11 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
-		NodeVersion:        GetNodeVersion(options),
-		PostInstallCommand: pkg.Settings.PostInstallCommand,
-		Args:               argsCommand,
-		IsWorkflow:         isWorkflow,
+		NodeVersion:         GetNodeVersion(options),
+		PostInstallCommand:  pkg.Settings.PostInstallCommand,
+		Args:                argsCommand,
+		IsWorkflow:          isWorkflow,
+		HasCustomActivities: hasCustomActivities,
 	}
 
 	if cfg.HasPackageJSON {
@@ -230,6 +237,9 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		{{end}}
 
 		{{if .IsWorkflow}}
+		{{if not .HasCustomActivities}}
+		RUN touch /airplane/activities.js
+		{{end}}
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
 		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js

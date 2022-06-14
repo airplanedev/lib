@@ -25,6 +25,20 @@ func AssertExistsAll(paths ...string) error {
 	return nil
 }
 
+// FilesExist ensures that any of the paths exists or returns an error.
+func AssertExistsAny(paths ...string) error {
+	for _, p := range paths {
+		if _, err := os.Stat(p); err == nil {
+			return nil
+		} else if os.IsNotExist(err) {
+			continue
+		} else {
+			return err
+		}
+	}
+	return fmt.Errorf("could not find any files %s", paths)
+}
+
 // Find attempts to find the path of the given filename.
 //
 // The method recursively visits parent dirs until the given
