@@ -25,6 +25,7 @@ type Definition_0_3 struct {
 	Slug        string                    `json:"slug"`
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
+	Resources   map[string]string         `json:"resources,omitempty"`
 
 	Image  *ImageDefinition_0_3  `json:"docker,omitempty"`
 	Node   *NodeDefinition_0_3   `json:"node,omitempty"`
@@ -366,9 +367,7 @@ func (d *SQLDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client 
 		return err
 	}
 	if res, ok := resourcesByName[d.Resource]; ok {
-		req.Resources = map[string]string{
-			"db": res.ID,
-		}
+		req.Resources["db"] = res.ID
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
 	}
@@ -492,9 +491,7 @@ func (d *RESTDefinition_0_3) fillInUpdateTaskRequest(ctx context.Context, client
 		return err
 	}
 	if res, ok := resourcesByName[d.Resource]; ok {
-		req.Resources = map[string]string{
-			"rest": res.ID,
-		}
+		req.Resources["rest"] = res.ID
 	} else {
 		return errors.Errorf("unknown resource: %s", d.Resource)
 	}
@@ -749,6 +746,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 	if format != DefFormatYAML ||
 		d.Description != "" ||
 		len(d.Parameters) > 0 ||
+		len(d.Resources) > 0 ||
 		len(d.Constraints) > 0 ||
 		d.RequireRequests ||
 		!d.AllowSelfApprovals.IsZero() ||
@@ -951,9 +949,14 @@ func (d Definition_0_3) GetUpdateTaskRequest(ctx context.Context, client api.IAP
 		ExecuteRules: api.UpdateExecuteRulesRequest{
 			RequireRequests: &d.RequireRequests,
 		},
+		Resources: make(map[string]string),
 	}
 
 	if err := d.addParametersToUpdateTaskRequest(ctx, &req); err != nil {
+		return api.UpdateTaskRequest{}, err
+	}
+
+	if err := d.addResourcesToUpdateTaskRequest(ctx, client, &req); err != nil {
 		return api.UpdateTaskRequest{}, err
 	}
 
@@ -1067,6 +1070,28 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 
 		req.Parameters[i] = param
 	}
+	return nil
+}
+
+func (d Definition_0_3) addResourcesToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
+	if len(d.Resources) == 0 {
+		return nil
+	}
+
+	resourcesBySlug, err := getResourcesBySlug(ctx, client)
+	if err != nil {
+		return errors.Wrap(err, "fetching resources")
+	}
+
+	for alias, slug := range d.Resources {
+		r, ok := resourcesBySlug[slug]
+		if ok {
+			req.Resources[alias] = r.ID
+		} else {
+			return errors.Errorf("unknown resource: %q", slug)
+		}
+	}
+
 	return nil
 }
 
@@ -1213,6 +1238,10 @@ func NewDefinitionFromTask_0_3(ctx context.Context, client api.IAPIClient, t api
 		return Definition_0_3{}, err
 	}
 
+	if err := d.convertResourcesFromTask(ctx, client, &t); err != nil {
+		return Definition_0_3{}, err
+	}
+
 	if err := d.convertTaskKindFromTask(ctx, client, &t); err != nil {
 		return Definition_0_3{}, err
 	}
@@ -1348,6 +1377,32 @@ func (d *Definition_0_3) convertParametersFromTask(ctx context.Context, client a
 	return nil
 }
 
+func (d *Definition_0_3) convertResourcesFromTask(ctx context.Context, client api.IAPIClient, t *api.Task) error {
+	if len(t.Resources) == 0 {
+		return nil
+	}
+
+	resourcesByID, err := getResourcesByID(ctx, client)
+	if err != nil {
+		return errors.Wrap(err, "fetching resources")
+	}
+
+	d.Resources = make(map[string]string)
+	for alias, id := range t.Resources {
+		// Ignore SQL/REST resources; they get routed elsewhere.
+		if (t.Kind == build.TaskKindSQL && alias == "db") ||
+			(t.Kind == build.TaskKindREST && alias == "rest") {
+			continue
+		}
+		r, ok := resourcesByID[id]
+		if ok {
+			d.Resources[alias] = r.Slug
+		}
+	}
+
+	return nil
+}
+
 func extractConfigVarValue(v interface{}) (string, error) {
 	m, ok := v.(map[string]interface{})
 	if !ok {
@@ -1420,6 +1475,18 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
+}
+
+func getResourcesBySlug(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
+	resp, err := client.ListResources(ctx)
+	if err != nil {
+		return nil, errors.Wrap(err, "fetching resources")
+	}
+	resourcesBySlug := map[string]api.Resource{}
+	for _, resource := range resp.Resources {
+		resourcesBySlug[resource.Slug] = resource
+	}
+	return resourcesBySlug, nil
 }
 
 func getResourcesByName(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {

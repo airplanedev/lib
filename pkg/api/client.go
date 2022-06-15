@@ -117,18 +117,19 @@ type ListResourcesResponse struct {
 }
 
 type Resource struct {
-	ID         string                 `json:"id" db:"id"`
-	TeamID     string                 `json:"teamID" db:"team_id"`
-	Name       string                 `json:"name" db:"name"`
-	Kind       ResourceKind           `json:"kind" db:"kind"`
-	KindConfig map[string]interface{} `json:"kindConfig" db:"kind_config"`
+	ID         string                 `json:"id"`
+	Slug       string                 `json:"slug"`
+	TeamID     string                 `json:"teamID"`
+	Name       string                 `json:"name"`
+	Kind       ResourceKind           `json:"kind"`
+	KindConfig map[string]interface{} `json:"kindConfig"`
 
-	CreatedAt time.Time `json:"createdAt" db:"created_at"`
-	CreatedBy string    `json:"createdBy" db:"created_by"`
-	UpdatedAt time.Time `json:"updatedAt" db:"updated_at"`
-	UpdatedBy string    `json:"updatedBy" db:"updated_by"`
+	CreatedAt time.Time `json:"createdAt"`
+	CreatedBy string    `json:"createdBy"`
+	UpdatedAt time.Time `json:"updatedAt"`
+	UpdatedBy string    `json:"updatedBy"`
 
-	IsPrivate bool `json:"isPrivate" db:"is_private"`
+	IsPrivate bool `json:"isPrivate"`
 }
 
 type ResourceKind string
