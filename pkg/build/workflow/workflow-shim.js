@@ -18,6 +18,8 @@ export async function __airplaneEntrypoint(params) {
     // TODO: Fetch env var names from workflow memo once that field has been exposed in the Temporal SDK.
     const envVarNames = [];
     let env = await getEnvVars(envVarNames);
+    // Add airplane-specific environment variables that are required by our SDKs.
+    // TODO: Add env id, env slug, etc.
     env["AIRPLANE_RUNTIME"] = "workflow"
 
     // Monkey patch process.env
