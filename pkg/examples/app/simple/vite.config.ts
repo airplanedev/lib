@@ -5,7 +5,7 @@ import react from "@vitejs/plugin-react";
 export default ({ command, mode }: ResolvedConfig) => {
   process.env = { ...process.env, ...loadEnv(mode, process.cwd()) };
   const host = process.env.AIRPLANE_API_HOST || "https://api.airplane.so:5000";
-  const base = command === "serve" ? "" : `${host}/i/views/getContent/`;
+  const base = command === "build" ? `${host}/i/views/getContent/` : "";
   return defineConfig({
     plugins: [react()],
     base,
