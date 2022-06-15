@@ -1,4 +1,5 @@
 import { proxySinks } from '@temporalio/workflow';
+import { _storage } from 'airplane';
 import task from '{{.Entrypoint}}';
 
 const { logger } = proxySinks();
@@ -9,9 +10,10 @@ const { logger } = proxySinks();
 // the Airplane API.
 export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
-
   try {
-    var result = await task(JSON.parse(params[0]));
+    var result = await _storage.run({runtime: "workflow"}, async () => {
+      return await task(JSON.parse(params[0]));
+    })
   } catch (err) {
     logger.info(err);
     logger.info('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
