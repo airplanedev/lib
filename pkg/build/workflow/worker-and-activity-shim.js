@@ -4,6 +4,7 @@ import { NativeConnection, Worker } from '@temporalio/worker';
 import { registerActivities } from "airplane"
 // TODO: Make this path configurable.
 import * as customActivities from "../activities"
+import * as shimActivities from "./workflow-shim-activities"
 
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
@@ -70,6 +71,7 @@ async function runWorker(params) {
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
     activities: {
       ...registerActivities(),
+      ...shimActivities,
       ...customActivities,
     },
     connection,

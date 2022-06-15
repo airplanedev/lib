@@ -15,22 +15,23 @@ import (
 )
 
 type templateParams struct {
-	Workdir                          string
-	Base                             string
-	HasPackageJSON                   bool
-	UsesWorkspaces                   bool
-	InlineShim                       string
-	InlineShimPackageJSON            string
-	InlineWorkflowBundlerScript      string
-	InlineWorkflowInterceptorsScript string
-	InlineWorkflowShimScript         string
-	IsWorkflow                       bool
-	HasCustomActivities              bool
-	NodeVersion                      string
-	ExternalFlags                    string
-	InstallCommand                   string
-	PostInstallCommand               string
-	Args                             string
+	Workdir                            string
+	Base                               string
+	HasPackageJSON                     bool
+	UsesWorkspaces                     bool
+	InlineShim                         string
+	InlineShimPackageJSON              string
+	InlineWorkflowBundlerScript        string
+	InlineWorkflowInterceptorsScript   string
+	InlineWorkflowShimScript           string
+	InlineWorkflowShimActivitiesScript string
+	IsWorkflow                         bool
+	HasCustomActivities                bool
+	NodeVersion                        string
+	ExternalFlags                      string
+	InstallCommand                     string
+	PostInstallCommand                 string
+	Args                               string
 }
 
 // node creates a dockerfile for Node (typescript/javascript).
@@ -161,6 +162,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			return "", err
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
+		cfg.InlineWorkflowShimActivitiesScript = inlineString(workflowShimActivitiesScript)
 	} else {
 		shim, err := TemplatedNodeShim(entrypoint)
 		if err != nil {
@@ -241,6 +243,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		RUN touch /airplane/activities.js
 		{{end}}
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
+		RUN {{.InlineWorkflowShimActivitiesScript}} >> /airplane/.airplane/workflow-shim-activities.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
 		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js
 		RUN node /airplane/.airplane/workflow-bundler.js
@@ -315,6 +318,9 @@ var workflowInterceptorsScript string
 
 //go:embed workflow/workflow-shim.js
 var workflowShimScript string
+
+//go:embed workflow/workflow-shim-activities.js
+var workflowShimActivitiesScript string
 
 func TemplatedNodeShim(entrypoint string) (string, error) {
 	return TemplateEntrypoint(nodeShim, entrypoint)

@@ -1,7 +1,11 @@
-import { proxySinks } from '@temporalio/workflow';
+import { proxySinks, proxyActivities } from '@temporalio/workflow';
 import task from '{{.Entrypoint}}';
 
 const { logger } = proxySinks();
+
+const { getEnvVars } = proxyActivities({
+  startToCloseTimeout: "1m",
+});
 
 // Main entrypoint to workflow; wraps a `workflow` function in the user code.
 //
@@ -11,6 +15,16 @@ export async function __airplaneEntrypoint(params) {
   logger.info('airplane_status:started');
 
   try {
+    // TODO: Fetch env var names from workflow memo once that field has been exposed in the Temporal SDK.
+    const envVarNames = [];
+    let env = await getEnvVars(envVarNames);
+    env["AIRPLANE_RUNTIME"] = "workflow"
+
+    // Monkey patch process.env
+    global.process = {
+      env
+    }
+
     var result = await task(JSON.parse(params[0]));
   } catch (err) {
     logger.info(err);
