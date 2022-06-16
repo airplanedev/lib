@@ -361,7 +361,7 @@ func TestDiscover(t *testing.T) {
 		},
 		{
 			name:  "view defn",
-			paths: []string{"./fixtures/app/defn.app.yaml"},
+			paths: []string{"./fixtures/view/defn.view.yaml"},
 			existingViews: map[string]api.App{
 				"my_view": {ID: "view123", Slug: "my_view", Name: "My View"},
 			},
@@ -372,9 +372,9 @@ func TestDiscover(t *testing.T) {
 						Name:        "My View",
 						Slug:        "my_view",
 						Description: "Test view yaml file",
-						Entrypoint:  fixturesPath + "/app/foo.js",
+						Entrypoint:  fixturesPath + "/view/foo.js",
 					},
-					Root:   fixturesPath + "/app",
+					Root:   fixturesPath + "/view",
 					Source: ConfigSourceDefn,
 				},
 			},
