@@ -51,8 +51,8 @@ func app(root string, buildArgs []string) (string, error) {
 
 		{{.Args}}
 
-		ENV AIRPLANE_VIEW_ID=foo
-		ENV AIRPLANE_API_HOST=bar
+		ARG AIRPLANE_VIEW_ID=foob
+		ARG AIRPLANE_API_HOST=barb
 
 		COPY package*.json yarn.* /airplane/
 		RUN {{.InstallCommand}}
