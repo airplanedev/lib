@@ -1,1 +1,3 @@
 slug: my_app
+name: my app
+entrypoint: .

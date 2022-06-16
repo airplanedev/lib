@@ -2,15 +2,17 @@ package build
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/pkg/errors"
 )
 
 // app creates a dockerfile for an app.
-func app(root string) (string, error) {
+func app(root string, buildArgs []string) (string, error) {
 	// TODO: create vite.config.ts if it does not exist.
 	// TODO: possibly support multiple build tools.
 	_, err := os.Stat(filepath.Join(root, "vite.config.ts"))
@@ -26,19 +28,28 @@ func app(root string) (string, error) {
 		return "", err
 	}
 
+	for i, a := range buildArgs {
+		buildArgs[i] = fmt.Sprintf("ARG %s", a)
+	}
+	argsCommand := strings.Join(buildArgs, "\n")
+
 	cfg := struct {
 		Base           string
 		InstallCommand string
+		Args           string
 		OutDir         string
 	}{
 		Base:           base,
 		InstallCommand: "yarn install --non-interactive --frozen-lockfile",
+		Args:           argsCommand,
 		OutDir:         "dist",
 	}
 
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
+
+		{{.Args}}
 
 		COPY package*.json yarn.* /airplane/
 		RUN {{.InstallCommand}}
