@@ -49,8 +49,7 @@ func app(root string, buildArgs []string) (string, error) {
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
 
-		ARG AIRPLANE_VIEW_ID=foob
-		ARG AIRPLANE_API_HOST=barb
+		{{.Args}}
 
 		COPY package*.json yarn.* /airplane/
 		RUN {{.InstallCommand}}
