@@ -1,8 +1,10 @@
 package definitions
 
 import (
+	"bytes"
 	_ "embed"
 	"encoding/json"
+	"text/template"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/goccy/go-yaml"
@@ -51,4 +53,20 @@ func (d *ViewDefinition) Unmarshal(format DefFormat, buf []byte) error {
 		return err
 	}
 	return nil
+}
+
+func (d *ViewDefinition) GenerateCommentedFile() ([]byte, error) {
+	tmpl, err := template.New("definition").Parse(viewDefinitionTemplate)
+	if err != nil {
+		return nil, errors.Wrap(err, "parsing definition template")
+	}
+	buf := new(bytes.Buffer)
+	if err := tmpl.Execute(buf, map[string]interface{}{
+		"slug":       d.Slug,
+		"name":       d.Name,
+		"entrypoint": d.Entrypoint,
+	}); err != nil {
+		return nil, errors.Wrap(err, "executing definition template")
+	}
+	return buf.Bytes(), nil
 }

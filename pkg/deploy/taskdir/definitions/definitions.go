@@ -12,9 +12,9 @@ var (
 	JSONTaskDefExtensions = []string{".task.json"}
 	TaskDefExtensions     = append(YamlTaskDefExtensions, JSONTaskDefExtensions...)
 
-	YamlAppDefExtensions = []string{".app.yaml", ".app.yml"}
-	JSONAppDefExtensions = []string{".app.json"}
-	AppDefExtensions     = append(YamlAppDefExtensions, JSONAppDefExtensions...)
+	YamlViewDefExtensions = []string{".view.yaml", ".view.yml"}
+	JSONViewDefExtensions = []string{".view.json"}
+	ViewDefExtensions     = append(YamlViewDefExtensions, JSONViewDefExtensions...)
 )
 
 func NewDefinitionFromTask(ctx context.Context, client api.IAPIClient, t api.Task) (DefinitionInterface, error) {
@@ -37,8 +37,8 @@ func IsTaskDef(fn string) bool {
 	return GetTaskDefFormat(fn) != DefFormatUnknown
 }
 
-func IsAppDef(fn string) bool {
-	return GetAppDefFormat(fn) != DefFormatUnknown
+func IsViewDef(fn string) bool {
+	return GetViewDefFormat(fn) != DefFormatUnknown
 }
 
 func GetDefFormat(fn string, yamlExtensions, jsonExtensions []string) DefFormat {
@@ -55,8 +55,8 @@ func GetDefFormat(fn string, yamlExtensions, jsonExtensions []string) DefFormat 
 	return DefFormatUnknown
 }
 
-func GetAppDefFormat(fn string) DefFormat {
-	return GetDefFormat(fn, YamlAppDefExtensions, JSONAppDefExtensions)
+func GetViewDefFormat(fn string) DefFormat {
+	return GetDefFormat(fn, YamlViewDefExtensions, JSONViewDefExtensions)
 }
 
 func GetTaskDefFormat(fn string) DefFormat {

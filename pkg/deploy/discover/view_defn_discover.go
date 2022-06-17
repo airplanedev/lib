@@ -20,7 +20,7 @@ type ViewDefnDiscoverer struct {
 var _ ViewDiscoverer = &ViewDefnDiscoverer{}
 
 func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*ViewConfig, error) {
-	if !definitions.IsAppDef(file) {
+	if !definitions.IsViewDef(file) {
 		return nil, nil
 	}
 
@@ -29,7 +29,7 @@ func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*
 		return nil, errors.Wrap(err, "reading view definition")
 	}
 
-	format := definitions.GetAppDefFormat(file)
+	format := definitions.GetViewDefFormat(file)
 	d := definitions.ViewDefinition{}
 
 	if err = d.Unmarshal(format, buf); err != nil {
