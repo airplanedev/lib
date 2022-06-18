@@ -1,7 +1,7 @@
 import { NativeConnection, Worker } from '@temporalio/worker';
 
 // Activity code runs in the same node process as the worker, so we import it here directly.
-import { registerActivities } from "airplane"
+import { _registerActivities } from "airplane"
 // TODO: Make this path configurable.
 import * as customActivities from "../activities"
 import * as shimActivities from "./workflow-shim-activities"
@@ -70,7 +70,7 @@ async function runWorker(params) {
     // to the shim.
     workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
     activities: {
-      ...registerActivities(),
+      ..._registerActivities(),
       ...shimActivities,
       ...customActivities,
     },

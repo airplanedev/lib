@@ -11,18 +11,12 @@ const { getEnvVars } = proxyActivities({
 //
 // This name must match the name we use when executing the workflow in
 // the Airplane API.
-export async function __airplaneEntrypoint(params) {
+export async function __airplaneEntrypoint(params, airplaneArgs) {
   logger.info('airplane_status:started');
 
   try {
-    // TODO: Fetch env var names from workflow memo once that field has been exposed in the Temporal SDK.
-    const envVarNames = [];
-    let env = await getEnvVars(envVarNames);
-    // Add airplane-specific environment variables that are required by our SDKs.
-    // TODO: Add env id, env slug, etc.
-    env["AIRPLANE_RUNTIME"] = "workflow"
-
     // Monkey patch process.env
+    let env = await getEnvVars(airplaneArgs.TaskRevisionEnvVarNames, airplaneArgs.RuntimeEnv);
     global.process = {
       env
     }
