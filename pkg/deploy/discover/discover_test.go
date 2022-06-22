@@ -379,6 +379,26 @@ func TestDiscover(t *testing.T) {
 				},
 			},
 		},
+		{
+			name:  "view defn with a custom root",
+			paths: []string{"./fixtures/viewCustomRoot/defn.view.yaml"},
+			existingViews: map[string]api.App{
+				"my_view": {ID: "view123", Slug: "my_view", Name: "My View"},
+			},
+			expectedViewConfigs: []ViewConfig{
+				{
+					ID: "view123",
+					Def: definitions.ViewDefinition{
+						Name:        "My View",
+						Slug:        "my_view",
+						Description: "Test view yaml file",
+						Entrypoint:  fixturesPath + "/viewCustomRoot/foo.js",
+					},
+					Root:   fixturesPath,
+					Source: ConfigSourceDefn,
+				},
+			},
+		},
 	}
 	for _, tC := range tests {
 		t.Run(tC.name, func(t *testing.T) {

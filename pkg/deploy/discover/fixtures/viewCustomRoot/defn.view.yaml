@@ -1,0 +1,4 @@
+slug: my_view
+name: My View
+description: Test view yaml file
+entrypoint: foo.js

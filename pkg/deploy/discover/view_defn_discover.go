@@ -8,6 +8,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
+	"github.com/airplanedev/lib/pkg/runtime/typescript"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
@@ -45,7 +46,12 @@ func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*
 		}
 	}
 
-	root, err := filepath.Abs(filepath.Dir(file))
+	typeScriptRuntime := typescript.Runtime{}
+	absFile, err := filepath.Abs(file)
+	if err != nil {
+		return nil, err
+	}
+	root, err := typeScriptRuntime.Root(absFile)
 	if err != nil {
 		return nil, errors.Wrap(err, "getting absolute view definition root")
 	}
