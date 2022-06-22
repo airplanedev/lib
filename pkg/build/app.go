@@ -2,24 +2,21 @@ package build
 
 import (
 	_ "embed"
-	"os"
-	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/pkg/errors"
 )
 
 // app creates a dockerfile for an app.
 func app(root string) (string, error) {
 	// TODO: create vite.config.ts if it does not exist.
 	// TODO: possibly support multiple build tools.
-	_, err := os.Stat(filepath.Join(root, "vite.config.ts"))
-	if err != nil {
-		if os.IsNotExist(err) {
-			return "", errors.New("only vite is supported. Root directory must have a vite.config.ts")
-		}
-		return "", err
-	}
+	// _, err := os.Stat(filepath.Join(root, "vite.config.ts"))
+	// if err != nil {
+	// 	if os.IsNotExist(err) {
+	// 		return "", errors.New("only vite is supported. Root directory must have a vite.config.ts")
+	// 	}
+	// 	return "", err
+	// }
 
 	base, err := getBaseNodeImage("")
 	if err != nil {
