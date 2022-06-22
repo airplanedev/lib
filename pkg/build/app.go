@@ -38,7 +38,7 @@ func app(root string) (string, error) {
 
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
-		WORKDIR /airplane
+		WORKDIR /airplane/examples/releaseCycle
 
 		COPY package*.json yarn.* /airplane/
 		RUN {{.InstallCommand}}
