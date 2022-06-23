@@ -4,7 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "airplane": "^0.1.2",
-    "temporalio": "^0.20.2"
+    "airplane": "0.2.0-10"
   }
 }
