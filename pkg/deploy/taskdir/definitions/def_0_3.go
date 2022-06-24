@@ -25,7 +25,7 @@ type Definition_0_3 struct {
 	Slug        string                    `json:"slug"`
 	Description string                    `json:"description,omitempty"`
 	Parameters  []ParameterDefinition_0_3 `json:"parameters,omitempty"`
-	Resources   map[string]string         `json:"resources,omitempty"`
+	Resources   ResourceDefinition_0_3    `json:"resources,omitempty"`
 
 	Image  *ImageDefinition_0_3  `json:"docker,omitempty"`
 	Node   *NodeDefinition_0_3   `json:"node,omitempty"`
@@ -746,7 +746,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 	if format != DefFormatYAML ||
 		d.Description != "" ||
 		len(d.Parameters) > 0 ||
-		len(d.Resources) > 0 ||
+		len(d.Resources.Attachments) > 0 ||
 		len(d.Constraints) > 0 ||
 		d.RequireRequests ||
 		!d.AllowSelfApprovals.IsZero() ||
@@ -1074,7 +1074,7 @@ func (d Definition_0_3) addParametersToUpdateTaskRequest(ctx context.Context, re
 }
 
 func (d Definition_0_3) addResourcesToUpdateTaskRequest(ctx context.Context, client api.IAPIClient, req *api.UpdateTaskRequest) error {
-	if len(d.Resources) == 0 {
+	if len(d.Resources.Attachments) == 0 {
 		return nil
 	}
 
@@ -1083,7 +1083,7 @@ func (d Definition_0_3) addResourcesToUpdateTaskRequest(ctx context.Context, cli
 		return errors.Wrap(err, "fetching resources")
 	}
 
-	for alias, slug := range d.Resources {
+	for alias, slug := range d.Resources.Attachments {
 		r, ok := resourcesBySlug[slug]
 		if ok {
 			req.Resources[alias] = r.ID
@@ -1181,7 +1181,7 @@ func (d *Definition_0_3) GetConfigAttachments() ([]api.ConfigAttachment, error) 
 }
 
 func (d *Definition_0_3) GetResourceAttachments() map[string]string {
-	return d.Resources
+	return d.Resources.Attachments
 }
 
 func (d *Definition_0_3) GetSlug() string {
@@ -1395,7 +1395,7 @@ func (d *Definition_0_3) convertResourcesFromTask(ctx context.Context, client ap
 		return errors.Wrap(err, "fetching resources")
 	}
 
-	d.Resources = make(map[string]string)
+	d.Resources.Attachments = make(map[string]string)
 	for alias, id := range t.Resources {
 		// Ignore SQL/REST resources; they get routed elsewhere.
 		if (t.Kind == build.TaskKindSQL && alias == "db") ||
@@ -1404,7 +1404,7 @@ func (d *Definition_0_3) convertResourcesFromTask(ctx context.Context, client ap
 		}
 		r, ok := resourcesByID[id]
 		if ok {
-			d.Resources[alias] = r.Slug
+			d.Resources.Attachments[alias] = r.Slug
 		}
 	}
 
@@ -1483,6 +1483,61 @@ func (d *Definition_0_3) SetBuildConfig(key string, value interface{}) {
 		d.buildConfig = map[string]interface{}{}
 	}
 	d.buildConfig[key] = value
+}
+
+type ResourceDefinition_0_3 struct {
+	Attachments map[string]string
+}
+
+func (r *ResourceDefinition_0_3) UnmarshalJSON(b []byte) error {
+	// If it's just a map, dump it in the Attachments field.
+	if err := json.Unmarshal(b, &r.Attachments); err == nil {
+		return nil
+	}
+
+	// Otherwise, expect a list.
+	var list []interface{}
+	if err := json.Unmarshal(b, &list); err != nil {
+		return err
+	}
+
+	r.Attachments = make(map[string]string)
+	for _, item := range list {
+		if s, ok := item.(string); ok {
+			if _, exists := r.Attachments[s]; exists {
+				return errors.New("aliases in resource list must be unique")
+			}
+			r.Attachments[s] = s
+		} else if m, ok := item.(map[string]interface{}); ok {
+			keys := []string{}
+			for alias := range m {
+				keys = append(keys, alias)
+			}
+			if len(keys) != 1 {
+				return errors.New("expected only one item in resource map")
+			}
+			alias := keys[0]
+			if _, exists := r.Attachments[alias]; exists {
+				return errors.New("aliases in resource list must be unique")
+			}
+			if slug, ok := m[alias].(string); ok {
+				r.Attachments[alias] = slug
+			} else {
+				return errors.New("expected string slug value in resource map")
+			}
+		} else {
+			return errors.New("expected string or map in resource list")
+		}
+	}
+	return nil
+}
+
+func (r ResourceDefinition_0_3) MarshalYAML() (interface{}, error) {
+	return r.Attachments, nil
+}
+
+func (r ResourceDefinition_0_3) IsZero() bool {
+	return len(r.Attachments) == 0
 }
 
 func getResourcesBySlug(ctx context.Context, client api.IAPIClient) (map[string]api.Resource, error) {
