@@ -527,9 +527,11 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 			},
 			definition: Definition_0_3{
-				Name:      "REST Task",
-				Slug:      "rest_task",
-				Resources: map[string]string{},
+				Name: "REST Task",
+				Slug: "rest_task",
+				Resources: ResourceDefinition_0_3{
+					Attachments: map[string]string{},
+				},
 				REST: &RESTDefinition_0_3{
 					Resource: "httpbin",
 					Method:   "GET",
@@ -814,9 +816,11 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 				},
 			},
 			definition: Definition_0_3{
-				Name:      "REST Task",
-				Slug:      "rest_task",
-				Resources: map[string]string{},
+				Name: "REST Task",
+				Slug: "rest_task",
+				Resources: ResourceDefinition_0_3{
+					Attachments: map[string]string{},
+				},
 				REST: &RESTDefinition_0_3{
 					Resource: "httpbin",
 					Method:   "GET",
@@ -973,8 +977,10 @@ func TestTaskToDefinition_0_3(t *testing.T) {
 			definition: Definition_0_3{
 				Name: "Image Task",
 				Slug: "image_task",
-				Resources: map[string]string{
-					"db": "local_db",
+				Resources: ResourceDefinition_0_3{
+					Attachments: map[string]string{
+						"db": "local_db",
+					},
 				},
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
@@ -1517,8 +1523,10 @@ func TestDefinitionToUpdateTaskRequest_0_3(t *testing.T) {
 			definition: Definition_0_3{
 				Name: "Image Task",
 				Slug: "image_task",
-				Resources: map[string]string{
-					"db": "local_db",
+				Resources: ResourceDefinition_0_3{
+					Attachments: map[string]string{
+						"db": "local_db",
+					},
 				},
 				Image: &ImageDefinition_0_3{
 					Image:      "ubuntu:latest",
