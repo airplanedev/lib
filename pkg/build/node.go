@@ -153,16 +153,16 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
 	if isWorkflow {
-		cfg.InlineShim = inlineString(workerAndActivityShim)
-		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
-		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
+		cfg.InlineShim = inlineString(WorkerAndActivityShim)
+		cfg.InlineWorkflowBundlerScript = inlineString(WorkflowBundlerScript)
+		cfg.InlineWorkflowInterceptorsScript = inlineString(WorkflowInterceptorsScript)
 
-		workflowShim, err := TemplateEntrypoint(workflowShimScript, entrypoint)
+		workflowShim, err := TemplatedWorkflowShim(entrypoint)
 		if err != nil {
 			return "", err
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
-		cfg.InlineWorkflowShimActivitiesScript = inlineString(workflowShimActivitiesScript)
+		cfg.InlineWorkflowShimActivitiesScript = inlineString(WorkflowShimActivitiesScript)
 	} else {
 		shim, err := TemplatedNodeShim(entrypoint)
 		if err != nil {
@@ -308,22 +308,26 @@ func GetNodeVersion(opts KindOptions) string {
 var nodeShim string
 
 //go:embed workflow/worker-and-activity-shim.js
-var workerAndActivityShim string
+var WorkerAndActivityShim string
 
 //go:embed workflow/workflow-bundler.js
-var workflowBundlerScript string
+var WorkflowBundlerScript string
 
 //go:embed workflow/workflow-interceptors.js
-var workflowInterceptorsScript string
+var WorkflowInterceptorsScript string
 
 //go:embed workflow/workflow-shim.js
 var workflowShimScript string
 
 //go:embed workflow/workflow-shim-activities.js
-var workflowShimActivitiesScript string
+var WorkflowShimActivitiesScript string
 
 func TemplatedNodeShim(entrypoint string) (string, error) {
 	return TemplateEntrypoint(nodeShim, entrypoint)
+}
+
+func TemplatedWorkflowShim(entrypoint string) (string, error) {
+	return TemplateEntrypoint(workflowShimScript, entrypoint)
 }
 
 func TemplateEntrypoint(script string, entrypoint string) (string, error) {

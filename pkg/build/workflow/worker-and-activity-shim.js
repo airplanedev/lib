@@ -26,10 +26,10 @@ async function runWorker(params) {
     throw 'AP_NAMESPACE is not set in environment';
   }
 
-  const temporalToken = process.env.AP_TEMPORAL_TOKEN;
-  if (temporalToken === undefined) {
-    throw 'AP_TEMPORAL_TOKEN is not set in environment';
-  }
+  // const temporalToken = process.env.AP_TEMPORAL_TOKEN;
+  // if (temporalToken === undefined) {
+  //   throw 'AP_TEMPORAL_TOKEN is not set in environment';
+  // }
 
   // We use TLS when hitting a remote Temporal API (i.e., behind a load balancer),
   // but not a local one. The easiest way to tell the difference is by
@@ -42,9 +42,9 @@ async function runWorker(params) {
 
   const connection = await NativeConnection.create({
     address: temporalHost,
-    headers: {
-      authorization: temporalToken,
-    },
+    // headers: {
+    //   authorization: temporalToken,
+    // },
     tls: useTLS,
   });
 
@@ -68,7 +68,7 @@ async function runWorker(params) {
   const worker = await Worker.create({
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
-    workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
+    workflowBundle: { path: '../node_sdk_workflow/.airplane/workflow-bundle.js' },
     activities: {
       ...createActivities(),
       ...shimActivities,

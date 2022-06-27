@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -136,6 +137,8 @@ func (r Runtime) FormatComment(s string) string {
 func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runtime.PrepareRunOptions) (rexprs []string, rcloser io.Closer, rerr error) {
 	checkNodeVersion(ctx, logger, opts.KindOptions)
 
+	isWorkflow := true
+
 	root, err := r.Root(opts.Path)
 	if err != nil {
 		return nil, nil, err
@@ -160,18 +163,66 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "entrypoint is not within the task root")
 	}
-	shim, err := build.TemplatedNodeShim(entrypoint)
-	if err != nil {
-		return nil, nil, err
+
+	var shim string
+	if isWorkflow {
+		shim = build.WorkerAndActivityShim
+	} else {
+		shim, err = build.TemplatedNodeShim(entrypoint)
+		if err != nil {
+			return nil, nil, err
+		}
 	}
 
 	if err := os.WriteFile(filepath.Join(tmpdir, "shim.js"), []byte(shim), 0644); err != nil {
 		return nil, nil, errors.Wrap(err, "writing shim file")
 	}
 
+	files, err := ioutil.ReadDir(root)
+	for _, f := range files {
+		fmt.Println(f.Name())
+	}
+
+	if isWorkflow {
+		// should be tmp file
+		if err := os.WriteFile(filepath.Join(root, "activities.js"), []byte(""), 0644); err != nil {
+			return nil, nil, errors.Wrap(err, "writing custom activities file")
+		}
+
+		workflowShim, err := build.TemplatedWorkflowShim(entrypoint)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if err := os.WriteFile(filepath.Join(tmpdir, "workflow-shim.js"), []byte(workflowShim), 0644); err != nil {
+			return nil, nil, errors.Wrap(err, "writing workflow shim file")
+		}
+
+		if err := os.WriteFile(filepath.Join(tmpdir, "workflow-shim-activities.js"), []byte(build.WorkflowShimActivitiesScript), 0644); err != nil {
+			return nil, nil, errors.Wrap(err, "writing shim activities file")
+		}
+
+		if err := os.WriteFile(filepath.Join(tmpdir, "workflow-interceptors.js"), []byte(build.WorkflowInterceptorsScript), 0644); err != nil {
+			return nil, nil, errors.Wrap(err, "writing workflow activities file")
+		}
+
+		if err := os.WriteFile(filepath.Join(tmpdir, "workflow-bundler.js"), []byte(build.WorkflowBundlerScript), 0644); err != nil {
+			return nil, nil, errors.Wrap(err, "writing workflow bundler file")
+		}
+
+		cmd := exec.CommandContext(ctx, "node", "workflow-bundler.js")
+		cmd.Dir = filepath.Join(root, ".airplane")
+		logger.Debug("Running %s (in %s)", strings.Join(cmd.Args, " "), root)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			logger.Log(strings.TrimSpace(string(out)))
+			return nil, nil, errors.New("failed to bundle workflow")
+		}
+	}
+
 	// Install the dependencies we need for our shim file:
 	rootPackageJSON := filepath.Join(root, "package.json")
-	pjson, err := build.GenShimPackageJSON(rootPackageJSON, false)
+	pjson, err := build.GenShimPackageJSON(rootPackageJSON, isWorkflow)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -196,6 +247,10 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 	externalDeps, err := build.ExternalPackages(rootPackageJSON)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	if isWorkflow {
+		externalDeps = append(externalDeps, "@temporalio", "@swc")
 	}
 	logger.Debug("Discovered external dependencies: %v", externalDeps)
 
@@ -232,6 +287,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 		return nil, nil, errors.New("esbuild failed: see logs")
 	}
 
+	fmt.Println(res.OutputFiles[0].Path)
 	return []string{"node", res.OutputFiles[0].Path, string(pv)}, closer, nil
 }
 
