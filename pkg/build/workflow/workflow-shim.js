@@ -16,7 +16,7 @@ export async function __airplaneEntrypoint(params, airplaneArgs) {
 
   try {
     // Monkey patch process.env
-    let env = await getEnvVars(airplaneArgs.TaskRevisionEnvVarNames, airplaneArgs.RuntimeEnv);
+    let env = await getEnvVars(airplaneArgs.EnvVarNames, airplaneArgs.RuntimeEnv);
     global.process = {
       env
     }
