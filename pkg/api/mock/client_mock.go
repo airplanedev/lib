@@ -9,7 +9,7 @@ import (
 type MockClient struct {
 	Tasks     map[string]api.Task
 	Resources []api.Resource
-	Apps      map[string]api.App
+	Views     map[string]api.View
 }
 
 var _ api.IAPIClient = &MockClient{}
@@ -46,10 +46,10 @@ func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuild
 	}, nil
 }
 
-func (mc *MockClient) GetApp(ctx context.Context, req api.GetAppRequest) (res api.App, err error) {
-	a, ok := mc.Apps[req.Slug]
+func (mc *MockClient) GetView(ctx context.Context, req api.GetViewRequest) (res api.View, err error) {
+	a, ok := mc.Views[req.Slug]
 	if !ok {
-		return api.App{}, &api.AppMissingError{AppURL: "api/", Slug: req.Slug}
+		return api.View{}, &api.AppMissingError{AppURL: "api/", Slug: req.Slug}
 	}
 	return a, nil
 }
