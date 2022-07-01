@@ -272,10 +272,10 @@ func GenShimPackageJSON(pathPackageJSON string, isWorkflow bool) ([]byte, error)
 		},
 	}
 
-	// if isWorkflow {
-	// 	// airplane>=0.2.0-6 already includes Temporal as a dependency, and so we don't include it here.
-	// 	pjson.Dependencies["airplane"] = "0.2.0-6"
-	// }
+	if isWorkflow {
+		// airplane>=0.2.0-6 already includes Temporal as a dependency, and so we don't include it here.
+		pjson.Dependencies["airplane"] = "0.2.0-6"
+	}
 
 	// Allow users to override any shim dependencies. Given shim code is bundled
 	// with user code, we cannot use separate versions of these dependencies so

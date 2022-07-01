@@ -1,8 +1,7 @@
 import { NativeConnection, Worker } from '@temporalio/worker';
 
 // Activity code runs in the same node process as the worker, so we import it here directly.
-// import { createActivities } from "airplane/internal/runtime/workflow"
-import { createActivities } from "../internal/runtime/workflow"
+import { createActivities } from "airplane/internal/runtime/workflow"
 
 // Main worker entrypoint; starts a worker that will process activities
 // and workflows for a single task queue (equivalent to airplane task revision).
