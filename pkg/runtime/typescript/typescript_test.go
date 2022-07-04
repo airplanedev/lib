@@ -6,11 +6,13 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/examples"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/runtime/runtimetest"
 	"github.com/airplanedev/lib/pkg/utils/fsx"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -109,4 +111,51 @@ func TestDev(tt *testing.T) {
 	}
 
 	runtimetest.Run(tt, ctx, tests)
+}
+
+func TestCreateParamsType(t *testing.T) {
+	testCases := []struct {
+		desc           string
+		parameters     map[string]api.Type
+		typePrefix     string
+		typescriptType string
+	}{
+		{
+			desc:           "No params",
+			typescriptType: "export type Params = {};\n",
+		},
+		{
+			desc: "params of each type",
+			parameters: map[string]api.Type{
+				"string":     api.TypeString,
+				"boolean":    api.TypeBoolean,
+				"integer":    api.TypeInteger,
+				"date":       api.TypeDate,
+				"upload":     api.TypeUpload,
+				"config-var": api.TypeConfigVar,
+			},
+			typescriptType: `export type Params = {
+  "config-var": { name: string; value: string };
+  boolean: boolean;
+  date: string;
+  integer: number;
+  string: string;
+  upload: { __airplaneType: "upload"; id: string; url: string };
+};
+`,
+		},
+		{
+			desc:           "Custom prefix",
+			typePrefix:     "My Task",
+			typescriptType: "export type MyTaskParams = {};\n",
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			ts, err := CreateParamsType(tC.parameters, tC.typePrefix)
+			require.NoError(t, err)
+
+			assert.Equal(t, tC.typescriptType, ts)
+		})
+	}
 }

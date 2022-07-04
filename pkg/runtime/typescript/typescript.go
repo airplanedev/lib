@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"text/template"
+	"sort"
+	"strings"
 
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/runtime/javascript"
 )
@@ -15,34 +17,10 @@ func init() {
 	runtime.Register(".ts", Runtime{})
 }
 
-// Code template.
-var code = template.Must(template.New("ts").Parse(`{{with .Comment -}}
-{{.}}
-
-{{end -}}
-type Params = {
-  {{- range .Params }}
-  {{ .Name }}: {{ .Type }}
-  {{- end }}
-}
-
-// Put the main logic of the task in this function.
-export default async function(params: Params) {
-  console.log('parameters:', params);
-
-  // You can return data to show outputs to users.
-  // Outputs documentation: https://docs.airplane.dev/tasks/outputs
-  return [
-    {element: 'hydrogen', weight: 1.008},
-    {element: 'helium', weight: 4.0026},
-  ];
-}
-`))
-
 // Data represents the data template.
 type data struct {
 	Comment string
-	Params  []param
+	Params  string
 }
 
 // Param represents the parameter.
@@ -60,13 +38,19 @@ type Runtime struct {
 func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
 	d := data{}
 	if t != nil {
-		d.Comment = runtime.Comment(r, t.URL)
-		for _, p := range t.Parameters {
-			d.Params = append(d.Params, param{
-				Name: p.Slug,
-				Type: typeof(p.Type),
-			})
+		if t.URL != "" {
+			d.Comment = runtime.Comment(r, t.URL)
 		}
+		var params map[string]api.Type
+		for _, p := range t.Parameters {
+			params[p.Slug] = p.Type
+
+		}
+		typescriptType, err := CreateParamsType(params, "")
+		if err != nil {
+			return nil, 0, err
+		}
+		d.Params = typescriptType
 	}
 
 	var buf bytes.Buffer
@@ -77,20 +61,57 @@ func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
 	return buf.Bytes(), 0644, nil
 }
 
-// Typeof translates the given type to typescript.
-func typeof(t runtime.Type) string {
-	switch t {
-	case runtime.TypeInteger, runtime.TypeFloat:
-		return "number"
-	case runtime.TypeDate, runtime.TypeDatetime:
-		return "string"
-	case runtime.TypeBoolean:
-		return "boolean"
-	case runtime.TypeString:
-		return "string"
-	case runtime.TypeUpload:
-		return "string"
-	default:
-		return "unknown"
+// CreateParamsType returns a string representation of a TypeScript type.
+func CreateParamsType(parameters map[string]api.Type, typePrefix string) (string, error) {
+	var params []string
+	for slug, paramType := range parameters {
+		slug = slugToTypeKey(slug)
+		paramType := typeof(paramType)
+		params = append(params, fmt.Sprintf("%s: %s;", slug, paramType))
 	}
+
+	sort.Strings(params)
+	tc := paramsTemplateConfig{
+		TaskName:   strings.Title(strings.ReplaceAll(typePrefix, " ", "")),
+		TaskParams: strings.Join(params, "\n  "),
+	}
+
+	t := paramsTemplate
+	if len(params) == 0 {
+		t = paramTypesTemplateNoParams
+	}
+
+	var buff bytes.Buffer
+	err := t.Execute(&buff, tc)
+	if err != nil {
+		return "", err
+	}
+	return buff.String(), nil
+}
+
+// typeof translates the given type to TypeScript.
+func typeof(t api.Type) string {
+	switch t {
+	case api.TypeBoolean:
+		return "boolean"
+	case api.TypeString:
+		return "string"
+	case api.TypeInteger, api.TypeFloat:
+		return "number"
+	case api.TypeDate, api.TypeDatetime:
+		return "string"
+	case api.TypeUpload:
+		return fileType
+	case api.TypeConfigVar:
+		return configType
+	}
+	return "unknown"
+}
+
+// slugToTypeKey converts a slug to a key that can be used in a TypeScript type.
+func slugToTypeKey(slug string) string {
+	if strings.Contains(slug, "-") {
+		return fmt.Sprintf("\"%s\"", slug)
+	}
+	return slug
 }

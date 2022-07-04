@@ -1,25 +1,12 @@
 package runtime
 
+import "github.com/airplanedev/lib/pkg/api"
+
 // Task represents a task.
 type Task struct {
 	URL        string
 	Parameters Parameters
 }
-
-// Type enumerates parameter types.
-type Type string
-
-// All Parameter types.
-const (
-	TypeString    Type = "string"
-	TypeBoolean   Type = "boolean"
-	TypeUpload    Type = "upload"
-	TypeInteger   Type = "integer"
-	TypeFloat     Type = "float"
-	TypeDate      Type = "date"
-	TypeDatetime  Type = "datetime"
-	TypeConfigVar Type = "configvar"
-)
 
 type Parameters []Parameter
 
@@ -27,7 +14,7 @@ type Parameters []Parameter
 type Parameter struct {
 	Name string
 	Slug string
-	Type Type
+	Type api.Type
 }
 
 // Values represent parameters values.
