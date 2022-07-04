@@ -106,7 +106,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 // Generate implementation.
 func (r Runtime) Generate(t *runtime.Task) ([]byte, os.FileMode, error) {
 	d := data{}
-	if t != nil {
+	if t != nil && t.URL != "" {
 		d.Comment = runtime.Comment(r, t.URL)
 	}
 
