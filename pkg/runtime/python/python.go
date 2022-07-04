@@ -148,9 +148,9 @@ func checkPythonInstalled(ctx context.Context, logger logger.Logger) error {
 }
 
 // Generate implementation.
-func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
+func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, fs.FileMode, error) {
 	d := data{}
-	if t != nil && t.URL != "" {
+	if t != nil && t.URL != "" && opts.GenerateComment {
 		d.Comment = runtime.Comment(r, t.URL)
 	}
 
