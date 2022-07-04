@@ -43,6 +43,11 @@ func TestExternalPackages(t *testing.T) {
 			packageJSON:      fixtures.Path(t, "node_externals/yarnworkspace_importlocalmismatched/package.json"),
 			externalPackages: []string{"react", "@types/react", "react-table", "lib"},
 		},
+		{
+			desc:             "marks external all packages in yarn workspace with yarn 2",
+			packageJSON:      fixtures.Path(t, "node_externals/yarn2workspace_importlocal/package.json"),
+			externalPackages: []string{"react", "@types/react", "react-table"},
+		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {

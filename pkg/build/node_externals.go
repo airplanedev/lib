@@ -11,6 +11,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/blang/semver/v4"
 	"github.com/pkg/errors"
 )
 
@@ -148,54 +149,103 @@ type workspaceInfoEntry struct {
 	WorkspaceDependencies []string `json:"workspaceDependencies"`
 }
 
+func isYarn2(pathPackageJSON string) (bool, error) {
+	cmd := exec.Command("yarn", "-v")
+	cmd.Dir = filepath.Dir(pathPackageJSON)
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		if len(out) > 0 {
+			return false, errors.Wrap(err, string(out))
+		}
+		return false, errors.Wrap(err, "reading yarn/npm workspaces: Do you have yarn installed?")
+	}
+
+	ver, err := semver.ParseTolerant(string(out))
+	if err != nil {
+		return false, errors.Wrapf(err, "determining yarn version %s", string(out))
+	}
+	return ver.GE(semver.Version{Major: 2}), nil
+}
+
 // getWorkspacePackages gets all local workspaces that are depended on by other workspaces.
 // It uses `yarn workspaces info` which does the heavy lifting of building out the dependency tree for us.
 // There is no npm workspaces equivalent, but `yarn workspaces info` works for both yarn and npm as long
 // as yarn is installed.
 func getWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
-	cmd := exec.Command("yarn", "workspaces", "info")
-	cmd.Dir = filepath.Dir(pathPackageJSON)
-	out, err := cmd.CombinedOutput()
+	yarn2, err := isYarn2(pathPackageJSON)
 	if err != nil {
-		if len(out) > 0 {
-			return nil, errors.Wrap(err, string(out))
+		return nil, err
+	}
+	if yarn2 {
+		cmd := exec.Command("yarn", "workspaces", "list", "--json")
+		cmd.Dir = filepath.Dir(pathPackageJSON)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			if len(out) > 0 {
+				return nil, errors.Wrap(err, string(out))
+			}
+			return nil, errors.Wrap(err, "reading yarn/npm workspaces: Do you have yarn installed?")
 		}
-		return nil, errors.Wrap(err, "reading yarn/npm workspaces: Do you have yarn installed?")
-	}
 
-	// out will be something like:
-	// yarn workspaces v1.22.17
-	// {
-	//   "pkg1": {
-	//     "location": "pkg1",
-	//     "workspaceDependencies": [],
-	//     "mismatchedWorkspaceDependencies": []
-	//   },
-	//   "pkg2": {
-	//     "location": "pkg2",
-	//     "workspaceDependencies": [
-	//       "pkg1"
-	//     ],
-	//     "mismatchedWorkspaceDependencies": []
-	//   }
-	// }
-	// Done in 0.02s.
-	r := regexp.MustCompile(`{[\S\s]+}`)
-	workspaceJSON := r.FindString(string(out))
-	if workspaceJSON == "" {
-		return nil, errors.New(fmt.Sprintf("empty yarn workspace info %s", string(out)))
-	}
-	var workspaceInfo map[string]workspaceInfoEntry
-	err = json.Unmarshal([]byte(workspaceJSON), &workspaceInfo)
-	if err != nil {
-		return nil, errors.Wrapf(err, "unmarshalling yarn workspace info %s", workspaceJSON)
-	}
-
-	packages := make(map[string]bool)
-	for _, entries := range workspaceInfo {
-		for _, dep := range entries.WorkspaceDependencies {
-			packages[dep] = true
+		packages := make(map[string]bool)
+		entries := strings.Split(strings.TrimSpace(string(out)), "\n")
+		for _, entry := range entries {
+			var workspaceInfo struct {
+				Name string `json:"name"`
+			}
+			err = json.Unmarshal([]byte(entry), &workspaceInfo)
+			if err != nil {
+				return nil, errors.Wrapf(err, "unmarshalling yarn workspace info %s", entry)
+			}
+			packages[workspaceInfo.Name] = true
 		}
+		return packages, nil
+	} else {
+		cmd := exec.Command("yarn", "workspaces", "info")
+		cmd.Dir = filepath.Dir(pathPackageJSON)
+		out, err := cmd.CombinedOutput()
+		if err != nil {
+			if len(out) > 0 {
+				return nil, errors.Wrap(err, string(out))
+			}
+			return nil, errors.Wrap(err, "reading yarn/npm workspaces: Do you have yarn installed?")
+		}
+
+		// out will be something like:
+		// yarn workspaces v1.22.17
+		// {
+		//   "pkg1": {
+		//     "location": "pkg1",
+		//     "workspaceDependencies": [],
+		//     "mismatchedWorkspaceDependencies": []
+		//   },
+		//   "pkg2": {
+		//     "location": "pkg2",
+		//     "workspaceDependencies": [
+		//       "pkg1"
+		//     ],
+		//     "mismatchedWorkspaceDependencies": []
+		//   }
+		// }
+		// Done in 0.02s.
+
+		r := regexp.MustCompile(`{[\S\s]+}`)
+		workspaceJSON := r.FindString(string(out))
+		if workspaceJSON == "" {
+			return nil, errors.New(fmt.Sprintf("empty yarn workspace info %s", string(out)))
+		}
+		var workspaceInfo map[string]workspaceInfoEntry
+		err = json.Unmarshal([]byte(workspaceJSON), &workspaceInfo)
+		if err != nil {
+			return nil, errors.Wrapf(err, "unmarshalling yarn workspace info %s", workspaceJSON)
+		}
+
+		packages := make(map[string]bool)
+		for _, entries := range workspaceInfo {
+			for _, dep := range entries.WorkspaceDependencies {
+				packages[dep] = true
+			}
+		}
+		return packages, nil
 	}
-	return packages, nil
 }
