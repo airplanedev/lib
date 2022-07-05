@@ -41,7 +41,7 @@ func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, f
 		if t.URL != "" && opts.GenerateComment {
 			d.Comment = runtime.Comment(r, t.URL)
 		}
-		var params map[string]api.Type
+		params := make(map[string]api.Type, len(t.Parameters))
 		for _, p := range t.Parameters {
 			params[p.Slug] = p.Type
 
