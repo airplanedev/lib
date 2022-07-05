@@ -7,7 +7,6 @@ var code = template.Must(template.New("ts").Parse(`{{with .Comment -}}
 
 {{end -}}
 {{.Params}}
-
 // Put the main logic of the task in this function.
 export default async function(params: Params) {
   console.log('parameters:', params);
