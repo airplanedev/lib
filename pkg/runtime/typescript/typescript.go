@@ -23,12 +23,6 @@ type data struct {
 	Params  string
 }
 
-// Param represents the parameter.
-type param struct {
-	Name string
-	Type string
-}
-
 // Runtime implementaton.
 type Runtime struct {
 	javascript.Runtime
