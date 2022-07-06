@@ -52,6 +52,14 @@ func TestNodeBuilder(t *testing.T) {
 			},
 		},
 		{
+			Root: "typescript/yarn2",
+			Kind: TaskKindNode,
+			Options: KindOptions{
+				"shim":       "true",
+				"entrypoint": "main.ts",
+			},
+		},
+		{
 			Root: "typescript/imports",
 			Kind: TaskKindNode,
 			Options: KindOptions{

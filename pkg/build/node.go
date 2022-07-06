@@ -175,7 +175,13 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	if pkg.Settings.InstallCommand != "" {
 		installCommand = pkg.Settings.InstallCommand
 	} else if isYarn {
-		installCommand = "yarn install --non-interactive --production --frozen-lockfile"
+		if yarn2, _ := isYarn2(rootPackageJSON); yarn2 {
+			// Yarn 2 has removed --non-interactive --production --frozen-lockfile. There
+			// is no real replacement for these, so we'll just install with `yarn install`.
+			installCommand = "yarn install"
+		} else {
+			installCommand = "yarn install --non-interactive --production --frozen-lockfile"
+		}
 	} else if hasPackageLock {
 		// Use npm ci if possible, since it's faster and behaves better:
 		// https://docs.npmjs.com/cli/v8/commands/npm-ci
