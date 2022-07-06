@@ -25,8 +25,7 @@ export async function __airplaneEntrypoint(params, workflowArgs) {
   }
 
   if (result !== undefined) {
-    const output = JSON.stringify(result);
-    airplane.setOutput(output);
+    airplane.setOutput(result);
   }
   logger.info('airplane_status:succeeded');
   return result;
