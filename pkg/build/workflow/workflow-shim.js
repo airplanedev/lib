@@ -3,22 +3,17 @@ import task from '{{.Entrypoint}}';
 
 const { logger } = proxySinks();
 
-const { getEnvVars } = proxyActivities({
-  startToCloseTimeout: "1m",
-});
-
 // Main entrypoint to workflow; wraps a `workflow` function in the user code.
 //
 // This name must match the name we use when executing the workflow in
 // the Airplane API.
-export async function __airplaneEntrypoint(params, airplaneArgs) {
+export async function __airplaneEntrypoint(params, workflowArgs) {
   logger.info('airplane_status:started');
 
   try {
     // Monkey patch process.env
-    let env = await getEnvVars(airplaneArgs.TaskRevisionEnvVarNames, airplaneArgs.RuntimeEnv);
     global.process = {
-      env
+      env: workflowArgs.EnvVars
     }
 
     var result = await task(JSON.parse(params[0]));

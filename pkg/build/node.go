@@ -15,23 +15,21 @@ import (
 )
 
 type templateParams struct {
-	Workdir                            string
-	Base                               string
-	HasPackageJSON                     bool
-	UsesWorkspaces                     bool
-	InlineShim                         string
-	InlineShimPackageJSON              string
-	InlineWorkflowBundlerScript        string
-	InlineWorkflowInterceptorsScript   string
-	InlineWorkflowShimScript           string
-	InlineWorkflowShimActivitiesScript string
-	IsWorkflow                         bool
-	HasCustomActivities                bool
-	NodeVersion                        string
-	ExternalFlags                      string
-	InstallCommand                     string
-	PostInstallCommand                 string
-	Args                               string
+	Workdir                          string
+	Base                             string
+	HasPackageJSON                   bool
+	UsesWorkspaces                   bool
+	InlineShim                       string
+	InlineShimPackageJSON            string
+	InlineWorkflowBundlerScript      string
+	InlineWorkflowInterceptorsScript string
+	InlineWorkflowShimScript         string
+	IsWorkflow                       bool
+	NodeVersion                      string
+	ExternalFlags                    string
+	InstallCommand                   string
+	PostInstallCommand               string
+	Args                             string
 }
 
 // node creates a dockerfile for Node (typescript/javascript).
@@ -61,11 +59,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	pathPackageLock := filepath.Join(root, "package-lock.json")
 	hasPackageLock := fsx.AssertExistsAll(pathPackageLock) == nil
 	isYarn := fsx.AssertExistsAll(pathYarnLock) == nil
-
-	hasCustomActivities := fsx.AssertExistsAny(
-		filepath.Join(root, "activities.ts"),
-		filepath.Join(root, "activities.js"),
-	) == nil
 
 	runtime, ok := options["runtime"]
 	var isWorkflow bool
@@ -109,11 +102,10 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		UsesWorkspaces: len(pkg.Workspaces.workspaces) > 0,
 		// esbuild is relatively generous in the node versions it supports:
 		// https://esbuild.github.io/api/#target
-		NodeVersion:         GetNodeVersion(options),
-		PostInstallCommand:  pkg.Settings.PostInstallCommand,
-		Args:                argsCommand,
-		IsWorkflow:          isWorkflow,
-		HasCustomActivities: hasCustomActivities,
+		NodeVersion:        GetNodeVersion(options),
+		PostInstallCommand: pkg.Settings.PostInstallCommand,
+		Args:               argsCommand,
+		IsWorkflow:         isWorkflow,
 	}
 
 	if cfg.HasPackageJSON {
@@ -162,7 +154,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			return "", err
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
-		cfg.InlineWorkflowShimActivitiesScript = inlineString(workflowShimActivitiesScript)
 	} else {
 		shim, err := TemplatedNodeShim(entrypoint)
 		if err != nil {
@@ -239,11 +230,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		{{end}}
 
 		{{if .IsWorkflow}}
-		{{if not .HasCustomActivities}}
-		RUN touch /airplane/activities.js
-		{{end}}
 		RUN {{.InlineWorkflowShimScript}} >> /airplane/.airplane/workflow-shim.js
-		RUN {{.InlineWorkflowShimActivitiesScript}} >> /airplane/.airplane/workflow-shim-activities.js
 		RUN {{.InlineWorkflowInterceptorsScript}} >> /airplane/.airplane/workflow-interceptors.js
 		RUN {{.InlineWorkflowBundlerScript}} >> /airplane/.airplane/workflow-bundler.js
 		RUN node /airplane/.airplane/workflow-bundler.js
@@ -318,9 +305,6 @@ var workflowInterceptorsScript string
 
 //go:embed workflow/workflow-shim.js
 var workflowShimScript string
-
-//go:embed workflow/workflow-shim-activities.js
-var workflowShimActivitiesScript string
 
 func TemplatedNodeShim(entrypoint string) (string, error) {
 	return TemplateEntrypoint(nodeShim, entrypoint)
