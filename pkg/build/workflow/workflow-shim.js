@@ -10,7 +10,6 @@ const { logger } = proxySinks();
 // the Airplane API.
 export async function __airplaneEntrypoint(params, workflowArgs) {
   logger.info('airplane_status:started');
-  
   try {
     // Monkey patch process.env
     global.process = {

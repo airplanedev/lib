@@ -15,6 +15,8 @@ import (
 type ViewDefnDiscoverer struct {
 	Client api.IAPIClient
 	Logger logger.Logger
+
+	MissingViewHandler func(context.Context, definitions.ViewDefinition) (*api.View, error)
 }
 
 var _ ViewDiscoverer = &ViewDefnDiscoverer{}
@@ -50,17 +52,26 @@ func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*
 		return nil, errors.Wrap(err, "getting absolute view definition root")
 	}
 
-	view, err := dd.Client.GetApp(ctx, api.GetAppRequest{Slug: d.Slug})
+	view, err := dd.Client.GetView(ctx, api.GetViewRequest{Slug: d.Slug})
 	if err != nil {
 		var merr *api.AppMissingError
 		if !errors.As(err, &merr) {
 			return nil, errors.Wrap(err, "unable to get view")
 		}
-		// TODO offer to create the view.
-		if dd.Logger != nil {
-			dd.Logger.Warning(`View with slug %s does not exist, skipping deploy.`, d.Slug)
+		if dd.MissingViewHandler == nil {
+			return nil, nil
 		}
-		return nil, nil
+
+		vptr, err := dd.MissingViewHandler(ctx, d)
+		if err != nil {
+			return nil, err
+		} else if vptr == nil {
+			if dd.Logger != nil {
+				dd.Logger.Warning(`View with slug %s does not exist, skipping deployment.`, d.Slug)
+			}
+			return nil, nil
+		}
+		view = *vptr
 	}
 	if view.ArchivedAt != nil {
 		dd.Logger.Warning(`View with slug %s is archived, skipping deployment.`, view.Slug)
