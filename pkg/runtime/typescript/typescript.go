@@ -10,6 +10,7 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/runtime/javascript"
+	"github.com/pkg/errors"
 )
 
 // Init register the runtime.
@@ -59,8 +60,10 @@ func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, f
 func CreateParamsType(parameters map[string]api.Type, typePrefix string) (string, error) {
 	var params []string
 	for slug, paramType := range parameters {
-		slug = slugToTypeKey(slug)
-		paramType := typeof(paramType)
+		paramType, err := typeof(paramType)
+		if err != nil {
+			return "", err
+		}
 		params = append(params, fmt.Sprintf("%s: %s;", slug, paramType))
 	}
 
@@ -78,34 +81,26 @@ func CreateParamsType(parameters map[string]api.Type, typePrefix string) (string
 	var buff bytes.Buffer
 	err := t.Execute(&buff, tc)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "applying parameter template")
 	}
 	return buff.String(), nil
 }
 
 // typeof translates the given type to TypeScript.
-func typeof(t api.Type) string {
+func typeof(t api.Type) (string, error) {
 	switch t {
 	case api.TypeBoolean:
-		return "boolean"
+		return "boolean", nil
 	case api.TypeString:
-		return "string"
+		return "string", nil
 	case api.TypeInteger, api.TypeFloat:
-		return "number"
+		return "number", nil
 	case api.TypeDate, api.TypeDatetime:
-		return "string"
+		return "string", nil
 	case api.TypeUpload:
-		return fileType
+		return fileType, nil
 	case api.TypeConfigVar:
-		return configType
+		return configType, nil
 	}
-	return "unknown"
-}
-
-// slugToTypeKey converts a slug to a key that can be used in a TypeScript type.
-func slugToTypeKey(slug string) string {
-	if strings.Contains(slug, "-") {
-		return fmt.Sprintf("\"%s\"", slug)
-	}
-	return slug
+	return "", errors.Errorf("unknown parameter type %s", t)
 }

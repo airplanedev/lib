@@ -132,11 +132,11 @@ func TestCreateParamsType(t *testing.T) {
 				"integer":    api.TypeInteger,
 				"date":       api.TypeDate,
 				"upload":     api.TypeUpload,
-				"config-var": api.TypeConfigVar,
+				"config_var": api.TypeConfigVar,
 			},
 			typescriptType: `export type Params = {
-  "config-var": { name: string; value: string };
   boolean: boolean;
+  config_var: { name: string; value: string };
   date: string;
   integer: number;
   string: string;
