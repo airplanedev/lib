@@ -59,16 +59,16 @@ class WorkflowLogInboundInterceptor {
   }
 
   async execute(input, next) {
-    workflowLog(this.info, `Workflow inbound activity execution: ${JSON.stringify(input)}`);
+    workflowLog(this.info, `Workflow execution starting: ${JSON.stringify(input)}`);
     try {
       const result = await next(input);
       workflowLog(
         this.info,
-        `Workflow inbound activity execution result: ${JSON.stringify(result)}`
+        `Workflow execution result: ${JSON.stringify(result)}`
       );
       return result;
     } catch (error) {
-      workflowLog(this.info, `Error in workflow activity execution: ${error}`);
+      workflowLog(this.info, `Error in workflow execution: ${error}`);
       throw error;
     }
   }
