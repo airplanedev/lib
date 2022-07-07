@@ -39,7 +39,7 @@ async function runWorker(params) {
 
   const connection = await NativeConnection.create({
     address: temporalHost,
-    headers: {
+    metadata: {
       authorization: temporalToken,
     },
     tls: useTLS,
@@ -57,7 +57,7 @@ async function runWorker(params) {
             `airplane_workflow_log:workflow//${workflowInfo.workflowId}/${workflowInfo.runId} ${message}`
           );
         },
-        callDuringReplay: true,
+        callDuringReplay: false,
       },
     },
   };
@@ -65,7 +65,10 @@ async function runWorker(params) {
   const worker = await Worker.create({
     // Path to bundle created by bundle-workflow.js script; this should be relative
     // to the shim.
-    workflowBundle: { path: '/airplane/.airplane/workflow-bundle.js' },
+    workflowBundle: {
+      codePath: '/airplane/.airplane/workflow-bundle.js',
+      sourceMapPath: '/airplane/.airplane/workflow-bundle.map.js',
+    },
     activities: {
       ...createActivities(),
     },
