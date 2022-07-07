@@ -175,8 +175,8 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	if pkg.Settings.InstallCommand != "" {
 		installCommand = pkg.Settings.InstallCommand
 	} else if isYarn {
-		if yarn2, _ := isYarn2(rootPackageJSON); yarn2 {
-			// Yarn 2 has removed --non-interactive --production --frozen-lockfile. There
+		if yarnBerry, _ := isYarnBerry(rootPackageJSON); yarnBerry {
+			// Yarn Berry has removed --non-interactive --production --frozen-lockfile. There
 			// is no real replacement for these, so we'll just install with `yarn install`.
 			installCommand = "yarn install"
 		} else {

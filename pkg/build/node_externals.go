@@ -149,7 +149,7 @@ type workspaceInfoEntry struct {
 	WorkspaceDependencies []string `json:"workspaceDependencies"`
 }
 
-func isYarn2(pathPackageJSON string) (bool, error) {
+func isYarnBerry(pathPackageJSON string) (bool, error) {
 	cmd := exec.Command("yarn", "-v")
 	cmd.Dir = filepath.Dir(pathPackageJSON)
 	out, err := cmd.CombinedOutput()
@@ -168,15 +168,15 @@ func isYarn2(pathPackageJSON string) (bool, error) {
 }
 
 // getWorkspacePackages gets all local workspaces that are depended on by other workspaces.
-// It uses `yarn workspaces info` which does the heavy lifting of building out the dependency tree for us.
-// There is no npm workspaces equivalent, but `yarn workspaces info` works for both yarn and npm as long
+// It uses the yarn CLI which does the heavy lifting of building out the dependency tree for us.
+// There is no npm workspaces equivalent, but the yarn CLI works for both yarn and npm as long
 // as yarn is installed.
 func getWorkspacePackages(pathPackageJSON string) (map[string]bool, error) {
-	yarn2, err := isYarn2(pathPackageJSON)
+	yarnBerry, err := isYarnBerry(pathPackageJSON)
 	if err != nil {
 		return nil, err
 	}
-	if yarn2 {
+	if yarnBerry {
 		cmd := exec.Command("yarn", "workspaces", "list", "--json")
 		cmd.Dir = filepath.Dir(pathPackageJSON)
 		out, err := cmd.CombinedOutput()
