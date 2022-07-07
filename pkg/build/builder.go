@@ -72,6 +72,7 @@ type DockerfileConfig struct {
 	Root         string
 	Options      KindOptions
 	BuildArgKeys []string
+	EnvVars      map[string]string
 }
 
 // Builder implements an image builder.
