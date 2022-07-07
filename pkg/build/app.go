@@ -30,15 +30,18 @@ func app(root string) (string, error) {
 		Base           string
 		InstallCommand string
 		OutDir         string
+		APIHost        string
 	}{
 		Base:           base,
 		InstallCommand: "yarn install --non-interactive --frozen-lockfile",
 		OutDir:         "dist",
+		APIHost:        "test_API_HOST",
 	}
 
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
+		ENV AIRPLANE_API_HOST={{.APIHost}}
 
 		COPY package*.json yarn.* /airplane/
 		RUN {{.InstallCommand}}

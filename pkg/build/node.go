@@ -95,6 +95,7 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		buildArgs[i] = fmt.Sprintf("ARG %s", a)
 	}
 	argsCommand := strings.Join(buildArgs, "\n")
+	fmt.Println(argsCommand)
 
 	cfg := templateParams{
 		Workdir:        workdir,
