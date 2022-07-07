@@ -2,6 +2,7 @@ package build
 
 import (
 	_ "embed"
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -10,7 +11,7 @@ import (
 )
 
 // app creates a dockerfile for an app.
-func app(root string) (string, error) {
+func app(root string, buildArgs []string) (string, error) {
 	// TODO: create vite.config.ts if it does not exist.
 	// TODO: possibly support multiple build tools.
 	_, err := os.Stat(filepath.Join(root, "vite.config.ts"))
@@ -37,6 +38,7 @@ func app(root string) (string, error) {
 		OutDir:         "dist",
 		APIHost:        "test_API_HOST",
 	}
+	fmt.Println(buildArgs)
 
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder

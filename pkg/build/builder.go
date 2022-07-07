@@ -327,7 +327,7 @@ func BuildDockerfile(c DockerfileConfig) (string, error) {
 	case NameShell:
 		return shell(c.Root, c.Options)
 	case NameApp:
-		return app(c.Root)
+		return app(c.Root, c.BuildArgKeys)
 	default:
 		return "", errors.Errorf("build: unknown builder type %q", c.Builder)
 	}
