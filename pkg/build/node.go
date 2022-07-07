@@ -171,7 +171,9 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			// is no real replacement for these, so we'll just install with `yarn install`.
 			installCommand = "yarn install"
 		} else {
-			installCommand = "yarn install --non-interactive --production --frozen-lockfile"
+			// In Yarn 2+, we need to keep the cache around for PnP. For Yarn 1, we can drop the
+			// cache which reduces the resulting image's size.
+			installCommand = "yarn install --non-interactive --production --frozen-lockfile; yarn cache clean"
 		}
 	} else if hasPackageLock {
 		// Use npm ci if possible, since it's faster and behaves better:
