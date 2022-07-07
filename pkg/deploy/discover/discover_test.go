@@ -19,7 +19,7 @@ func TestDiscover(t *testing.T) {
 		name                string
 		paths               []string
 		existingTasks       map[string]api.Task
-		existingViews       map[string]api.App
+		existingViews       map[string]api.View
 		expectedErr         bool
 		expectedTaskConfigs []TaskConfig
 		expectedViewConfigs []ViewConfig
@@ -362,7 +362,7 @@ func TestDiscover(t *testing.T) {
 		{
 			name:  "view defn",
 			paths: []string{"./fixtures/view/defn.view.yaml"},
-			existingViews: map[string]api.App{
+			existingViews: map[string]api.View{
 				"my_view": {ID: "view123", Slug: "my_view", Name: "My View"},
 			},
 			expectedViewConfigs: []ViewConfig{
@@ -385,7 +385,7 @@ func TestDiscover(t *testing.T) {
 			require := require.New(t)
 			apiClient := &mock.MockClient{
 				Tasks: tC.existingTasks,
-				Apps:  tC.existingViews,
+				Views: tC.existingViews,
 			}
 			scriptDiscoverer := &ScriptDiscoverer{
 				Client: apiClient,

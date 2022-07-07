@@ -14,7 +14,7 @@ type IAPIClient interface {
 	GetTask(ctx context.Context, req GetTaskRequest) (res Task, err error)
 	// GetTaskMetadata fetches a task's metadata by slug. If the slug does not match a task, a *TaskMissingError is returned.
 	GetTaskMetadata(ctx context.Context, slug string) (res TaskMetadata, err error)
-	GetApp(ctx context.Context, req GetAppRequest) (res App, err error)
+	GetView(ctx context.Context, req GetViewRequest) (res View, err error)
 	ListResources(ctx context.Context) (res ListResourcesResponse, err error)
 	CreateBuildUpload(ctx context.Context, req CreateBuildUploadRequest) (res CreateBuildUploadResponse, err error)
 }
@@ -346,7 +346,7 @@ type ExecuteRules struct {
 	RequireRequests     bool `json:"requireRequests"`
 }
 
-type App struct {
+type View struct {
 	ID          string     `json:"id"`
 	Slug        string     `json:"slug"`
 	ArchivedAt  *time.Time `json:"archivedAt"`
@@ -357,9 +357,16 @@ type App struct {
 	CreatedAt   time.Time  `json:"createdAt"`
 }
 
-type GetAppRequest struct {
+type GetViewRequest struct {
 	ID   string
 	Slug string
+}
+
+type CreateViewRequest struct {
+	Slug        string  `json:"slug"`
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	EnvVars     EnvVars `json:"envVars"`
 }
 
 type Schedule struct {
