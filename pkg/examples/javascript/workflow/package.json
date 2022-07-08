@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "airplane": "0.2.0-10"
+    "airplane": "0.2.0-19"
   }
 }
