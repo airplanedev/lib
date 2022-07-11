@@ -9,8 +9,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-// app creates a dockerfile for an app.
-func app(root string) (string, error) {
+// view creates a dockerfile for an view.
+func view(root string) (string, error) {
 	// TODO: create vite.config.ts if it does not exist.
 	// TODO: possibly support multiple build tools.
 	_, err := os.Stat(filepath.Join(root, "vite.config.ts"))

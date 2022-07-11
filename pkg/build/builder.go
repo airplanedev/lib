@@ -301,7 +301,7 @@ const (
 	NamePython Name = "python"
 	NameNode   Name = "node"
 	NameShell  Name = "shell"
-	NameApp    Name = "app"
+	NameView   Name = "view"
 
 	NameSQL  Name = "sql"
 	NameREST Name = "rest"
@@ -326,8 +326,8 @@ func BuildDockerfile(c DockerfileConfig) (string, error) {
 		return node(c.Root, c.Options, c.BuildArgKeys)
 	case NameShell:
 		return shell(c.Root, c.Options)
-	case NameApp:
-		return app(c.Root)
+	case NameView:
+		return view(c.Root)
 	default:
 		return "", errors.Errorf("build: unknown builder type %q", c.Builder)
 	}

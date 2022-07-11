@@ -5,13 +5,13 @@ import (
 	"testing"
 )
 
-func TestAppBuilder(t *testing.T) {
+func TestViewBuilder(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []Test{
 		{
-			Root:    "app/simple",
-			Kind:    "app",
+			Root:    "view/simple",
+			Kind:    "view",
 			SkipRun: true,
 		},
 	}
