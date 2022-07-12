@@ -61,12 +61,13 @@ func view(root string, options KindOptions) (string, error) {
 		APIHost:          apiHost,
 	}
 
-	// TODO: patch package.json.
+	// TODO: patch package.json correctly.
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
 
 		COPY package*.json yarn.* /airplane/
+		RUN yarn add vite
 		RUN {{.InstallCommand}}
 
 		RUN mkdir /airplane/src/
