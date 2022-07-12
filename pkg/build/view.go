@@ -72,7 +72,8 @@ func view(root string, options KindOptions) (string, error) {
 		WORKDIR /airplane
 
 		COPY package*.json yarn.* /airplane/
-		RUN yarn add vite @vitejs/plugin-react
+		RUN [ -f package.json ] || { echo "{}" > package.json; }
+		RUN yarn add vite @vitejs/plugin-react react react-dom @airplane/views
 		RUN {{.InstallCommand}}
 
 		RUN mkdir /airplane/src/
