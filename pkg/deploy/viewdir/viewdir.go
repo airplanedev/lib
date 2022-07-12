@@ -2,6 +2,7 @@ package viewdir
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 
 	"github.com/airplanedev/lib/pkg/api"
@@ -43,9 +44,14 @@ func NewViewDirectory(
 	api *api.Client,
 	logger logger.Logger,
 	root string,
+	searchPath string,
 	envSlug string,
 ) (ViewDirectory, error) {
-	// Discover local views in the directory of the file.
+	absRoot, err := filepath.Abs(root)
+	if err != nil {
+		return ViewDirectory{}, errors.Wrap(err, "getting absolute root filepath")
+	}
+
 	d := &discover.Discoverer{
 		ViewDiscoverers: []discover.ViewDiscoverer{
 			&discover.ViewDefnDiscoverer{
@@ -56,7 +62,33 @@ func NewViewDirectory(
 		EnvSlug: envSlug,
 		Client:  api,
 	}
-	_, viewConfigs, err := d.Discover(ctx, root)
+
+	// If pointing towards a view definition file, we just use that file as the view to run.
+	if definitions.IsViewDef(searchPath) {
+		vc, err := d.ViewDiscoverers[0].GetViewConfig(ctx, searchPath)
+		if err != nil {
+			return ViewDirectory{}, errors.Wrap(err, "reading view config")
+		}
+
+		return ViewDirectory{
+			root:           absRoot,
+			entrypointPath: vc.Def.Entrypoint,
+		}, nil
+	}
+
+	// If pointing towards a non-view-definition file, we use the directory around
+	// that as our search path.
+	fileInfo, err := os.Stat(searchPath)
+	if err != nil {
+		return ViewDirectory{}, errors.Wrapf(err, "describing %s", searchPath)
+	}
+	if !fileInfo.IsDir() {
+		searchPath = filepath.Dir(searchPath)
+	}
+
+	// We try to find a single view in our search path. If there isn't exactly
+	// one view, we error out.
+	_, viewConfigs, err := d.Discover(ctx, searchPath)
 	if err != nil {
 		return ViewDirectory{}, errors.Wrap(err, "discovering view configs")
 	}
@@ -64,14 +96,9 @@ func NewViewDirectory(
 		return ViewDirectory{}, errors.New("currently can only have one view!")
 	}
 	vc := viewConfigs[0]
-	absRoot, err := filepath.Abs(root)
-	if err != nil {
-		return ViewDirectory{}, errors.Wrap(err, "getting absolute root filepath")
-	}
 
 	return ViewDirectory{
 		root:           absRoot,
 		entrypointPath: vc.Def.Entrypoint,
-		logger:         logger,
 	}, nil
 }
