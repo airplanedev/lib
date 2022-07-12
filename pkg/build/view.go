@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/MakeNowJust/heredoc"
-	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/pkg/errors"
 )
 
@@ -17,9 +16,9 @@ func view(root string, options KindOptions) (string, error) {
 	if entrypoint == "" {
 		return "", errors.New("expected an entrypoint")
 	}
-	if err := fsx.AssertExistsAll(filepath.Join(root, entrypoint)); err != nil {
+	/*if err := fsx.AssertExistsAll(filepath.Join(root, entrypoint)); err != nil {
 		return "", err
-	}
+	}*/
 
 	// Assert that API host is set.
 	apiHost, _ := options["apiHost"].(string)
