@@ -1,12 +1,16 @@
 package outputs
 
 import (
+	"fmt"
+
 	"github.com/airplanedev/ojson"
 	"github.com/airplanedev/path"
 	"github.com/pkg/errors"
 )
 
 func ApplyOutputCommand(cmd *ParsedLine, o *ojson.Value) error {
+	fmt.Printf(">>>>> %+v\n", cmd)
+
 	switch cmd.Command {
 	case "":
 		if err := applyLegacy(cmd.Name, cmd.Value.V, o); err != nil {
@@ -31,6 +35,8 @@ func ApplyOutputCommand(cmd *ParsedLine, o *ojson.Value) error {
 }
 
 func applyLegacy(name string, v interface{}, o *ojson.Value) error {
+	fmt.Printf(">>>> Applying legacy with with name %s and value %+v", name, v)
+
 	if o.V == nil {
 		o.V = ojson.NewObject()
 	}
