@@ -2,10 +2,15 @@ package build
 
 import (
 	_ "embed"
+	"strings"
 
 	"github.com/MakeNowJust/heredoc"
 	"github.com/pkg/errors"
 )
+
+func DoView(root string, options KindOptions) (string, error) {
+	return view(root, options)
+}
 
 // view creates a dockerfile for an view.
 func view(root string, options KindOptions) (string, error) {
@@ -67,6 +72,7 @@ func view(root string, options KindOptions) (string, error) {
 		WORKDIR /airplane
 
 		COPY package*.json yarn.* /airplane/
+		COPY views /views/
 		RUN yarn add vite @vitejs/plugin-react
 		RUN {{.InstallCommand}}
 
@@ -103,6 +109,9 @@ func indexHtmlString() (string, error) {
 var mainTsxTemplateStr string
 
 func mainTsxString(entrypoint string) (string, error) {
+	if strings.HasSuffix(entrypoint, ".tsx") {
+		entrypoint = entrypoint[:len(entrypoint)-4]
+	}
 	return applyTemplate(mainTsxTemplateStr, struct {
 		Entrypoint string
 	}{
