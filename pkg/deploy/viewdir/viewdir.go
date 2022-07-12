@@ -8,7 +8,6 @@ import (
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/discover"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
-	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
 
@@ -20,7 +19,6 @@ type ViewDirectoryInterface interface {
 type ViewDirectory struct {
 	root           string
 	entrypointPath string
-	logger         logger.Logger
 }
 
 func (this *ViewDirectory) Root() string {
@@ -41,8 +39,7 @@ func missingViewHandler(ctx context.Context, defn definitions.ViewDefinition) (*
 
 func NewViewDirectory(
 	ctx context.Context,
-	api *api.Client,
-	logger logger.Logger,
+	api api.IAPIClient,
 	root string,
 	searchPath string,
 	envSlug string,

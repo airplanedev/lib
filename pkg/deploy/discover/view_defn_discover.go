@@ -54,7 +54,7 @@ func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*
 
 	view, err := dd.Client.GetView(ctx, api.GetViewRequest{Slug: d.Slug})
 	if err != nil {
-		var merr *api.AppMissingError
+		var merr *api.ViewMissingError
 		if !errors.As(err, &merr) {
 			return nil, errors.Wrap(err, "unable to get view")
 		}

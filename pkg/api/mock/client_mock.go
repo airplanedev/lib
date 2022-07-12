@@ -49,7 +49,7 @@ func (mc *MockClient) CreateBuildUpload(ctx context.Context, req api.CreateBuild
 func (mc *MockClient) GetView(ctx context.Context, req api.GetViewRequest) (res api.View, err error) {
 	a, ok := mc.Views[req.Slug]
 	if !ok {
-		return api.View{}, &api.AppMissingError{AppURL: "api/", Slug: req.Slug}
+		return api.View{}, &api.ViewMissingError{AppURL: "api/", Slug: req.Slug}
 	}
 	return a, nil
 }
