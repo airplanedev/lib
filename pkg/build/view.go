@@ -2,15 +2,13 @@ package build
 
 import (
 	_ "embed"
+	"path/filepath"
 	"strings"
 
 	"github.com/MakeNowJust/heredoc"
+	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/pkg/errors"
 )
-
-func DoView(root string, options KindOptions) (string, error) {
-	return view(root, options)
-}
 
 // view creates a dockerfile for an view.
 func view(root string, options KindOptions) (string, error) {
@@ -19,9 +17,9 @@ func view(root string, options KindOptions) (string, error) {
 	if entrypoint == "" {
 		return "", errors.New("expected an entrypoint")
 	}
-	/*if err := fsx.AssertExistsAll(filepath.Join(root, entrypoint)); err != nil {
+	if err := fsx.AssertExistsAll(filepath.Join(root, entrypoint)); err != nil {
 		return "", err
-	}*/
+	}
 
 	// Assert that API host is set.
 	apiHost, _ := options["apiHost"].(string)
