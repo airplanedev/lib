@@ -13,7 +13,7 @@ func TestViewBuilder(t *testing.T) {
 			Root: "view/simple",
 			Kind: "view",
 			Options: KindOptions{
-				"entrypoint": "src/main.tsx",
+				"entrypoint": "src/App.tsx",
 				"apiHost":    "https://api:5000",
 			},
 			SkipRun: true,
