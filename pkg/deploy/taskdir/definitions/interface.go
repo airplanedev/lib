@@ -31,6 +31,7 @@ type DefinitionInterface interface {
 	GetKindAndOptions() (build.TaskKind, build.KindOptions, error)
 	GetEnv() (api.TaskEnv, error)
 	GetConfigAttachments() ([]api.ConfigAttachment, error)
+	GetResourceAttachments() map[string]string
 	GetSlug() string
 	GetName() string
 	UpgradeJST() error
