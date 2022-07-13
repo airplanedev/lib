@@ -10,8 +10,12 @@ func TestViewBuilder(t *testing.T) {
 
 	tests := []Test{
 		{
-			Root:    "view/simple",
-			Kind:    "view",
+			Root: "view/simple",
+			Kind: "view",
+			Options: KindOptions{
+				"entrypoint": "src/main.tsx",
+				"apiHost":    "https://api:5000",
+			},
 			SkipRun: true,
 		},
 	}
