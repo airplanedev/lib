@@ -46,14 +46,14 @@ func (dd *DefnDiscoverer) IsAirplaneTask(ctx context.Context, file string) (stri
 	return def.GetSlug(), nil
 }
 
-func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
+func (dd *DefnDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error) {
 	if !definitions.IsTaskDef(file) {
 		// Check if there is a file in the same directory with the same name that is a task defn.
 		fileWithoutExtension := strings.TrimSuffix(file, filepath.Ext(file))
 		for _, tde := range definitions.TaskDefExtensions {
 			fileWithTaskDefExtension := fileWithoutExtension + tde
 			if fsx.Exists(fileWithTaskDefExtension) {
-				return dd.GetTaskConfig(ctx, fileWithTaskDefExtension)
+				return dd.GetTaskConfigs(ctx, fileWithTaskDefExtension)
 			}
 		}
 		return nil, nil
@@ -105,7 +105,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 
 	entrypoint, err := def.GetAbsoluteEntrypoint()
 	if err == definitions.ErrNoEntrypoint {
-		return &tc, nil
+		return []TaskConfig{tc}, nil
 	} else if err != nil {
 		return nil, err
 	} else if err = fsx.AssertExistsAll(entrypoint); err != nil {
@@ -148,7 +148,7 @@ func (dd *DefnDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Task
 		}
 	}
 
-	return &tc, nil
+	return []TaskConfig{tc}, nil
 }
 
 func (dd *DefnDiscoverer) ConfigSource() ConfigSource {

@@ -30,7 +30,7 @@ func (sd *ScriptDiscoverer) IsAirplaneTask(ctx context.Context, file string) (st
 	return slug, nil
 }
 
-func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
+func (sd *ScriptDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error) {
 	slug := runtime.Slug(file)
 	if slug == "" {
 		return nil, nil
@@ -93,13 +93,13 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		return nil, err
 	}
 
-	return &TaskConfig{
+	return []TaskConfig{TaskConfig{
 		TaskID:         task.ID,
 		TaskRoot:       taskroot,
 		TaskEntrypoint: absFile,
 		Def:            def,
 		Source:         sd.ConfigSource(),
-	}, nil
+	}}, nil
 }
 
 func (sd *ScriptDiscoverer) ConfigSource() ConfigSource {
