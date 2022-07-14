@@ -8,6 +8,7 @@ import (
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
+	"github.com/airplanedev/lib/pkg/utils/fsx"
 	"github.com/airplanedev/lib/pkg/utils/logger"
 	"github.com/pkg/errors"
 )
@@ -51,10 +52,13 @@ func (dd *ViewDefnDiscoverer) GetViewConfig(ctx context.Context, file string) (*
 	if err != nil {
 		return nil, errors.Wrap(err, "getting absolute view definition root")
 	}
+	if p, ok := fsx.Find(root, "package.json"); ok {
+		root = p
+	}
 
 	view, err := dd.Client.GetView(ctx, api.GetViewRequest{Slug: d.Slug})
 	if err != nil {
-		var merr *api.AppMissingError
+		var merr *api.ViewMissingError
 		if !errors.As(err, &merr) {
 			return nil, errors.Wrap(err, "unable to get view")
 		}

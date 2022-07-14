@@ -21,21 +21,21 @@ func (err TaskMissingError) ExplainError() string {
 	)
 }
 
-// AppMissingError implements an explainable error.
-type AppMissingError struct {
+// ViewMissingError implements an explainable error.
+type ViewMissingError struct {
 	AppURL string
 	Slug   string
 }
 
 // Error implementation.
-func (err AppMissingError) Error() string {
-	return fmt.Sprintf("app with slug %q does not exist", err.Slug)
+func (err ViewMissingError) Error() string {
+	return fmt.Sprintf("view with slug %q does not exist", err.Slug)
 }
 
 // ExplainError implementation.
-func (err AppMissingError) ExplainError() string {
+func (err ViewMissingError) ExplainError() string {
 	return fmt.Sprintf(
-		"Follow the URL below to create the app:\n%s",
+		"Follow the URL below to create the view:\n%s",
 		err.AppURL+"/apps/new",
 	)
 }

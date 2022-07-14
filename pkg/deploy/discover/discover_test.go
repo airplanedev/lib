@@ -374,7 +374,7 @@ func TestDiscover(t *testing.T) {
 						Description: "Test view yaml file",
 						Entrypoint:  fixturesPath + "/view/foo.js",
 					},
-					Root:   fixturesPath + "/view",
+					Root:   fixturesPath,
 					Source: ConfigSourceDefn,
 				},
 			},

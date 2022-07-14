@@ -20,7 +20,8 @@ export async function __airplaneEntrypoint(params, workflowArgs) {
   } catch (err) {
     logger.info(err);
     logger.info('airplane_output_append:error ' + JSON.stringify({ error: String(err) }));
-    throw err;
+    logger.info('airplane_output_append:error {"error":"Error executing workflow"}')
+    return
   }
 
   if (result !== undefined) {
