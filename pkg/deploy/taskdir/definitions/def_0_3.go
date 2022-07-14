@@ -1192,6 +1192,10 @@ func (d *Definition_0_3) GetName() string {
 	return d.Name
 }
 
+func (d *Definition_0_3) GetRuntime() build.TaskRuntime {
+	return d.Runtime
+}
+
 func (d *Definition_0_3) SetEntrypoint(entrypoint string) error {
 	taskKind, err := d.taskKind()
 	if err != nil {

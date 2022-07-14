@@ -34,6 +34,7 @@ type DefinitionInterface interface {
 	GetResourceAttachments() map[string]string
 	GetSlug() string
 	GetName() string
+	GetRuntime() build.TaskRuntime
 	UpgradeJST() error
 	GetUpdateTaskRequest(ctx context.Context, client api.IAPIClient) (api.UpdateTaskRequest, error)
 	SetWorkdir(taskroot, workdir string) error
