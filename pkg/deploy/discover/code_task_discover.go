@@ -36,7 +36,7 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 	}
 
 	// Run parser on the file
-	out, err := exec.Command("node", "parser/node/parser.js", file).Output()
+	out, err := exec.Command("npx", "ts-node", "parser/node/parser.ts", file).Output()
 	if err != nil {
 		return nil, err
 	}
