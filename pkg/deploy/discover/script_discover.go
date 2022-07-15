@@ -93,13 +93,15 @@ func (sd *ScriptDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]
 		return nil, err
 	}
 
-	return []TaskConfig{TaskConfig{
-		TaskID:         task.ID,
-		TaskRoot:       taskroot,
-		TaskEntrypoint: absFile,
-		Def:            def,
-		Source:         sd.ConfigSource(),
-	}}, nil
+	return []TaskConfig{
+		{
+			TaskID:         task.ID,
+			TaskRoot:       taskroot,
+			TaskEntrypoint: absFile,
+			Def:            def,
+			Source:         sd.ConfigSource(),
+		},
+	}, nil
 }
 
 func (sd *ScriptDiscoverer) ConfigSource() ConfigSource {
