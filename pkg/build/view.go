@@ -26,6 +26,9 @@ func view(root string, options KindOptions) (string, error) {
 	if apiHost == "" {
 		return "", errors.New("expected an api host")
 	}
+	if !strings.HasPrefix(apiHost, "https://") {
+		apiHost = "https://" + apiHost
+	}
 
 	// TODO: possibly support multiple build tools.
 	base, err := getBaseNodeImage("")
