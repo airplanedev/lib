@@ -173,6 +173,10 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		} else {
 			installCommand = "yarn install --non-interactive --production --frozen-lockfile"
 		}
+		// Because the install command is running in the context of a docker build, the yarn cache
+		// isn't used after the packages are installed, and so we clean the cache to keep the
+		// image lean.
+		installCommand += " && yarn cache clean"
 	} else if hasPackageLock {
 		// Use npm ci if possible, since it's faster and behaves better:
 		// https://docs.npmjs.com/cli/v8/commands/npm-ci
