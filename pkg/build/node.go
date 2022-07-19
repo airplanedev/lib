@@ -171,12 +171,13 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			// is no real replacement for these, so we'll just install with `yarn install`.
 			installCommand = "yarn install"
 		} else {
-			installCommand = "yarn install --non-interactive --production --frozen-lockfile"
+			// Because the install command is running in the context of a docker build, the yarn cache
+			// isn't used after the packages are installed, and so we clean the cache to keep the
+			// image lean. This doesn't apply to Yarn v2 (specifically Plug'n'Play), which uses the
+			// cache directory for storing packages.
+			installCommand = "yarn install --non-interactive --production --frozen-lockfile && yarn cache clean"
 		}
-		// Because the install command is running in the context of a docker build, the yarn cache
-		// isn't used after the packages are installed, and so we clean the cache to keep the
-		// image lean.
-		installCommand += " && yarn cache clean"
+
 	} else if hasPackageLock {
 		// Use npm ci if possible, since it's faster and behaves better:
 		// https://docs.npmjs.com/cli/v8/commands/npm-ci
