@@ -837,6 +837,15 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		return d.Marshal(format)
 	}
 
+	// Run yaml.Marshal to take care of any weird characters. Note that this won't work if there
+	// are newlines in the name.
+	nameBuf, err := yaml.Marshal(d.Name)
+	if err != nil {
+		return nil, errors.Wrap(err, "marshalling name")
+	}
+	// yaml.Marshal always appends a newline, trim it.
+	name := strings.TrimSuffix(string(nameBuf), "\n")
+
 	tmpl, err := template.New("definition").Parse(definitionTemplate)
 	if err != nil {
 		return nil, errors.Wrap(err, "parsing definition template")
@@ -844,7 +853,7 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 	buf := new(bytes.Buffer)
 	if err := tmpl.Execute(buf, map[string]interface{}{
 		"slug":                   d.Slug,
-		"name":                   d.Name,
+		"name":                   name,
 		"taskDefinition":         taskDefinition.String(),
 		"paramsExtraDescription": paramsExtraInfo,
 	}); err != nil {
