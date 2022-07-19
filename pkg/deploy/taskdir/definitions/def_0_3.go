@@ -837,9 +837,8 @@ func (d Definition_0_3) GenerateCommentedFile(format DefFormat) ([]byte, error) 
 		return d.Marshal(format)
 	}
 
-	// Run yaml.Marshal to take care of any weird characters. Note that this won't work if there
-	// are newlines in the name.
-	nameBuf, err := yaml.Marshal(d.Name)
+	// Remove any newlines from the name & run yaml.Marshal to take care of any weird characters.
+	nameBuf, err := yaml.Marshal(strings.ReplaceAll(d.Name, "\n", ""))
 	if err != nil {
 		return nil, errors.Wrap(err, "marshalling name")
 	}
