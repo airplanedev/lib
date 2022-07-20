@@ -177,7 +177,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			// cache directory for storing packages.
 			installCommand = "yarn install --non-interactive --production --frozen-lockfile && yarn cache clean"
 		}
-
 	} else if hasPackageLock {
 		// Use npm ci if possible, since it's faster and behaves better:
 		// https://docs.npmjs.com/cli/v8/commands/npm-ci
