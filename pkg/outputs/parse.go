@@ -21,6 +21,7 @@ type ParsedLine struct {
 	Name     string
 	JsonPath string
 	Value    ojson.Value
+	Size     int
 }
 
 var ErrOutputLineTooLong = errors.New("output line too long")
@@ -189,6 +190,8 @@ func Parse(chunks map[string]*strings.Builder, logText string, opts ParseOptions
 			Name:    defaultOutputName,
 			Value:   ojson.Value{V: ""},
 		}
+	} else {
+		line.Size = len(outputText)
 	}
 
 	return line, err
