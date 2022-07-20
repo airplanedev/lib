@@ -4,10 +4,13 @@ import (
 	"bytes"
 	"fmt"
 	"io/fs"
-	"text/template"
+	"sort"
+	"strings"
 
+	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/runtime/javascript"
+	"github.com/pkg/errors"
 )
 
 // Init register the runtime.
@@ -15,40 +18,10 @@ func init() {
 	runtime.Register(".ts", Runtime{})
 }
 
-// Code template.
-var code = template.Must(template.New("ts").Parse(`{{with .Comment -}}
-{{.}}
-
-{{end -}}
-type Params = {
-  {{- range .Params }}
-  {{ .Name }}: {{ .Type }}
-  {{- end }}
-}
-
-// Put the main logic of the task in this function.
-export default async function(params: Params) {
-  console.log('parameters:', params);
-
-  // You can return data to show outputs to users.
-  // Outputs documentation: https://docs.airplane.dev/tasks/outputs
-  return [
-    {element: 'hydrogen', weight: 1.008},
-    {element: 'helium', weight: 4.0026},
-  ];
-}
-`))
-
 // Data represents the data template.
 type data struct {
 	Comment string
-	Params  []param
-}
-
-// Param represents the parameter.
-type param struct {
-	Name string
-	Type string
+	Params  string
 }
 
 // Runtime implementaton.
@@ -57,16 +30,22 @@ type Runtime struct {
 }
 
 // Generate implementation.
-func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
+func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, fs.FileMode, error) {
 	d := data{}
 	if t != nil {
-		d.Comment = runtime.Comment(r, t.URL)
-		for _, p := range t.Parameters {
-			d.Params = append(d.Params, param{
-				Name: p.Slug,
-				Type: typeof(p.Type),
-			})
+		if t.URL != "" && opts.GenerateComment {
+			d.Comment = runtime.Comment(r, t.URL)
 		}
+		params := make(map[string]api.Type, len(t.Parameters))
+		for _, p := range t.Parameters {
+			params[p.Slug] = p.Type
+
+		}
+		typescriptType, err := CreateParamsType(params, "")
+		if err != nil {
+			return nil, 0, err
+		}
+		d.Params = typescriptType
 	}
 
 	var buf bytes.Buffer
@@ -77,20 +56,51 @@ func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
 	return buf.Bytes(), 0644, nil
 }
 
-// Typeof translates the given type to typescript.
-func typeof(t runtime.Type) string {
-	switch t {
-	case runtime.TypeInteger, runtime.TypeFloat:
-		return "number"
-	case runtime.TypeDate, runtime.TypeDatetime:
-		return "string"
-	case runtime.TypeBoolean:
-		return "boolean"
-	case runtime.TypeString:
-		return "string"
-	case runtime.TypeUpload:
-		return "string"
-	default:
-		return "unknown"
+// CreateParamsType returns a string representation of a TypeScript type.
+func CreateParamsType(parameters map[string]api.Type, typePrefix string) (string, error) {
+	var params []string
+	for slug, paramType := range parameters {
+		paramType, err := typeof(paramType)
+		if err != nil {
+			return "", err
+		}
+		params = append(params, fmt.Sprintf("%s: %s;", slug, paramType))
 	}
+
+	sort.Strings(params)
+	tc := paramsTemplateConfig{
+		TaskName:   strings.Title(strings.ReplaceAll(typePrefix, " ", "")),
+		TaskParams: strings.Join(params, "\n  "),
+	}
+
+	t := paramsTemplate
+	if len(params) == 0 {
+		t = paramTypesTemplateNoParams
+	}
+
+	var buff bytes.Buffer
+	err := t.Execute(&buff, tc)
+	if err != nil {
+		return "", errors.Wrap(err, "applying parameter template")
+	}
+	return buff.String(), nil
+}
+
+// typeof translates the given type to TypeScript.
+func typeof(t api.Type) (string, error) {
+	switch t {
+	case api.TypeBoolean:
+		return "boolean", nil
+	case api.TypeString:
+		return "string", nil
+	case api.TypeInteger, api.TypeFloat:
+		return "number", nil
+	case api.TypeDate, api.TypeDatetime:
+		return "string", nil
+	case api.TypeUpload:
+		return fileType, nil
+	case api.TypeConfigVar:
+		return configType, nil
+	}
+	return "", errors.Errorf("unknown parameter type %s", t)
 }

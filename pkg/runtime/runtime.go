@@ -33,13 +33,17 @@ var (
 	ErrNotImplemented = errors.New("runtime: not implemented")
 )
 
+type GenerateOpts struct {
+	GenerateComment bool
+}
+
 // Interface repersents a runtime.
 type Interface interface {
 	// Generate accepts a task and generates code to match the task.
 	//
 	// os.FileMode is used for the permissions of the generated file. Files will typically use 0644
 	// but might use 0744 for executable scripts (e.g. shell scripts).
-	Generate(task *Task) ([]byte, os.FileMode, error)
+	Generate(task *Task, opts GenerateOpts) ([]byte, os.FileMode, error)
 
 	// Workdir attempts to detect the root of the given task path.
 	//

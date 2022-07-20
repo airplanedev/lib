@@ -55,9 +55,9 @@ type data struct {
 type Runtime struct{}
 
 // Generate implementation.
-func (r Runtime) Generate(t *runtime.Task) ([]byte, fs.FileMode, error) {
+func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, fs.FileMode, error) {
 	d := data{}
-	if t != nil {
+	if t != nil && t.URL != "" && opts.GenerateComment {
 		d.Comment = runtime.Comment(r, t.URL)
 	}
 

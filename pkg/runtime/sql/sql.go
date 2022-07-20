@@ -32,7 +32,7 @@ func (r Runtime) PrepareRun(ctx context.Context, logger logger.Logger, opts runt
 }
 
 // Generate implementation.
-func (r Runtime) Generate(t *runtime.Task) ([]byte, os.FileMode, error) {
+func (r Runtime) Generate(t *runtime.Task, opts runtime.GenerateOpts) ([]byte, os.FileMode, error) {
 	return code, 0644, nil
 }
 
