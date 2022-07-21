@@ -35,8 +35,7 @@ func (c *CodeTaskDiscoverer) IsAirplaneTask(ctx context.Context, file string) (s
 }
 
 func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error) {
-	// Only analyze typescript files that end with .tasks.ts
-	if !strings.HasSuffix(file, ".tasks.ts") {
+	if !(strings.HasSuffix(file, ".tasks.ts") || strings.HasSuffix(file, ".tasks.js")) {
 		return nil, nil
 	}
 
