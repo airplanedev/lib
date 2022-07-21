@@ -67,14 +67,18 @@ func view(root string, options KindOptions) (string, error) {
 		APIHost:          apiHost,
 	}
 
-	// TODO: patch package.json correctly.
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
+		RUN apt update && apt install -y jq
 
 		COPY package*.json yarn.* /airplane/
 		RUN [ -f package.json ] || { echo "{}" > package.json; }
-		RUN yarn add vite @vitejs/plugin-react react react-dom @airplane/views
+		RUN [ $(jq .dependencies.vite package.json) != 'null' ] || yarn add vite
+		RUN [ $(jq .dependencies.\"@vitejs/plugin-react\" package.json) != 'null' ] || yarn add @vitejs/plugin-react
+		RUN [ $(jq .dependencies.react package.json) != 'null' ] || yarn add react
+		RUN [ $(jq .dependencies.react-dom package.json) != 'null' ] || yarn add react-dom
+		RUN [ $(jq .dependencies.\"@airplane/views\" package.json) != 'null' ] || yarn add @airplane/views
 		RUN {{.InstallCommand}}
 
 		RUN mkdir /airplane/src/
