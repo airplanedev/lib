@@ -2,7 +2,9 @@ package discover
 
 import (
 	"context"
+	_ "embed"
 	"encoding/json"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -15,6 +17,9 @@ import (
 	"github.com/airplanedev/lib/pkg/utils/pathcase"
 	"github.com/pkg/errors"
 )
+
+//go:embed parser/node/parser.ts
+var parserScript []byte
 
 type CodeTaskDiscoverer struct {
 	Client  api.IAPIClient
@@ -35,8 +40,19 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 		return nil, nil
 	}
 
+	// Create a temp file
+	tempFile, err := os.CreateTemp("", "airplane.parser.node.*.ts")
+	if err != nil {
+		return nil, nil
+	}
+	_, err = tempFile.Write(parserScript)
+	if err != nil {
+		return nil, err
+	}
+
 	// Run parser on the file
-	out, err := exec.Command("npx", "ts-node", "parser/node/parser.ts", file).Output()
+	out, err := exec.Command("npx", "-p", "typescript", "-p", "@types/node", "-p", "ts-node",
+		"ts-node", tempFile.Name(), file).Output()
 	if err != nil {
 		return nil, err
 	}
@@ -110,14 +126,14 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 			return nil, nil
 		}
 
-		parameters := parsedTask["parameters"].([]interface{})
+		parameters := parsedTask["parameters"].(map[string]interface{})
 		var params []definitions.ParameterDefinition_0_3
-		for _, taskParam := range parameters {
+		for taskParamSlug, taskParam := range parameters {
 			constructedParam := taskParam.(map[string]interface{})
 			params = append(params, definitions.ParameterDefinition_0_3{
 				Name: constructedParam["name"].(string),
-				Slug: constructedParam["name"].(string),
-				Type: constructedParam["type"].(string),
+				Slug: taskParamSlug,
+				Type: constructedParam["kind"].(string),
 			})
 		}
 		def.Parameters = params
@@ -128,6 +144,7 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 
 		def.SetBuildConfig("entrypoint", ep)
 		def.SetBuildConfig("entrypointFunc", parsedTask["entrypointFunc"].(string))
+		def.SetBuildConfig("isCodeDefinedTask", true)
 
 		var paramSlugs []string
 		for _, param := range def.Parameters {

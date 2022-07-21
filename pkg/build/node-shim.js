@@ -1,6 +1,10 @@
 // This file includes a shim that will execute your task code.
 import airplane from "airplane";
-import task from '{{.Entrypoint}}';
+{{if .IsCodeDefinedTask}}
+import { {{.EntrypointFunc}} } from "{{.Entrypoint}}";
+{{else}}
+import task from "{{.Entrypoint}}";
+{{end}}
 
 async function main() {
   if (process.argv.length !== 3) {
@@ -15,7 +19,11 @@ async function main() {
   }
 
   try {
+    {{if .IsCodeDefinedTask}}
+    let ret = await {{.EntrypointFunc}}._airplane.baseFunc(JSON.parse(process.argv[2]));
+    {{else}}
     let ret = await task(JSON.parse(process.argv[2]));
+    {{end}}
     if (ret !== undefined) {
       airplane.setOutput(ret);
     }

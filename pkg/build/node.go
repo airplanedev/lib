@@ -144,8 +144,11 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	}
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
-	entrypointFunc, _ := options["entrypointFunc"].(string)
-	paramSlugs, _ := options["paramSlugs"].([]string)
+	entrypointFunc, ok := options["entrypointFunc"].(string)
+	if !ok {
+		entrypointFunc = "task"
+	}
+	isCodeDefinedTask, _ := options["isCodeDefinedTask"].(bool)
 	if isWorkflow {
 		cfg.InlineShim = inlineString(workerAndActivityShim)
 		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
@@ -158,19 +161,11 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 			return "", err
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
-	} else if entrypointFunc != "" {
-		shim, err := TemplateEntrypoint(codeNodeShim, NodeShimParams{
-			Entrypoint:     entrypoint,
-			EntrypointFunc: entrypointFunc,
-			ParamSlugs:     paramSlugs,
-		})
-		if err != nil {
-			return "", err
-		}
-		cfg.InlineShim = inlineString(shim)
 	} else {
 		shim, err := TemplatedNodeShim(NodeShimParams{
-			Entrypoint: entrypoint,
+			Entrypoint:        entrypoint,
+			EntrypointFunc:    entrypointFunc,
+			IsCodeDefinedTask: isCodeDefinedTask,
 		})
 		if err != nil {
 			return "", err
@@ -322,13 +317,10 @@ var workflowInterceptorsScript string
 //go:embed workflow/workflow-shim.js
 var workflowShimScript string
 
-//go:embed code-node-shim.js
-var codeNodeShim string
-
 type NodeShimParams struct {
-	Entrypoint     string
-	EntrypointFunc string
-	ParamSlugs     []string
+	Entrypoint        string
+	EntrypointFunc    string
+	IsCodeDefinedTask bool
 }
 
 func TemplatedNodeShim(params NodeShimParams) (string, error) {
@@ -345,13 +337,13 @@ func TemplateEntrypoint(script string, params NodeShimParams) (string, error) {
 	entrypoint = backslashEscape(entrypoint, `"`)
 
 	shim, err := applyTemplate(script, struct {
-		Entrypoint     string
-		EntrypointFunc string
-		ParamSlugs     []string
+		Entrypoint        string
+		EntrypointFunc    string
+		IsCodeDefinedTask bool
 	}{
-		Entrypoint:     entrypoint,
-		EntrypointFunc: params.EntrypointFunc,
-		ParamSlugs:     params.ParamSlugs,
+		Entrypoint:        entrypoint,
+		EntrypointFunc:    params.EntrypointFunc,
+		IsCodeDefinedTask: params.IsCodeDefinedTask,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "templating shim")
