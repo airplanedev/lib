@@ -1,0 +1,15 @@
+name: Update Registry Cache
+slug: update_registry_cache
+parameters:
+- name: GCP Project
+  slug: gcp_project
+  type: shorttext
+  options:
+  - label: Prod
+    value: airplane-prod
+  - label: Stage
+    value: airplane-stage
+node:
+  entrypoint: main.ts
+  nodeVersion: "18"
+timeout: 3600
