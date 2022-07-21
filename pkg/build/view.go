@@ -36,15 +36,15 @@ func view(root string, options KindOptions) (string, error) {
 		return "", err
 	}
 
-	mainTsxStr, err := mainTsxString(entrypoint)
+	mainTsxStr, err := MainTsxString(entrypoint)
 	if err != nil {
 		return "", err
 	}
-	indexHtmlStr, err := indexHtmlString()
+	indexHtmlStr, err := IndexHtmlString()
 	if err != nil {
 		return "", err
 	}
-	viteConfigStr, err := viteConfigString()
+	viteConfigStr, err := ViteConfigString()
 	if err != nil {
 		return "", err
 	}
@@ -95,21 +95,21 @@ func view(root string, options KindOptions) (string, error) {
 //go:embed views/vite.config.ts
 var viteConfigTemplateStr string
 
-func viteConfigString() (string, error) {
+func ViteConfigString() (string, error) {
 	return viteConfigTemplateStr, nil
 }
 
 //go:embed views/index.html
 var indexHtmlTemplateStr string
 
-func indexHtmlString() (string, error) {
+func IndexHtmlString() (string, error) {
 	return indexHtmlTemplateStr, nil
 }
 
 //go:embed views/main.tsx
 var mainTsxTemplateStr string
 
-func mainTsxString(entrypoint string) (string, error) {
+func MainTsxString(entrypoint string) (string, error) {
 	if strings.HasSuffix(entrypoint, ".tsx") {
 		entrypoint = entrypoint[:len(entrypoint)-4]
 	}
