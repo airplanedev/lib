@@ -157,9 +157,11 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
 	} else {
+		entrypointFunc, _ := options["entrypointFunc"].(string)
+
 		shim, err := TemplatedNodeShim(NodeShimParams{
 			Entrypoint:     entrypoint,
-			EntrypointFunc: options["entrypointFunc"].(string),
+			EntrypointFunc: entrypointFunc,
 		})
 		if err != nil {
 			return "", err
