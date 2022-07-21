@@ -19,10 +19,11 @@ async function main() {
   }
 
   try {
+    var ret;
     if ("__airplane" in task) {
-      let ret = await task.__airplane.baseFunc(JSON.parse(process.argv[2]));
+      ret = await task.__airplane.baseFunc(JSON.parse(process.argv[2]));
     } else {
-      let ret = await task(JSON.parse(process.argv[2]));
+      ret = await task(JSON.parse(process.argv[2]));
     }
     if (ret !== undefined) {
       airplane.setOutput(ret);
