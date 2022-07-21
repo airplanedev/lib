@@ -144,11 +144,6 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 	}
 	cfg.InlineShimPackageJSON = inlineString(string(pjson))
 
-	entrypointFunc, ok := options["entrypointFunc"].(string)
-	if !ok {
-		entrypointFunc = "task"
-	}
-	isCodeDefinedTask, _ := options["isCodeDefinedTask"].(bool)
 	if isWorkflow {
 		cfg.InlineShim = inlineString(workerAndActivityShim)
 		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
@@ -163,9 +158,8 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
 	} else {
 		shim, err := TemplatedNodeShim(NodeShimParams{
-			Entrypoint:        entrypoint,
-			EntrypointFunc:    entrypointFunc,
-			IsCodeDefinedTask: isCodeDefinedTask,
+			Entrypoint:     entrypoint,
+			EntrypointFunc: options["entrypointFunc"].(string),
 		})
 		if err != nil {
 			return "", err
@@ -318,9 +312,8 @@ var workflowInterceptorsScript string
 var workflowShimScript string
 
 type NodeShimParams struct {
-	Entrypoint        string
-	EntrypointFunc    string
-	IsCodeDefinedTask bool
+	Entrypoint     string
+	EntrypointFunc string
 }
 
 func TemplatedNodeShim(params NodeShimParams) (string, error) {
@@ -337,13 +330,11 @@ func TemplateEntrypoint(script string, params NodeShimParams) (string, error) {
 	entrypoint = backslashEscape(entrypoint, `"`)
 
 	shim, err := applyTemplate(script, struct {
-		Entrypoint        string
-		EntrypointFunc    string
-		IsCodeDefinedTask bool
+		Entrypoint     string
+		EntrypointFunc string
 	}{
-		Entrypoint:        entrypoint,
-		EntrypointFunc:    params.EntrypointFunc,
-		IsCodeDefinedTask: params.IsCodeDefinedTask,
+		Entrypoint:     entrypoint,
+		EntrypointFunc: params.EntrypointFunc,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "templating shim")

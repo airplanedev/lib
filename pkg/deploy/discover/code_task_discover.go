@@ -143,7 +143,6 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 
 		def.SetBuildConfig("entrypoint", ep)
 		def.SetBuildConfig("entrypointFunc", parsedTask["entrypointFunc"].(string))
-		def.SetBuildConfig("isCodeDefinedTask", true)
 
 		var paramSlugs []string
 		for _, param := range def.Parameters {

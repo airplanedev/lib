@@ -36,20 +36,20 @@ class AirplaneParser {
         let configs: TaskConfigWithBuildArgs[] = [];
         for (const file of this.files) {
             const resolvedPath = path.relative(__dirname, file);
-            const lib = resolvedPath.replace(RegExp(".ts$"), "");
-            let imports = require(`./${lib}`);
+            const lib = resolvedPath.replace(/.ts$/, "");
+            const exports = require(`./${lib}`);
 
-            for (const itemName in imports) {
-                const item = imports[itemName];
+            for (const exportName in exports) {
+                const item = exports[exportName];
                 
-                if ("_airplane" in item) {
-                    const config = item._airplane.config;
+                if ("__airplane" in item) {
+                    const config = item.__airplane.config;
 
                     var params: Record<string, ParamSchema> = {};
                     for (var uParamSlug in config.parameters) {
                         const uParamConfig = config.parameters[uParamSlug];
 
-                        if (typeof uParamSlug === "string") {
+                        if (typeof uParamConfig === "string") {
                             params[uParamSlug] = {
                                 name: uParamSlug,
                                 kind: uParamConfig,
@@ -66,7 +66,7 @@ class AirplaneParser {
                         slug: config.slug,
                         name: config.name,
                         parameters: params,
-                        entrypointFunc: itemName,
+                        entrypointFunc: exportName,
                     });
                 }
             }
