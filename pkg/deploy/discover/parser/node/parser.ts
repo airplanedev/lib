@@ -1,28 +1,28 @@
 const path = require("node:path");
 
 type ParamSchema = {
-    name: string;
-    kind: string;
-};
+    name: string
+    kind: string
+}
 
 type TaskConfig = {
-    slug: string;
-    name: string;
-    description?: string;
-    parameters?: Record<string, ParamSchema>;
-    requireRequests?: boolean;
-    allowSelfApprovals?: boolean;
-    timeout?: number;
-    constraints?: Record<string, string>;
-    runtime?: "standard" | "workflow";
-};
+    slug: string
+    name: string
+    description?: string
+    parameters?: Record<string, ParamSchema>
+    requireRequests?: boolean
+    allowSelfApprovals?: boolean
+    timeout?: number
+    constraints?: Record<string, string>
+    runtime?: "standard" | "workflow"
+}
 
 type TaskConfigWithBuildArgs = TaskConfig & {
-    entrypointFunc: string;
-};
+    entrypointFunc: string
+}
 
 class AirplaneParser {
-    files: string[];
+    files: string[]
 
     constructor(files: string[]) {
         this.files = files;
@@ -74,7 +74,7 @@ class AirplaneParser {
 
         return configs;
     }
-};
+}
 
 const files = process.argv.slice(2);
 let parser = new AirplaneParser(files);
