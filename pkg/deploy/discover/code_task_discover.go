@@ -13,40 +13,11 @@ import (
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/utils/logger"
-	"github.com/airplanedev/ojson"
 	"github.com/pkg/errors"
 )
 
 //go:embed parser/node/parser.ts
 var parserScript []byte
-
-// Parser types (all languages)
-type ParserTaskConfigs struct {
-	Configs ParserTaskConfig `json:"slug"`
-}
-
-type ParserTaskConfig struct {
-	Slug               string            `json:"slug"`
-	Name               *string           `json:"name"`
-	Description        *string           `json:"description"`
-	Parameters         *ojson.Value      `json:"parameters"`
-	Resources          map[string]string `json:"resources"`
-	RequireRequests    *bool             `json:"requireRequests"`
-	AllowSelfApprovals *bool             `json:"allowSelfApprovals"`
-	Timeout            *int              `json:"timeout"`
-	Constraints        map[string]string `json:"constraints"`
-	Runtime            *string           `json:"runtime"`
-}
-
-type Param struct {
-	Type        string        `json:"type"`
-	Name        *string       `json:"name"`
-	Description *string       `json:"description"`
-	Required    *bool         `json:"required"`
-	Default     interface{}   `json:"default"`
-	Regex       *string       `json:"regex"`
-	Options     []ojson.Value `json:"options"`
-}
 
 type CodeTaskDiscoverer struct {
 	Client api.IAPIClient
