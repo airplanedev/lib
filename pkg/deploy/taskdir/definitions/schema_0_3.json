@@ -404,7 +404,7 @@
             {
               "type": "array",
               "items": {
-                { "type": "string", "pattern": "^[a-z0-9_]{1,50}$" }
+                "type": "string", "pattern": "^[a-z0-9_]{1,50}$"
               }
             }
           ]
