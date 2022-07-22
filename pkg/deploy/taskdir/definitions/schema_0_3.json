@@ -390,7 +390,7 @@
           }
         },
         "resources": {
-          "description": "[Experimental] A map of resources that can be accessed from your task. Keys are aliases, which determine how you refer to the resource in your task; values are existing resource slugs in your Airplane team. Can also be a list of resource slugs (where the alias is the slug) or a list of objects with a single alias -> slug mapping.",
+          "description": "[Experimental] A list of resources to make available to your task. Resources are identified by slug, but can be mapped to an alias to configure how the task references the resource. If using aliases, resources are expressed as a map of alias to slug.",
           "oneOf": [
             {
               "type": "object",
