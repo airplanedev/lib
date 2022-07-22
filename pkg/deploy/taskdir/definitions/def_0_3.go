@@ -1508,25 +1508,8 @@ func (r *ResourceDefinition_0_3) UnmarshalJSON(b []byte) error {
 				return errors.New("aliases in resource list must be unique")
 			}
 			r.Attachments[s] = s
-		} else if m, ok := item.(map[string]interface{}); ok {
-			keys := []string{}
-			for alias := range m {
-				keys = append(keys, alias)
-			}
-			if len(keys) != 1 {
-				return errors.New("expected only one item in resource map")
-			}
-			alias := keys[0]
-			if _, exists := r.Attachments[alias]; exists {
-				return errors.New("aliases in resource list must be unique")
-			}
-			if slug, ok := m[alias].(string); ok {
-				r.Attachments[alias] = slug
-			} else {
-				return errors.New("expected string slug value in resource map")
-			}
 		} else {
-			return errors.New("expected string or map in resource list")
+			return errors.New("expected string in resource list")
 		}
 	}
 	return nil

@@ -390,7 +390,7 @@
           }
         },
         "resources": {
-          "description": "[Experimental] A list of resources to make available to your task. Resources are identified by slug, but can be mapped to an alias to configure how the task references the resource. If using aliases, resources are expressed as a map of alias to slug.",
+          "description": "A list of resources to make available to your task. Resources are identified by slug, but can be mapped to an alias to configure how the task references the resource. If using aliases, resources are expressed as a map of alias to slug.",
           "oneOf": [
             {
               "type": "object",
@@ -404,20 +404,7 @@
             {
               "type": "array",
               "items": {
-                "oneOf": [
-                  { "type": "string", "pattern": "^[a-z0-9_]{1,50}$" },
-                  {
-                    "type": "object",
-                    "patternProperties": {
-                      "^[a-z0-9_]{1,50}$": {
-                        "type": "string",
-                        "pattern": "^[a-z0-9_]{1,50}$"
-                      }
-                    },
-                    "minProperties": 1,
-                    "maxProperties": 1
-                  }
-                ]
+                { "type": "string", "pattern": "^[a-z0-9_]{1,50}$" }
               }
             }
           ]
