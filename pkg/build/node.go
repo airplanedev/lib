@@ -149,13 +149,20 @@ func node(root string, options KindOptions, buildArgs []string) (string, error) 
 		cfg.InlineWorkflowBundlerScript = inlineString(workflowBundlerScript)
 		cfg.InlineWorkflowInterceptorsScript = inlineString(workflowInterceptorsScript)
 
-		workflowShim, err := TemplateEntrypoint(workflowShimScript, entrypoint)
+		workflowShim, err := TemplateEntrypoint(workflowShimScript, NodeShimParams{
+			Entrypoint: entrypoint,
+		})
 		if err != nil {
 			return "", err
 		}
 		cfg.InlineWorkflowShimScript = inlineString(workflowShim)
 	} else {
-		shim, err := TemplatedNodeShim(entrypoint)
+		entrypointFunc, _ := options["entrypointFunc"].(string)
+
+		shim, err := TemplatedNodeShim(NodeShimParams{
+			Entrypoint:     entrypoint,
+			EntrypointFunc: entrypointFunc,
+		})
 		if err != nil {
 			return "", err
 		}
@@ -316,23 +323,30 @@ var workflowInterceptorsScript string
 //go:embed workflow/workflow-shim.js
 var workflowShimScript string
 
-func TemplatedNodeShim(entrypoint string) (string, error) {
-	return TemplateEntrypoint(nodeShim, entrypoint)
+type NodeShimParams struct {
+	Entrypoint     string
+	EntrypointFunc string
 }
 
-func TemplateEntrypoint(script string, entrypoint string) (string, error) {
+func TemplatedNodeShim(params NodeShimParams) (string, error) {
+	return TemplateEntrypoint(nodeShim, params)
+}
+
+func TemplateEntrypoint(script string, params NodeShimParams) (string, error) {
 	// Remove the `.ts` suffix if one exists, since tsc doesn't accept
 	// import paths with `.ts` endings. `.js` endings are fine.
-	entrypoint = strings.TrimSuffix(entrypoint, ".ts")
+	entrypoint := strings.TrimSuffix(params.Entrypoint, ".ts")
 	// The shim is stored under the .airplane directory.
 	entrypoint = filepath.Join("../", entrypoint)
 	// Escape for embedding into a string
 	entrypoint = backslashEscape(entrypoint, `"`)
 
 	shim, err := applyTemplate(script, struct {
-		Entrypoint string
+		Entrypoint     string
+		EntrypointFunc string
 	}{
-		Entrypoint: entrypoint,
+		Entrypoint:     entrypoint,
+		EntrypointFunc: params.EntrypointFunc,
 	})
 	if err != nil {
 		return "", errors.Wrap(err, "templating shim")

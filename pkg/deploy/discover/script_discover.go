@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/airplanedev/lib/pkg/api"
+	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
 	"github.com/airplanedev/lib/pkg/runtime"
 	_ "github.com/airplanedev/lib/pkg/runtime/javascript"
@@ -30,7 +31,7 @@ func (sd *ScriptDiscoverer) IsAirplaneTask(ctx context.Context, file string) (st
 	return slug, nil
 }
 
-func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error) {
+func (sd *ScriptDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error) {
 	slug := runtime.Slug(file)
 	if slug == "" {
 		return nil, nil
@@ -59,49 +60,72 @@ func (sd *ScriptDiscoverer) GetTaskConfig(ctx context.Context, file string) (*Ta
 		return nil, err
 	}
 
-	r, err := runtime.Lookup(file, task.Kind)
+	pathMetadata, err := taskPathMetadata(file, task.Kind)
 	if err != nil {
-		return nil, errors.Wrapf(err, "cannot determine how to deploy %q - check your CLI is up to date", file)
+		return nil, err
 	}
-
-	absFile, err := filepath.Abs(file)
-	if err != nil {
+	def.SetBuildConfig("entrypoint", pathMetadata.Entrypoint)
+	if err := def.SetWorkdir(pathMetadata.TaskRoot, pathMetadata.Workdir); err != nil {
 		return nil, err
 	}
 
-	taskroot, err := r.Root(absFile)
-	if err != nil {
-		return nil, err
-	}
-
-	// Entrypoint needs to be relative to the taskroot.
-	absEntrypoint, err := pathcase.ActualFilename(absFile)
-	if err != nil {
-		return nil, err
-	}
-	ep, err := filepath.Rel(taskroot, absEntrypoint)
-	if err != nil {
-		return nil, err
-	}
-	def.SetBuildConfig("entrypoint", ep)
-
-	wd, err := r.Workdir(absFile)
-	if err != nil {
-		return nil, err
-	}
-	if err := def.SetWorkdir(taskroot, wd); err != nil {
-		return nil, err
-	}
-
-	return &TaskConfig{
-		TaskID:         task.ID,
-		TaskRoot:       taskroot,
-		TaskEntrypoint: absFile,
-		Def:            def,
-		Source:         sd.ConfigSource(),
+	return []TaskConfig{
+		{
+			TaskID:         task.ID,
+			TaskRoot:       pathMetadata.TaskRoot,
+			TaskEntrypoint: pathMetadata.AbsFile,
+			Def:            def,
+			Source:         sd.ConfigSource(),
+		},
 	}, nil
 }
 
 func (sd *ScriptDiscoverer) ConfigSource() ConfigSource {
 	return ConfigSourceScript
+}
+
+type TaskPathMetadata struct {
+	AbsFile    string
+	Entrypoint string
+	TaskRoot   string
+	Workdir    string
+}
+
+func taskPathMetadata(file string, kind build.TaskKind) (TaskPathMetadata, error) {
+	r, err := runtime.Lookup(file, kind)
+	if err != nil {
+		return TaskPathMetadata{}, errors.Wrapf(err, "cannot determine how to deploy %q - check your CLI is up to date", file)
+	}
+
+	absFile, err := filepath.Abs(file)
+	if err != nil {
+		return TaskPathMetadata{}, err
+	}
+
+	taskroot, err := r.Root(absFile)
+	if err != nil {
+		return TaskPathMetadata{}, err
+	}
+
+	// Entrypoint needs to be relative to the taskroot.
+	absEntrypoint, err := pathcase.ActualFilename(absFile)
+	if err != nil {
+		return TaskPathMetadata{}, err
+	}
+	ep, err := filepath.Rel(taskroot, absEntrypoint)
+	if err != nil {
+		return TaskPathMetadata{}, err
+	}
+
+	wd, err := r.Workdir(absFile)
+	if err != nil {
+		return TaskPathMetadata{}, err
+	}
+
+	return TaskPathMetadata{
+		AbsFile:    absFile,
+		Entrypoint: ep,
+		TaskRoot:   taskroot,
+		Workdir:    wd,
+	}, nil
 }

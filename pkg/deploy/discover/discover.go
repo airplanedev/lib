@@ -24,6 +24,7 @@ type ConfigSource string
 const (
 	ConfigSourceScript ConfigSource = "script"
 	ConfigSourceDefn   ConfigSource = "defn"
+	ConfigSourceCode   ConfigSource = "code"
 )
 
 type TaskConfig struct {
@@ -59,7 +60,7 @@ type TaskDiscoverer interface {
 	IsAirplaneTask(ctx context.Context, file string) (string, error)
 	// GetTaskConfig converts an Airplane task file into a fully-qualified task definition.
 	// If the task should not be discovered as an Airplane task, a nil task config is returned.
-	GetTaskConfig(ctx context.Context, file string) (*TaskConfig, error)
+	GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error)
 	// ConfigSource returns a unique identifier of this Discoverer.
 	ConfigSource() ConfigSource
 }
@@ -132,19 +133,22 @@ func (d *Discoverer) Discover(ctx context.Context, paths ...string) ([]TaskConfi
 		} else {
 			// We found a file.
 			for _, td := range d.TaskDiscoverers {
-				taskConfig, err := td.GetTaskConfig(ctx, p)
+				taskConfigs, err := td.GetTaskConfigs(ctx, p)
 				if err != nil {
 					return nil, nil, err
 				}
-				if taskConfig == nil {
+				if len(taskConfigs) == 0 {
 					// This file is not an Airplane task.
 					continue
 				}
-				slug := taskConfig.Def.GetSlug()
-				if _, ok := taskConfigsBySlug[slug]; !ok {
-					taskConfigsBySlug[slug] = []TaskConfig{}
+
+				for _, taskConfig := range taskConfigs {
+					slug := taskConfig.Def.GetSlug()
+					if _, ok := taskConfigsBySlug[slug]; !ok {
+						taskConfigsBySlug[slug] = []TaskConfig{}
+					}
+					taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], taskConfig)
 				}
-				taskConfigsBySlug[slug] = append(taskConfigsBySlug[slug], *taskConfig)
 			}
 			for _, vd := range d.ViewDiscoverers {
 				viewConfig, err := vd.GetViewConfig(ctx, p)
