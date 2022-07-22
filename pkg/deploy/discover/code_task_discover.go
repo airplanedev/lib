@@ -4,38 +4,76 @@ import (
 	"context"
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"strings"
 
 	"github.com/airplanedev/lib/pkg/api"
 	"github.com/airplanedev/lib/pkg/build"
 	"github.com/airplanedev/lib/pkg/deploy/taskdir/definitions"
-	"github.com/airplanedev/lib/pkg/runtime"
 	"github.com/airplanedev/lib/pkg/utils/logger"
-	"github.com/airplanedev/lib/pkg/utils/pathcase"
+	"github.com/airplanedev/ojson"
 	"github.com/pkg/errors"
 )
 
 //go:embed parser/node/parser.ts
 var parserScript []byte
 
+// Parser types (all languages)
+type ParserTaskConfigs struct {
+	Configs ParserTaskConfig `json:"slug"`
+}
+
+type ParserTaskConfig struct {
+	Slug               string            `json:"slug"`
+	Name               *string           `json:"name"`
+	Description        *string           `json:"description"`
+	Parameters         *ojson.Value      `json:"parameters"`
+	Resources          map[string]string `json:"resources"`
+	RequireRequests    *bool             `json:"requireRequests"`
+	AllowSelfApprovals *bool             `json:"allowSelfApprovals"`
+	Timeout            *int              `json:"timeout"`
+	Constraints        map[string]string `json:"constraints"`
+	Runtime            *string           `json:"runtime"`
+}
+
+type Param struct {
+	Type        string        `json:"type"`
+	Name        *string       `json:"name"`
+	Description *string       `json:"description"`
+	Required    *bool         `json:"required"`
+	Default     interface{}   `json:"default"`
+	Regex       *string       `json:"regex"`
+	Options     []ojson.Value `json:"options"`
+}
+
 type CodeTaskDiscoverer struct {
-	Client  api.IAPIClient
-	Logger  logger.Logger
-	EnvSlug string
+	Client api.IAPIClient
+	Logger logger.Logger
+
+	// MissingTaskHandler is called from `GetTaskConfig` if a task ID cannot be found for a definition
+	// file. The handler should either create the task and return the created task's TaskMetadata, or
+	// it should return `nil` to signal that the definition should be ignored. If not set, these
+	// definitions are ignored.
+	MissingTaskHandler func(context.Context, definitions.DefinitionInterface) (*api.TaskMetadata, error)
 }
 
 var _ TaskDiscoverer = &CodeTaskDiscoverer{}
 
 func (c *CodeTaskDiscoverer) IsAirplaneTask(ctx context.Context, file string) (string, error) {
-	// Run thing that extracts slug from something in the file.
-	return "", nil
+	taskConfigs, err := c.GetTaskConfigs(ctx, file)
+	if err != nil {
+		return "", err
+	}
+	if len(taskConfigs) == 0 {
+		return "", nil
+	}
+	return taskConfigs[0].Def.GetSlug(), nil
 }
 
 func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([]TaskConfig, error) {
-	if !(strings.HasSuffix(file, ".tasks.ts") || strings.HasSuffix(file, ".tasks.js")) {
+	if !(strings.HasSuffix(file, ".task.ts") || strings.HasSuffix(file, ".task.js")) {
 		return nil, nil
 	}
 
@@ -44,6 +82,7 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 	if err != nil {
 		return nil, nil
 	}
+	defer tempFile.Close()
 	_, err = tempFile.Write(parserScript)
 	if err != nil {
 		return nil, err
@@ -66,99 +105,84 @@ func (c *CodeTaskDiscoverer) GetTaskConfigs(ctx context.Context, file string) ([
 		return nil, nil
 	}
 
-	// Entrypoint needs to be relative to the taskroot.
-	r, err := runtime.Lookup(file, build.TaskKindNode)
-	if err != nil {
-		return nil, err
-	}
-
-	absFile, err := filepath.Abs(file)
-	if err != nil {
-		return nil, err
-	}
-
-	taskroot, err := r.Root(absFile)
-	if err != nil {
-		return nil, err
-	}
-
-	absEntrypoint, err := pathcase.ActualFilename(absFile)
-	if err != nil {
-		return nil, err
-	}
-	ep, err := filepath.Rel(taskroot, absEntrypoint)
-	if err != nil {
-		return nil, err
-	}
-
-	wd, err := r.Workdir(absFile)
+	pathMetadata, err := taskPathMetadata(file, build.TaskKindNode)
 	if err != nil {
 		return nil, err
 	}
 
 	var taskConfigs []TaskConfig
 	for _, parsedTask := range parsedTasks {
-		// Construct task config
-		def := definitions.Definition_0_3{
-			Name: parsedTask["name"].(string),
-			Slug: parsedTask["slug"].(string),
-			Node: &definitions.NodeDefinition_0_3{
-				NodeVersion: "18",
-			},
+		// Modify fields to add ones that are strictly required
+		entrypointFunc := parsedTask["entrypointFunc"].(string)
+		delete(parsedTask, "entrypointFunc")
+		parsedTask["node"] = map[string]interface{}{
+			"nodeVersion": "18",
+			"entrypoint":  pathMetadata.Entrypoint,
 		}
 
-		task, err := c.Client.GetTask(ctx, api.GetTaskRequest{
-			Slug:    def.Slug,
-			EnvSlug: c.EnvSlug,
-		})
+		// Construct task config
+		def := definitions.Definition_0_3{}
+		b, err := json.Marshal(parsedTask)
+		if err != nil {
+			panic("failed to re-marshal unmarshalled json")
+		}
+
+		if err := def.Unmarshal(definitions.DefFormatJSON, b); err != nil {
+			switch err := errors.Cause(err).(type) {
+			case definitions.ErrSchemaValidation:
+				errorMsgs := []string{}
+				for _, verr := range err.Errors {
+					errorMsgs = append(errorMsgs, fmt.Sprintf("%s: %s", verr.Field(), verr.Description()))
+				}
+				return nil, definitions.NewErrReadDefinition(fmt.Sprintf("Error reading %s", file), errorMsgs...)
+			default:
+				return nil, errors.Wrap(err, "unmarshalling task definition")
+			}
+		}
+
+		def.SetBuildConfig("entrypoint", pathMetadata.Entrypoint)
+		def.SetBuildConfig("entrypointFunc", entrypointFunc)
+
+		if err := def.SetWorkdir(pathMetadata.TaskRoot, pathMetadata.Workdir); err != nil {
+			return nil, err
+		}
+
+		if err := def.SetAbsoluteEntrypoint(pathMetadata.AbsFile); err != nil {
+			return nil, err
+		}
+
+		// Task metadata
+		metadata, err := c.Client.GetTaskMetadata(ctx, def.GetSlug())
 		if err != nil {
 			var merr *api.TaskMissingError
 			if !errors.As(err, &merr) {
-				return nil, errors.Wrap(err, "unable to get task")
+				return nil, errors.Wrap(err, "unable to get task metadata")
 			}
 
-			c.Logger.Warning(`Task with slug %s does not exist, skipping deployment.`, def.Slug)
+			if c.MissingTaskHandler == nil {
+				return nil, nil
+			}
+
+			mptr, err := c.MissingTaskHandler(ctx, &def)
+			if err != nil {
+				return nil, err
+			} else if mptr == nil {
+				if c.Logger != nil {
+					c.Logger.Warning(`Task with slug %s does not exist, skipping deployment.`, def.GetSlug())
+				}
+				return nil, nil
+			}
+			metadata = *mptr
+		}
+		if metadata.IsArchived {
+			c.Logger.Warning(`Task with slug %s is archived, skipping deployment.`, metadata.Slug)
 			return nil, nil
-		}
-		if task.IsArchived {
-			c.Logger.Warning(`Task with slug %s is archived, skipping deployment.`, def.Slug)
-			return nil, nil
-		}
-
-		parameters := parsedTask["parameters"].(map[string]interface{})
-		var params []definitions.ParameterDefinition_0_3
-		for taskParamSlug, taskParam := range parameters {
-			constructedParam := taskParam.(map[string]interface{})
-			params = append(params, definitions.ParameterDefinition_0_3{
-				Name: constructedParam["name"].(string),
-				Slug: taskParamSlug,
-				Type: constructedParam["kind"].(string),
-			})
-		}
-		def.Parameters = params
-
-		if err := def.SetAbsoluteEntrypoint(absFile); err != nil {
-			return nil, err
-		}
-
-		def.SetBuildConfig("entrypoint", ep)
-		def.SetBuildConfig("entrypointFunc", parsedTask["entrypointFunc"].(string))
-
-		var paramSlugs []string
-		for _, param := range def.Parameters {
-			// Preserve order of parameters
-			paramSlugs = append(paramSlugs, param.Slug)
-		}
-		def.SetBuildConfig("paramSlugs", paramSlugs)
-
-		if err := def.SetWorkdir(taskroot, wd); err != nil {
-			return nil, err
 		}
 
 		taskConfigs = append(taskConfigs, TaskConfig{
-			TaskID:         task.ID,
-			TaskRoot:       taskroot,
-			TaskEntrypoint: absFile,
+			TaskID:         metadata.ID,
+			TaskRoot:       pathMetadata.TaskRoot,
+			TaskEntrypoint: pathMetadata.AbsFile,
 			Def:            &def,
 			Source:         ConfigSourceCode,
 		})
