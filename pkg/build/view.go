@@ -97,7 +97,6 @@ func view(root string, options KindOptions) (string, error) {
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
-		RUN apt update && apt install -y jq
 
 		COPY package*.json yarn.* /airplane/
 		RUN [ -f package.json ] || { echo "{}" > package.json; }
