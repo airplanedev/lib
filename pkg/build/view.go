@@ -101,7 +101,7 @@ func view(root string, options KindOptions) (string, error) {
 
 		COPY package*.json yarn.* /airplane/
 		RUN [ -f package.json ] || { echo "{}" > package.json; }
-		{{if .PackagesToAdd != "" }}
+		{{if .PackagesToAdd }}
 			RUN yarn add {{.PackagesToAdd}}
 		{{end}}
 		RUN {{.InstallCommand}}
