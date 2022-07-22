@@ -2,6 +2,8 @@ package build
 
 import (
 	_ "embed"
+	"encoding/json"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 
@@ -49,6 +51,29 @@ func view(root string, options KindOptions) (string, error) {
 		return "", err
 	}
 
+	packageJSONPath := filepath.Join(root, "package.json")
+	var packageJSON interface{}
+	if fsx.Exists(packageJSONPath) {
+		packageJSONFile, err := ioutil.ReadFile(packageJSONPath)
+		if err != nil {
+			return "", errors.Wrap(err, "reading package JSON")
+		}
+		if err := json.Unmarshal([]byte(packageJSONFile), &packageJSON); err != nil {
+			return "", errors.Wrap(err, "parsing package JSON")
+		}
+	}
+
+	packagesToCheck := []string{"vite", "@vitejs/plugin-react", "react", "react-dom", "@airplane/views"}
+	packagesToAdd := []string{}
+	deps, ok := packageJSON.(map[string]interface{})["dependencies"].(map[string]interface{})
+	if ok {
+		for _, pkg := range packagesToCheck {
+			if _, ok := deps[pkg]; !ok {
+				packagesToAdd = append(packagesToAdd, pkg)
+			}
+		}
+	}
+
 	cfg := struct {
 		Base             string
 		InstallCommand   string
@@ -57,6 +82,7 @@ func view(root string, options KindOptions) (string, error) {
 		InlineIndexHtml  string
 		InlineViteConfig string
 		APIHost          string
+		PackagesToAdd    string
 	}{
 		Base:             base,
 		InstallCommand:   "yarn install --non-interactive --frozen-lockfile",
@@ -65,16 +91,18 @@ func view(root string, options KindOptions) (string, error) {
 		InlineIndexHtml:  inlineString(indexHtmlStr),
 		InlineViteConfig: inlineString(viteConfigStr),
 		APIHost:          apiHost,
+		PackagesToAdd:    strings.Join(packagesToAdd, " "),
 	}
 
-	// TODO: patch package.json correctly.
 	return applyTemplate(heredoc.Doc(`
 		FROM {{.Base}} as builder
 		WORKDIR /airplane
 
 		COPY package*.json yarn.* /airplane/
 		RUN [ -f package.json ] || { echo "{}" > package.json; }
-		RUN yarn add vite @vitejs/plugin-react react react-dom @airplane/views
+		{{if .PackagesToAdd }}
+			RUN yarn add {{.PackagesToAdd}}
+		{{end}}
 		RUN {{.InstallCommand}}
 
 		RUN mkdir /airplane/src/
