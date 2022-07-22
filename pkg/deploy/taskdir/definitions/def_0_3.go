@@ -1533,7 +1533,16 @@ func (r *ResourceDefinition_0_3) UnmarshalJSON(b []byte) error {
 }
 
 func (r ResourceDefinition_0_3) MarshalYAML() (interface{}, error) {
-	return r.Attachments, nil
+	// Return a list if we can.
+	slugs := []string{}
+	for alias, slug := range r.Attachments {
+		// If we have a single case of alias != slug, just return the map.
+		if alias != slug {
+			return r.Attachments, nil
+		}
+		slugs = append(slugs, slug)
+	}
+	return slugs, nil
 }
 
 func (r ResourceDefinition_0_3) IsZero() bool {
