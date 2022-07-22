@@ -137,6 +137,7 @@ func TestParseOutput(tt *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, test.expectedName, output.Name)
 			require.Equal(t, "", output.Command)
+			require.Equal(t, len(test.log), output.Size)
 			expectedJSON := ojson.Value{V: test.expectedValue}
 			require.Equal(t, expectedJSON, output.Value)
 		})

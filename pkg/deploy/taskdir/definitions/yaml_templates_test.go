@@ -12,49 +12,70 @@ import (
 func TestYAMLComments(t *testing.T) {
 	fixturesPath, _ := filepath.Abs("./fixtures")
 	for _, test := range []struct {
+		descriptor string
 		name       string
+		slug       string
 		file       string
 		kind       build.TaskKind
 		entrypoint string
 	}{
 		{
-			name:       "python",
+			descriptor: "python",
+			name:       "My Task",
+			slug:       "my_task",
 			file:       fixturesPath + "/python.task.yaml",
 			kind:       build.TaskKindPython,
 			entrypoint: "my_task.py",
 		},
 		{
-			name:       "node",
+			descriptor: "node",
+			name:       "My Task",
+			slug:       "my_task",
 			file:       fixturesPath + "/node.task.yaml",
 			kind:       build.TaskKindNode,
 			entrypoint: "my_task.ts",
 		},
 		{
-			name:       "shell",
+			descriptor: "shell",
+			name:       "My Task",
+			slug:       "my_task",
 			file:       fixturesPath + "/shell.task.yaml",
 			kind:       build.TaskKindShell,
 			entrypoint: "my_task.sh",
 		},
 		{
-			name: "docker",
-			file: fixturesPath + "/docker.task.yaml",
-			kind: build.TaskKindImage,
+			descriptor: "docker",
+			name:       "My Task",
+			slug:       "my_task",
+			file:       fixturesPath + "/docker.task.yaml",
+			kind:       build.TaskKindImage,
 		},
 		{
-			name:       "sql",
+			descriptor: "sql",
+			name:       "My Task",
+			slug:       "my_task",
 			file:       fixturesPath + "/sql.task.yaml",
 			kind:       build.TaskKindSQL,
 			entrypoint: "my_task.sql",
 		},
 		{
-			name: "rest",
-			file: fixturesPath + "/rest.task.yaml",
-			kind: build.TaskKindREST,
+			descriptor: "rest",
+			name:       "My Task",
+			slug:       "my_task",
+			file:       fixturesPath + "/rest.task.yaml",
+			kind:       build.TaskKindREST,
+		},
+		{
+			descriptor: "name with special characters",
+			name:       "[Test] My Task",
+			slug:       "test_my_task",
+			file:       fixturesPath + "/specialchars.task.yaml",
+			kind:       build.TaskKindREST,
 		},
 	} {
-		t.Run(test.name, func(t *testing.T) {
+		t.Run(test.descriptor, func(t *testing.T) {
 			require := require.New(t)
-			def, err := NewDefinition_0_3("My Task", "my_task", test.kind, test.entrypoint)
+			def, err := NewDefinition_0_3(test.name, test.slug, test.kind, test.entrypoint)
 			require.NoError(err)
 
 			got, err := def.GenerateCommentedFile(DefFormatYAML)
